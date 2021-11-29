@@ -2,13 +2,165 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-11-23T07:16:12.015Z</updated>
+    <updated>2021-11-29T08:49:30.112Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[十个常用的JavaScript使用技巧]]></title>
+        <id>https://umeimmense.github.io/post/shi-ge-chang-yong-de-javascript-shi-yong-ji-qiao</id>
+        <link href="https://umeimmense.github.io/post/shi-ge-chang-yong-de-javascript-shi-yong-ji-qiao">
+        </link>
+        <updated>2021-11-23T07:48:55.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>编写简短、简洁和干净的 JavaScript 代码的技巧😎<br>
+<img src="https://umeimmense.github.io/post-images/1638169801723.png" alt="" loading="lazy"><br>
+JavaScript 有很多很酷的特性，大多数初学者和中级开发人员都不知道。我挑选了 10 个我在日常 JavaScript 项目中使用的技巧。</p>
+<h2 id="1-有条件的向对象中添加属性">1. 有条件的向对象中添加属性</h2>
+<p>我们可以使用扩展运算符 <code>...</code> 来有条件地向 JavaScript 对象快速添加属性。</p>
+<pre><code class="language-javascript">const condition = true;
+const person = {
+  id: 1,
+  name: 'John Doe',
+  ...(condition &amp;&amp; { age: 16 }),
+};
+</code></pre>
+<p>如果每个操作数的计算结果都为true， &amp;&amp; 运算符将返回最后计算的表达式。因此返回一个对象 { age: 16 }，然后将其作为 person 对象的一部分。</p>
+<p>如果条件为 false，则 JavaScript 将执行以下操作：</p>
+<pre><code class="language-javascript">const person = {
+  id: 1,
+  name: 'John Doe',
+  ...(false), // evaluates to false
+};
+// spreading false has no effect on the object
+console.log(person); // { id: 1, name: 'John Doe' }
+</code></pre>
+<h2 id="2-检查一个属性是否存在于一个对象中">2. 检查一个属性是否存在于一个对象中</h2>
+<p>我们可以使用<code>in</code>关键字来检查 JavaScript 对象中是否存在属性</p>
+<pre><code class="language-javascript">const person = { name: 'John Doe', salary: 1000 };
+console.log('salary' in person); // returns true
+console.log('age' in person); // returns false
+</code></pre>
+<h2 id="3-对象中的动态属性名称">3. 对象中的动态属性名称</h2>
+<p>使用动态键设置对象属性很简单。只需使用 ['key_name'] 符号添加属性</p>
+<pre><code class="language-javascript">const dynamic = 'flavour';
+var item = {
+  name: 'Biscuit',
+  [dynamic]: 'Chocolate'
+}
+console.log(item); // { name: 'Biscuit', flavour: 'Chocolate' }
+</code></pre>
+<p>同样的技巧也可用于使用动态键引用对象属性：</p>
+<pre><code class="language-javascript">const keyName = 'name';
+console.log(item[keyName]); // returns 'Biscuit'
+</code></pre>
+<h2 id="4-使用动态键进行对象解构">4. 使用动态键进行对象解构</h2>
+<p>你可能知道你可以解构一个变量并立即用 : 符号重命名它。但是你知道当你不知道键名或键名是动态的时，你也可以解构对象的属性吗？<br>
+首先，让我们看看如何在解构（用别名解构）时重命名变量。</p>
+<pre><code class="language-javascript">const person = { id: 1, name: 'John Doe' };
+const { name: personName } = person;
+console.log(personName); // returns 'John Doe'
+</code></pre>
+<p>现在，让我们使用动态键来解构属性：</p>
+<pre><code class="language-javascript">const templates = {
+  'hello': 'Hello there',
+  'bye': 'Good bye'
+};
+const templateName = 'bye';
+const { [templateName]: template } = templates;
+console.log(template) // returns 'Good bye'
+</code></pre>
+<h2 id="5-运算符">5. ?? 运算符</h2>
+<p>这 <code>??</code>当你要检查变量是 null 还是 undefined 时，运算符很有用。当其左侧操作数为空或未定义时，它返回右侧操作数，否则返回其左侧操作数。</p>
+<pre><code class="language-javascript">const foo = null ?? 'Hello';
+console.log(foo); // returns 'Hello'
+const bar = 'Not null' ?? 'Hello';
+console.log(bar); // returns 'Not null'
+const baz = 0 ?? 'Hello';
+console.log(baz); // returns 0
+</code></pre>
+<p>在第三个示例中，返回 0 是因为即使 0 在 JavaScript 中被认为是假的，但它不是 null 或未定义的。你可能认为我们可以使用 ||运算符在这里，但这两者之间存在差异：</p>
+<pre><code class="language-javascript">const cannotBeZero = 0 || 5;
+console.log(cannotBeZero); // returns 5
+const canBeZero = 0 ?? 5;
+console.log(canBeZero); // returns 0
+</code></pre>
+<h2 id="6-可选链">6. ?. 可选链</h2>
+<p>我们都可能曾经遇到过TypeError：无法读取 null 的属性“foo”之类的错误。这对每个 JavaSript 开发人员来说都是头疼的问题。引入了可选链就是为了解决这个问题。让我们来看看：</p>
+<pre><code class="language-javascript">const book = { id:1, title: 'Title', author: null };
+// normally, you would do this
+console.log(book.author.age) // throws error
+console.log(book.author &amp;&amp; book.author.age); // returns null (no error)
+// with optional chaining
+console.log(book.author?.age); // returns undefined
+// or deep optional chaining
+console.log(book.author?.address?.city); // returns undefined
+</code></pre>
+<p>你还可以使用具有以下功能的可选链：</p>
+<pre><code class="language-javascript">const person = {
+  firstName: 'Haseeb',
+  lastName: 'Anwar',
+  printName: function () {
+    return `${this.firstName} ${this.lastName}`;
+  },
+};
+console.log(person.printName()); // returns 'Haseeb Anwar'
+console.log(persone.doesNotExist?.()); // returns undefined
+</code></pre>
+<h2 id="7-使用-的布尔转换符">7. 使用 !! 的布尔转换符</h2>
+<p>这 <code>!!</code>运算符可用于将表达式的结果快速转换为布尔值 <code>true</code> 或 <code>false</code>。就是这样：</p>
+<pre><code class="language-javascript">const greeting = 'Hello there!';
+console.log(!!greeting) // returns true
+const noGreeting = '';
+console.log(!!noGreeting); // returns false
+</code></pre>
+<h2 id="8-字符串和整数转换">8. 字符串和整数转换</h2>
+<p>使用 + 运算符快速将字符串转换为数字，如下所示：</p>
+<pre><code class="language-javascript">const stringNumer = '123';
+console.log(+stringNumer); // returns integer 123
+console.log(typeof +stringNumer); // returns 'number'
+</code></pre>
+<p>要将数字快速转换为字符串，请使用 + 运算符后跟空字符串 &quot;&quot;：</p>
+<pre><code class="language-javascript">const myString = 25 + '';
+console.log(myString); // returns '25'
+console.log(typeof myString); // returns 'string'
+</code></pre>
+<p>这些类型转换非常方便，但它们的清晰度和代码可读性较差。因此，在生产中使用它们之前，你可能需要考虑一下。不过可以用才<code>code golf</code>中。</p>
+<h2 id="9-检查数组中的假值">9. 检查数组中的假值</h2>
+<p>你熟悉 filter、some 和 every 数组方法。但你也应该知道，你可以仅使用布尔方法来测试真值：</p>
+<pre><code class="language-javascript">const myArray = [null, false, 'Hello', undefined, 0];
+// filter falsy values
+const filtered = myArray.filter(Boolean);
+console.log(filtered); // returns ['Hello']
+// check if at least one value is truthy
+const anyTruthy = myArray.some(Boolean);
+console.log(anyTruthy); // returns true
+// check if all values are truthy
+const allTruthy = myArray.every(Boolean);
+console.log(allTruthy); // returns false
+</code></pre>
+<p>这是它的工作原理。众所周知，这些数组方法采用回调函数，因此我们将布尔值作为回调函数传递。 <code>Boolean</code> 本身接受一个参数并根据参数的真实性返回<code>true</code>或 <code>false</code>。所以我们可以这样说：</p>
+<pre><code class="language-javascript">myArray.filter(val =&gt; Boolean(val));
+</code></pre>
+<p>是不是和这个一样：</p>
+<pre><code class="language-javascript">myArray.filter(Boolean);
+</code></pre>
+<h2 id="10展平数组">10.展平数组</h2>
+<p>原型 Array 上有一个方法 flat 可以让你从数组的数组中创建一个数组：</p>
+<pre><code class="language-javascript">const myArray = [{ id: 1 }, [{ id: 2 }], [{ id: 3 }]];
+const flattedArray = myArray.flat(); 
+// returns [ { id: 1 }, { id: 2 }, { id: 3 } 
+</code></pre>
+<p>你还可以定义一个深度级别，指定嵌套数组结构应展平的深度。例如：</p>
+<pre><code class="language-javascirpt">const arr = [0, 1, 2, [[[3, 4]]]];
+console.log(arr.flat(2)); // returns [0, 1, 2, [3,4]]
+</code></pre>
+<p>感谢你阅读到最后。我希望这些技巧对你有用。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[XSS 的攻击手段与防御]]></title>
         <id>https://umeimmense.github.io/post/xss</id>
