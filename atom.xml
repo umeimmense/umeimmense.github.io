@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-12-07T09:38:07.150Z</updated>
+    <updated>2021-12-07T10:03:57.137Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -21,7 +21,7 @@
 <li>DOM 是一种Tree状数据结构</li>
 <li>我们操作系统中的目录和文件可以表示为Tree</li>
 <li>家庭层次结构可以表示为Tree。<br>
-Tree的许多变体（如堆、BST 等）可用于解决与调度、图像处理、数据库等相关的问题。许多复杂的问题乍一看似乎与Tree无关，但可以实际上被表示为一个。我们也会（在本系列的后面部分）解决这些问题，以了解Tree如何使看似复杂的问题更容易理解和解决。</li>
+Tree的许多变体（如堆、BST 等）可用于解决与调度、图像处理、数据库等相关的问题。许多复杂的问题乍一看似乎与Tree无关，但可以被表示为一个Tree的问题。我们也会（在本系列的后面部分）解决这些问题，从而了解Tree如何使看似复杂的问题更容易理解和解决。</li>
 </ul>
 <h2 id="简介">简介</h2>
 <p>二叉树实现节点非常简单</p>
@@ -109,7 +109,7 @@ null  null   null   null
  left node -&gt; right node -&gt; root node // post-order traversal
 </code></pre>
 <p>所有这些遍历技术都可以递归和迭代实现。让我们进入实现细节：</p>
-<h4 id="前序遍历">前序遍历</h4>
+<h4 id="前序遍历pre-order-traversal">前序遍历(Pre-Order traversal)</h4>
 <h5 id="分析">分析</h5>
 <pre><code> root node -&gt; left node -&gt; right node
 </code></pre>
@@ -151,6 +151,150 @@ null  null   null   null
       if(item.left) stack.push(item.left)
    }
 }
+</code></pre>
+<h4 id="中序遍历in-order-traversal">中序遍历(In-Order traversal)</h4>
+<h5 id="分析-2">分析</h5>
+<p>下面是一棵树的中序遍历的过程：</p>
+<pre><code>left node -&gt; root node -&gt; right node
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://umeimmense.github.io/post-images/1638870255515.png" alt="" loading="lazy"></figure>
+<h5 id="技巧-2">技巧</h5>
+<p>我们可以使用这个简单的技巧来手动找出任何树的中序遍历：在树的底部水平放置一个平面镜，并获取所有节点的投影<br>
+<img src="https://umeimmense.github.io/post-images/1638870350959.png" alt="" loading="lazy"></p>
+<h5 id="实现-2">实现</h5>
+<ul>
+<li>递归<pre><code class="language-javascript">function walkInOrder(root){
+if(root === null) return
+
+if(root.left) walkInOrder(root.left)
+
+</code></pre>
+</li>
+</ul>
+<p>// do something here<br>
+console.log(root.val)</p>
+<p>if(root.right) walkInOrder(root.right)<br>
+}</p>
+<pre><code>- 迭代
+这个算法乍一看可能有点神秘。但它相当直观。让我们这样看：在中序遍历中，最左边的孩子节点首先被打印，然后是根，然后是孩子节点。所以首先想到的是想出这样的东西：
+```javascript
+const curr = root
+
+while(curr){
+while(curr.left){
+  curr = curr.left // get to leftmost child
+}
+
+console.log(curr) // print it
+
+curr = curr.right // now move to right child
+}
+</code></pre>
+<p>在上述方法中，我们无法回溯，即返回导致最左侧节点的父节点。所以我们需要一个堆栈来记录这些。因此，我们修订后的方法可能如下所示：</p>
+<pre><code class="language-javascript">const stack = []
+const curr = root
+
+while(stack.length || curr){
+while(curr){
+  stack.push(curr) // keep recording the trail, to backtrack
+  curr = curr.left // get to leftmost child
+}
+const leftMost = stack.pop()
+console.log(leftMost) // print it
+
+curr = leftMost.right // now move to right child
+}
+</code></pre>
+<p>现在我们可以使用上面的方法来制定最终的迭代算法：</p>
+<pre><code class="language-javascript">function walkInOrder(root){
+  if(root === null) return
+
+  const stack = []
+  let current = root
+
+  while(stack.length || current){
+      while(current){
+         stack.push(current)
+         current = current.left
+      }
+      const last = stack.pop()
+
+      // do something
+      console.log(last)
+
+      current = last.right
+   }
+}
+</code></pre>
+<h4 id="后序遍历post-order-traversal">后序遍历（Post-Order traversal）</h4>
+<h5 id="分析-3">分析</h5>
+<p>下面是一棵树的中序遍历的过程：</p>
+<pre><code> left node -&gt; right node -&gt; root node
+</code></pre>
+<figure data-type="image" tabindex="3"><img src="https://umeimmense.github.io/post-images/1638870734512.png" alt="" loading="lazy"></figure>
+<h5 id="技巧-3">技巧</h5>
+<p>对于任何树的快速手动后序遍历：一个接一个地提取所有最左边的孩子节点。<br>
+<img src="https://umeimmense.github.io/post-images/1638870834926.png" alt="" loading="lazy"></p>
+<h5 id="实现-3">实现</h5>
+<p>让我们深入研究这种遍历的实际实现。</p>
+<ul>
+<li>递归<pre><code class="language-javascript">  function walkPostOrder(root){
+  if(root === null) return
+
+  if(root.left) walkPostOrder(root.left)
+  if(root.right) walkPostOrder(root.right)
+
+  // do something here
+  console.log(root.val)
+
+  }
+</code></pre>
+</li>
+<li>迭代<br>
+我们已经有了用于前序遍历的迭代算法。我们可以用那个吗？因为后序遍历似乎只是前序遍历的反向。让我们来看看：</li>
+</ul>
+<pre><code>// PreOrder:
+root -&gt; left -&gt; right
+
+// Reverse of PreOrder:
+right -&gt; left -&gt; root
+
+// But PostOrder is:
+left -&gt; right -&gt; root
+</code></pre>
+<p>从上面分析可见有细微的差别。我们可以通过稍微修改我们的 前序遍历算法然后反转它应该给出 后序遍历结果来适应这一点。总体算法将是：</p>
+<pre><code>// record result using 
+root -&gt; right -&gt; left
+
+// reverse result
+left -&gt; right -&gt; root
+</code></pre>
+<ul>
+<li>使用与上述迭代前序遍历算法类似的方法，使用临时堆栈。
+<ul>
+<li>唯一的区别是 root -&gt; right -&gt; left 而不是 root -&gt; left -&gt; right</li>
+</ul>
+</li>
+<li>结果将遍历序列记录在一个array</li>
+<li>结果的反转就是后序遍历</li>
+</ul>
+<pre><code class="language-javascript">function walkPostOrder(root){
+  if(root === null) return []
+
+  const tempStack = [root], result = []
+
+  while(tempStack.length){
+      const last = tempStack.pop()
+
+      result.push(last)
+
+      if(last.left) tempStack.push(last.left)
+      if(last.right) tempStack.push(last.right)
+    }
+
+    return result.reverse()
+}
+
 </code></pre>
 ]]></content>
     </entry>
