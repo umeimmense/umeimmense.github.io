@@ -1,0 +1,271 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>JavaScript 中的稀疏数组与密集数组的区别？ | Cool Coding</title>
+
+<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1638971057645">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Cool Coding
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://umeimmense.github.io/resume/" class="menu gt-a-link" target="_blank">
+                            简历
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1638971057645" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    JavaScript 中的稀疏数组与密集数组的区别？
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2021-12-07 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="前言">前言</h2>
+<p>JavaScript 中的数组非常易于使用。但是，你应该注意一个细微差别：某些数组中可能存在漏洞。<br>
+在这篇文章中，我将描述 JavaScript 中稀疏数组和密集数组之间的区别。此外，你将找到创建稀疏数组的常用方法。</p>
+<h2 id="密集数组">密集数组</h2>
+<p>JavaScript 中的数组是一个对象，表示元素的有序集合。数组中的元素有一个确切的顺序。你可以使用索引访问数组的第 n 项。</p>
+<pre><code class="language-javascript">const names = ['Batman', 'Joker', 'Bane'];
+console.log(names[0]); // logs 'Batman'
+console.log(names[1]); // logs 'Joker'
+console.log(names[2]); // logs 'Bane'
+console.log(names.length); // logs 3
+</code></pre>
+<ul>
+<li><code>names[0]</code> 访问索引 0（第一个元素）处的数组项。</li>
+<li>数组还有一个属性长度，它表示数组中的项数。在前面的示例中，<code>names.length</code> 为 3，因为数组中的元素个数为 3。</li>
+<li>上面创建的名称数组是一个密集数组：这意味着它包含每个索引处的元素，从 0 开始，直到 names.length - 1。<br>
+我们定义这是一个函数 isDense(array) ，用于确定数组是否在每个索引处都有元素：</li>
+</ul>
+<pre><code class="language-javascript">function isDense(array) {
+ for (let index = 0; index &lt; array.length; index++) {
+   if (!(index in array)) {
+     return false;
+   }
+ }
+ return true;
+}
+const names = ['Batman', 'Joker', 'Bane'];
+console.log(isDense(names)); // logs true
+</code></pre>
+<p>其中 <code>index in array</code> 确定数组是否在索引位置有一个元素。</p>
+<p>这是一个有趣的问题：JavaScript 中的所有数组都是密集的吗？或者当 <code>isDense(array)</code> 返回 false 时可能有数组？</p>
+<h2 id="稀疏数组">稀疏数组</h2>
+<p>有些情况下 JavaScript 数组中可能存在漏洞。这样的数组被命名为稀疏数组。<br>
+例如，如果你使用数组字面量但省略指示项就会创建了一个稀疏数组：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+console.log(names[0]); // logs 'Batman'
+console.log(names[1]); // logs undefined
+console.log(names[2]); // logs 'Bane'
+console.log(isDense(names)); // logs false
+</code></pre>
+<p><code>['Batman', , 'Bane']</code> 数组文字创建一个稀疏数组，在 1 索引处有一个缺失。如果你访问这个位置的值——names[1]——它的计算结果是 <code>undefined</code>。</p>
+<p>要明确检查特定索引处是否有空缺，你可以这样写<code>index in names</code>中：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+// No hole
+console.log(0 in names); // logs true
+// Hole
+console.log(1 in names); // logs false
+</code></pre>
+<p>当然，如果你在稀疏数组上运行 isDense() 它将返回 false：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+console.log(isDense(names)); // logs false
+</code></pre>
+<p>现在你对稀疏数组有所了解。但是创建稀疏数组的常用方法是什么？</p>
+<h2 id="创建稀疏数组的方法">创建稀疏数组的方法</h2>
+<h3 id="数组字面量">数组字面量</h3>
+<p>在使用数组字面量时省略一个值会创建一个稀疏数组（注意记录器数组中的空词）：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+console.log(names); // logs ['Batman', empty, 'Bane']
+</code></pre>
+<h3 id="array-构造函数">Array() 构造函数</h3>
+<p>调用 <code>Array(length)</code> 或 <code>new Array(length)</code>（带有一个数字参数）会创建一个完全稀疏的数组：</p>
+<pre><code class="language-javascript">const array = Array(3);
+console.log(isDense(array)); // logs false
+console.log(array);          // logs [empty, empty, empty]
+</code></pre>
+<h3 id="删除操作符">删除操作符</h3>
+<p>在数组上使用 <code>delete array[index]</code>运算符时：</p>
+<pre><code class="language-javascript">const names = ['Batman', 'Joker', 'Bane'];
+delete names[1];
+console.log(isDense(names)); // logs false
+console.log(names);          // logs ['Batman', empty, 'Bane']
+</code></pre>
+<p>最初，names数组是密集的。<br>
+但是执行 <code>delete names[1]</code>会删除索引 1 处的元素并使 <code>names</code> 数组变得稀疏。</p>
+<h3 id="增加length属性">增加length属性</h3>
+<p>如果你增加数组的长度属性，那么你也会在数组中创建空缺：</p>
+<pre><code class="language-javascript">const names = ['Batman', 'Joker', 'Bane'];
+names.length = 5;
+console.log(isDense(names)); // logs false
+console.log(names); // logs ['Batman', 'Joker', 'Bane', empty, empty]
+</code></pre>
+<p>最初<code>names</code>数组有3个元素，是一个密集数组。<br>
+但是，将<code>names.length</code> 增加到 5 个元素会在 3 和 4 个索引处创建 2 个孔。</p>
+<p>附带说明一下，减少 <code>length</code> 属性不会创建稀疏数组，而是从数组末尾删除元素。</p>
+<h3 id="数组方法和稀疏数组">数组方法和稀疏数组</h3>
+<p>稀疏数组的一个问题是许多数组内置方法只是跳过稀疏数组中的空缺。<br>
+例如， <code>array.forEach(eachFunc)</code> 不会在孔上调用 <code>eachFunc</code> ：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+names.forEach(name =&gt; {
+  console.log(name);
+});
+// logs 'Batman'
+// logs 'Bane'
+</code></pre>
+<p>以同样的方式 <code>array.map(mapperFunc)</code>、<code>array.filter(predicateFunc)</code> 和更多函数跳过这些空缺位置。如果你不小心创建了一个稀疏数组，可能很难理解为什么数组方法不能按预期工作。</p>
+<h2 id="总结">总结</h2>
+<p>在 JavaScript 中，数组可以是密集的或稀疏的。</p>
+<p>如果每个索引处都有从 0 开始直到 <code>array.length - 1</code> 的元素，则数组是密集的。否则，如果任何索引处至少缺少一项，则数组是稀疏的。</p>
+<p>虽然你不会过多地处理稀疏数组，但你应该了解可以创建一个数组的情况：</p>
+<ul>
+<li>跳过数组 <code>[1, , 3]</code> 中的值时</li>
+<li>使用 <code>Array(length)</code> 时</li>
+<li>使用<code>delete array[index]</code></li>
+<li>当增加 <code>array.length</code> 属性时</li>
+</ul>
+<p>稀疏数组的问题在于某些 JavaScript 函数（如 <code>array.forEach()</code>、<code>array.map()</code> 等）在迭代数组项时会跳过空缺值。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/chu-tan-react-router-6" class="post-title gt-a-link">
+                    初探 React Router 6 
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"></div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/umeimmense" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        
+    </div>
+    <!-- <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://umeimmense.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div> -->
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
