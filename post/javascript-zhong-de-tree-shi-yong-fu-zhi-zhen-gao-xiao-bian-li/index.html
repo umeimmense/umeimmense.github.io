@@ -6,7 +6,7 @@
 
 <title>JavaScript 中的 Tree 使用父指针高效遍历 | Cool Coding</title>
 
-<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1639107592778">
+<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1639127999867">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
@@ -85,7 +85,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1639107592778" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1639127999867" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -101,7 +101,7 @@
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
-                        · 2021-12-07 ·
+                        · 2021-12-08 ·
                     </time>
                     
                         <a href="https://umeimmense.github.io/tag/algorithm" class="post-tags">
@@ -130,8 +130,7 @@
 }
 </code></pre>
 <p>现在让我们看看如何使用这个新的 Node 定义来创建一个类似的树，就像我们在上一篇文章中所做的那样。</p>
-<pre><code class="language-javascript">
-const root = new Node(2)
+<pre><code class="language-javascript">const root = new Node(2)
 const left = new Node(1)
 root.left = left
 left.parent = root
@@ -139,6 +138,41 @@ left.parent = root
 const right = new Node(3)
 root.right = right
 right.parent = root
+</code></pre>
+<p>我们只需要确保父字段指向父节点。这是我们使用上述代码获得的最终树的视觉参考：<br>
+<img src="https://umeimmense.github.io/post-images/1639116374962.jpeg" alt="" loading="lazy"></p>
+<p>##寻找后继节点</p>
+<h3 id="前序">前序</h3>
+<p>假设每个节点都有一个parent指针，如何找出二叉树中任何节点的 preOrder 后继？<br>
+让我们试着分析一下这个问题：</p>
+<ol>
+<li>首先，我们在这里处理 preOrder，这意味着我们正在寻找以下顺序：</li>
+</ol>
+<pre><code class="language-javascript">root -&gt; left -&gt; right
+</code></pre>
+<ol start="2">
+<li>这意味着如果我们已经在当前节点，我们想寻找左子节点作为后继节点。</li>
+<li>如果根本没有左子节点怎么办？那么在这种情况下，我们会寻找合适的节点，如果在有左子节点，那就是后继节点。</li>
+<li>如果没有左子节点或右子节点，那么我们需要回溯（继续向上走向父节点）。我们一直回溯，直到通过它的右子节点到达父级（因为这意味着 preOrder 对于父级下的整个子树是完整的，根据 #1 的定义）。</li>
+</ol>
+<p>最终算法实现就是这样：</p>
+<pre><code class="language-javascript">function preOrderSuccessor(node){
+   if(!node) return
+
+   if(node.left) return node.left
+   if(node.right) return node.right
+
+   let parent = node.parent
+
+   while(parent &amp;&amp; parent.right === node) {
+     node = node.parent
+     parent = parent.parent
+   }
+
+   if(!parent) return null // we backtracked till root, so no successor
+
+   return parent.right
+}
 
 </code></pre>
 
@@ -149,8 +183,8 @@ right.parent = root
         
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://umeimmense.github.io/post/chu-tan-react-router-6" class="post-title gt-a-link">
-                    初探 React Router 6 
+                <a href="https://umeimmense.github.io/post/javascript-zhong-de-tree" class="post-title gt-a-link">
+                    JavaScript 中的 Tree
                 </a>
             </div>
         

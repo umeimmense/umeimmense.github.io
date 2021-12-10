@@ -2,13 +2,195 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-12-10T03:40:08.864Z</updated>
+    <updated>2021-12-10T09:20:04.477Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[JavaScript 中的稀疏数组与密集数组的区别？]]></title>
+        <id>https://umeimmense.github.io/post/javascript-zhong-de-xi-shu-shu-zu-yu-mi-ji-shu-zu-de-qu-bie</id>
+        <link href="https://umeimmense.github.io/post/javascript-zhong-de-xi-shu-shu-zu-yu-mi-ji-shu-zu-de-qu-bie">
+        </link>
+        <updated>2021-12-10T08:02:13.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>JavaScript 中的数组非常易于使用。但是，你应该注意一个细微差别：某些数组中可能存在漏洞。<br>
+在这篇文章中，我将描述 JavaScript 中稀疏数组和密集数组之间的区别。此外，你将找到创建稀疏数组的常用方法。</p>
+<h2 id="密集数组">密集数组</h2>
+<p>JavaScript 中的数组是一个对象，表示元素的有序集合。数组中的元素有一个确切的顺序。你可以使用索引访问数组的第 n 项。</p>
+<pre><code class="language-javascript">const names = ['Batman', 'Joker', 'Bane'];
+console.log(names[0]); // logs 'Batman'
+console.log(names[1]); // logs 'Joker'
+console.log(names[2]); // logs 'Bane'
+console.log(names.length); // logs 3
+</code></pre>
+<ul>
+<li><code>names[0]</code> 访问索引 0（第一个元素）处的数组项。</li>
+<li>数组还有一个属性长度，它表示数组中的项数。在前面的示例中，<code>names.length</code> 为 3，因为数组中的元素个数为 3。</li>
+<li>上面创建的名称数组是一个密集数组：这意味着它包含每个索引处的元素，从 0 开始，直到 names.length - 1。<br>
+我们定义这是一个函数 isDense(array) ，用于确定数组是否在每个索引处都有元素：</li>
+</ul>
+<pre><code class="language-javascript">function isDense(array) {
+ for (let index = 0; index &lt; array.length; index++) {
+   if (!(index in array)) {
+     return false;
+   }
+ }
+ return true;
+}
+const names = ['Batman', 'Joker', 'Bane'];
+console.log(isDense(names)); // logs true
+</code></pre>
+<p>其中 <code>index in array</code> 确定数组是否在索引位置有一个元素。</p>
+<p>这是一个有趣的问题：JavaScript 中的所有数组都是密集的吗？或者当 <code>isDense(array)</code> 返回 false 时可能有数组？</p>
+<h2 id="稀疏数组">稀疏数组</h2>
+<p>有些情况下 JavaScript 数组中可能存在漏洞。这样的数组被命名为稀疏数组。<br>
+例如，如果你使用数组字面量但省略指示项就会创建了一个稀疏数组：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+console.log(names[0]); // logs 'Batman'
+console.log(names[1]); // logs undefined
+console.log(names[2]); // logs 'Bane'
+console.log(isDense(names)); // logs false
+</code></pre>
+<p><code>['Batman', , 'Bane']</code> 数组文字创建一个稀疏数组，在 1 索引处有一个缺失。如果你访问这个位置的值——names[1]——它的计算结果是 <code>undefined</code>。</p>
+<p>要明确检查特定索引处是否有空缺，你可以这样写<code>index in names</code>中：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+// No hole
+console.log(0 in names); // logs true
+// Hole
+console.log(1 in names); // logs false
+</code></pre>
+<p>当然，如果你在稀疏数组上运行 isDense() 它将返回 false：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+console.log(isDense(names)); // logs false
+</code></pre>
+<p>现在你对稀疏数组有所了解。但是创建稀疏数组的常用方法是什么？</p>
+<h2 id="创建稀疏数组的方法">创建稀疏数组的方法</h2>
+<h3 id="数组字面量">数组字面量</h3>
+<p>在使用数组字面量时省略一个值会创建一个稀疏数组（注意记录器数组中的空词）：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+console.log(names); // logs ['Batman', empty, 'Bane']
+</code></pre>
+<h3 id="array-构造函数">Array() 构造函数</h3>
+<p>调用 <code>Array(length)</code> 或 <code>new Array(length)</code>（带有一个数字参数）会创建一个完全稀疏的数组：</p>
+<pre><code class="language-javascript">const array = Array(3);
+console.log(isDense(array)); // logs false
+console.log(array);          // logs [empty, empty, empty]
+</code></pre>
+<h3 id="删除操作符">删除操作符</h3>
+<p>在数组上使用 <code>delete array[index]</code>运算符时：</p>
+<pre><code class="language-javascript">const names = ['Batman', 'Joker', 'Bane'];
+delete names[1];
+console.log(isDense(names)); // logs false
+console.log(names);          // logs ['Batman', empty, 'Bane']
+</code></pre>
+<p>最初，names数组是密集的。<br>
+但是执行 <code>delete names[1]</code>会删除索引 1 处的元素并使 <code>names</code> 数组变得稀疏。</p>
+<h3 id="增加length属性">增加length属性</h3>
+<p>如果你增加数组的长度属性，那么你也会在数组中创建空缺：</p>
+<pre><code class="language-javascript">const names = ['Batman', 'Joker', 'Bane'];
+names.length = 5;
+console.log(isDense(names)); // logs false
+console.log(names); // logs ['Batman', 'Joker', 'Bane', empty, empty]
+</code></pre>
+<p>最初<code>names</code>数组有3个元素，是一个密集数组。<br>
+但是，将<code>names.length</code> 增加到 5 个元素会在 3 和 4 个索引处创建 2 个孔。</p>
+<p>附带说明一下，减少 <code>length</code> 属性不会创建稀疏数组，而是从数组末尾删除元素。</p>
+<h3 id="数组方法和稀疏数组">数组方法和稀疏数组</h3>
+<p>稀疏数组的一个问题是许多数组内置方法只是跳过稀疏数组中的空缺。<br>
+例如， <code>array.forEach(eachFunc)</code> 不会在孔上调用 <code>eachFunc</code> ：</p>
+<pre><code class="language-javascript">const names = ['Batman', , 'Bane'];
+names.forEach(name =&gt; {
+  console.log(name);
+});
+// logs 'Batman'
+// logs 'Bane'
+</code></pre>
+<p>以同样的方式 <code>array.map(mapperFunc)</code>、<code>array.filter(predicateFunc)</code> 和更多函数跳过这些空缺位置。如果你不小心创建了一个稀疏数组，可能很难理解为什么数组方法不能按预期工作。</p>
+<h2 id="总结">总结</h2>
+<p>在 JavaScript 中，数组可以是密集的或稀疏的。</p>
+<p>如果每个索引处都有从 0 开始直到 <code>array.length - 1</code> 的元素，则数组是密集的。否则，如果任何索引处至少缺少一项，则数组是稀疏的。</p>
+<p>虽然你不会过多地处理稀疏数组，但你应该了解可以创建一个数组的情况：</p>
+<ul>
+<li>跳过数组 <code>[1, , 3]</code> 中的值时</li>
+<li>使用 <code>Array(length)</code> 时</li>
+<li>使用<code>delete array[index]</code></li>
+<li>当增加 <code>array.length</code> 属性时</li>
+</ul>
+<p>稀疏数组的问题在于某些 JavaScript 函数（如 <code>array.forEach()</code>、<code>array.map()</code> 等）在迭代数组项时会跳过空缺值。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JavaScript 中的 Tree 使用父指针高效遍历]]></title>
+        <id>https://umeimmense.github.io/post/javascript-zhong-de-tree-shi-yong-fu-zhi-zhen-gao-xiao-bian-li</id>
+        <link href="https://umeimmense.github.io/post/javascript-zhong-de-tree-shi-yong-fu-zhi-zhen-gao-xiao-bian-li">
+        </link>
+        <updated>2021-12-08T03:18:12.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>在本系列的<a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">第一部分</a>中，我们研究了遍历二叉树的递归和迭代方法。<br>
+在实际应用中，树节点有一个父节点是很常见的：一个指向父节点的指针，因此也称为父指针。让我们以浏览器中的 DOM 为例。假设我们使用以下命令选择任何节点：</p>
+<pre><code class="language-javascript">const element = document.querySelector(&quot;#id&quot;)
+</code></pre>
+<p>在本文中，我们将研究如何使用这些父指针来提高遍历效率。我稍后会解释我所说的“更高效”是什么意思。在下一篇文章中，我们还将了解如何使用此处学到的经验教训从头开始创建 myQuery 库。</p>
+<h2 id="更新节点定义">更新节点定义</h2>
+<p>首先，我们需要更新Node 函数</p>
+<pre><code class="language-javascript">function Node(value){
+  this.value = value
+  this.left = null
+  this.right = null
+  this.parent = null // added parent field
+}
+</code></pre>
+<p>现在让我们看看如何使用这个新的 Node 定义来创建一个类似的树，就像我们在上一篇文章中所做的那样。</p>
+<pre><code class="language-javascript">const root = new Node(2)
+const left = new Node(1)
+root.left = left
+left.parent = root
+
+const right = new Node(3)
+root.right = right
+right.parent = root
+</code></pre>
+<p>我们只需要确保父字段指向父节点。这是我们使用上述代码获得的最终树的视觉参考：<br>
+<img src="https://umeimmense.github.io/post-images/1639116374962.jpeg" alt="" loading="lazy"></p>
+<p>##寻找后继节点</p>
+<h3 id="前序">前序</h3>
+<p>假设每个节点都有一个parent指针，如何找出二叉树中任何节点的 preOrder 后继？<br>
+让我们试着分析一下这个问题：</p>
+<ol>
+<li>首先，我们在这里处理 preOrder，这意味着我们正在寻找以下顺序：</li>
+</ol>
+<pre><code class="language-javascript">root -&gt; left -&gt; right
+</code></pre>
+<ol start="2">
+<li>这意味着如果我们已经在当前节点，我们想寻找左子节点作为后继节点。</li>
+<li>如果根本没有左子节点怎么办？那么在这种情况下，我们会寻找合适的节点，如果在有左子节点，那就是后继节点。</li>
+<li>如果没有左子节点或右子节点，那么我们需要回溯（继续向上走向父节点）。我们一直回溯，直到通过它的右子节点到达父级（因为这意味着 preOrder 对于父级下的整个子树是完整的，根据 #1 的定义）。</li>
+</ol>
+<p>最终算法实现就是这样：</p>
+<pre><code class="language-javascript">function preOrderSuccessor(node){
+   if(!node) return
+
+   if(node.left) return node.left
+   if(node.right) return node.right
+
+   let parent = node.parent
+
+   while(parent &amp;&amp; parent.right === node) {
+     node = node.parent
+     parent = parent.parent
+   }
+
+   if(!parent) return null // we backtracked till root, so no successor
+
+   return parent.right
+}
+
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[JavaScript 中的 Tree]]></title>
         <id>https://umeimmense.github.io/post/javascript-zhong-de-tree</id>
@@ -294,41 +476,6 @@ left -&gt; right -&gt; root
 
     return result.reverse()
 }
-
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[JavaScript 中的 Tree 使用父指针高效遍历]]></title>
-        <id>https://umeimmense.github.io/post/javascript-zhong-de-tree-shi-yong-fu-zhi-zhen-gao-xiao-bian-li</id>
-        <link href="https://umeimmense.github.io/post/javascript-zhong-de-tree-shi-yong-fu-zhi-zhen-gao-xiao-bian-li">
-        </link>
-        <updated>2021-12-07T03:18:12.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>在本系列的<a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">第一部分</a>中，我们研究了遍历二叉树的递归和迭代方法。<br>
-在实际应用中，树节点有一个父节点是很常见的：一个指向父节点的指针，因此也称为父指针。让我们以浏览器中的 DOM 为例。假设我们使用以下命令选择任何节点：</p>
-<pre><code class="language-javascript">const element = document.querySelector(&quot;#id&quot;)
-</code></pre>
-<p>在本文中，我们将研究如何使用这些父指针来提高遍历效率。我稍后会解释我所说的“更高效”是什么意思。在下一篇文章中，我们还将了解如何使用此处学到的经验教训从头开始创建 myQuery 库。</p>
-<h2 id="更新节点定义">更新节点定义</h2>
-<p>首先，我们需要更新Node 函数</p>
-<pre><code class="language-javascript">function Node(value){
-  this.value = value
-  this.left = null
-  this.right = null
-  this.parent = null // added parent field
-}
-</code></pre>
-<p>现在让我们看看如何使用这个新的 Node 定义来创建一个类似的树，就像我们在上一篇文章中所做的那样。</p>
-<pre><code class="language-javascript">
-const root = new Node(2)
-const left = new Node(1)
-root.left = left
-left.parent = root
-
-const right = new Node(3)
-root.right = right
-right.parent = root
 
 </code></pre>
 ]]></content>
