@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-12-10T03:39:32.844Z</updated>
+    <updated>2021-12-10T03:40:08.864Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -294,6 +294,41 @@ left -&gt; right -&gt; root
 
     return result.reverse()
 }
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JavaScript 中的 Tree 使用父指针高效遍历]]></title>
+        <id>https://umeimmense.github.io/post/javascript-zhong-de-tree-shi-yong-fu-zhi-zhen-gao-xiao-bian-li</id>
+        <link href="https://umeimmense.github.io/post/javascript-zhong-de-tree-shi-yong-fu-zhi-zhen-gao-xiao-bian-li">
+        </link>
+        <updated>2021-12-07T03:18:12.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>在本系列的<a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">第一部分</a>中，我们研究了遍历二叉树的递归和迭代方法。<br>
+在实际应用中，树节点有一个父节点是很常见的：一个指向父节点的指针，因此也称为父指针。让我们以浏览器中的 DOM 为例。假设我们使用以下命令选择任何节点：</p>
+<pre><code class="language-javascript">const element = document.querySelector(&quot;#id&quot;)
+</code></pre>
+<p>在本文中，我们将研究如何使用这些父指针来提高遍历效率。我稍后会解释我所说的“更高效”是什么意思。在下一篇文章中，我们还将了解如何使用此处学到的经验教训从头开始创建 myQuery 库。</p>
+<h2 id="更新节点定义">更新节点定义</h2>
+<p>首先，我们需要更新Node 函数</p>
+<pre><code class="language-javascript">function Node(value){
+  this.value = value
+  this.left = null
+  this.right = null
+  this.parent = null // added parent field
+}
+</code></pre>
+<p>现在让我们看看如何使用这个新的 Node 定义来创建一个类似的树，就像我们在上一篇文章中所做的那样。</p>
+<pre><code class="language-javascript">
+const root = new Node(2)
+const left = new Node(1)
+root.left = left
+left.parent = root
+
+const right = new Node(3)
+root.right = right
+right.parent = root
 
 </code></pre>
 ]]></content>

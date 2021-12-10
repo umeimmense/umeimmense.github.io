@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Browser | Cool Coding</title>
+<title>JavaScript 中的 Tree 使用父指针高效遍历 | Cool Coding</title>
 
 <link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1639107592778">
 
@@ -25,11 +25,11 @@
 
 
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
-    <div class="main-content">
-        <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -93,49 +93,73 @@
     </div>
 </nav>
 
-        <div class="current-tag-container">
-            <h2 class="title gt-c-content-color-first">
-                #Browser
-            </h2>
-        </div>
-        <div class="post-list-container">
-    <div class="post-inner">
-        
-            <div class="post gt-bg-theme-color-second">
-                <div class="post-left">
-                    <div>
-                        
-                        <a href="https://umeimmense.github.io/post/javascript-yin-qing-ru-he-ti-sheng-qi-yun-xing-shi-de-xing-neng">
-                            <span class="post-title gt-c-content-color-first">JavaScript 引擎如何提升其运行时的性能？</span>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    JavaScript 中的 Tree 使用父指针高效遍历
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2021-12-07 ·
+                    </time>
+                    
+                        <a href="https://umeimmense.github.io/tag/algorithm" class="post-tags">
+                            # Algorithm
                         </a>
-                    </div>
-                    <div class="gt-post-content post-abstract gt-c-content-color-second">
-                        
-                    </div>
-                    <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            发布于 · 2021-12-02 ·
-                        </time>
-                        
-                            <a href="https://umeimmense.github.io/tag/browser" class="post-tag">
-                                # Browser
-                            </a>
-                        
-                            <a href="https://umeimmense.github.io/tag/javascript" class="post-tag">
-                                # JavaScript
-                            </a>
-                        
-                    </div>
+                    
+                        <a href="https://umeimmense.github.io/tag/javascript" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
                 </div>
-                
+                <div class="post-content">
+                    <h2 id="前言">前言</h2>
+<p>在本系列的<a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">第一部分</a>中，我们研究了遍历二叉树的递归和迭代方法。<br>
+在实际应用中，树节点有一个父节点是很常见的：一个指向父节点的指针，因此也称为父指针。让我们以浏览器中的 DOM 为例。假设我们使用以下命令选择任何节点：</p>
+<pre><code class="language-javascript">const element = document.querySelector(&quot;#id&quot;)
+</code></pre>
+<p>在本文中，我们将研究如何使用这些父指针来提高遍历效率。我稍后会解释我所说的“更高效”是什么意思。在下一篇文章中，我们还将了解如何使用此处学到的经验教训从头开始创建 myQuery 库。</p>
+<h2 id="更新节点定义">更新节点定义</h2>
+<p>首先，我们需要更新Node 函数</p>
+<pre><code class="language-javascript">function Node(value){
+  this.value = value
+  this.left = null
+  this.right = null
+  this.parent = null // added parent field
+}
+</code></pre>
+<p>现在让我们看看如何使用这个新的 Node 定义来创建一个类似的树，就像我们在上一篇文章中所做的那样。</p>
+<pre><code class="language-javascript">
+const root = new Node(2)
+const left = new Node(1)
+root.left = left
+left.parent = root
+
+const right = new Node(3)
+root.right = right
+right.parent = root
+
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/chu-tan-react-router-6" class="post-title gt-a-link">
+                    初探 React Router 6 
+                </a>
             </div>
         
-    </div>
-</div>
-        <div class="pagination-container">
-    
-    
-</div>
+
+        
+
+        
+
+        
 
         <div class="site-footer gt-c-content-color-first">
     <div class="slogan gt-c-content-color-first"></div>
