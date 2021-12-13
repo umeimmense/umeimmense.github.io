@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-12-13T06:11:24.427Z</updated>
+    <updated>2021-12-13T08:56:42.926Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -120,6 +120,266 @@ names.forEach(name =&gt; {
 <li>当增加 <code>array.length</code> 属性时</li>
 </ul>
 <p>稀疏数组的问题在于某些 JavaScript 函数（如 <code>array.forEach()</code>、<code>array.map()</code> 等）在迭代数组项时会跳过空缺值。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JavaScript 将树遍历算法应用于 DOM]]></title>
+        <id>https://umeimmense.github.io/post/javascript-jiang-shu-bian-li-suan-fa-ying-yong-yu-dom</id>
+        <link href="https://umeimmense.github.io/post/javascript-jiang-shu-bian-li-suan-fa-ying-yong-yu-dom">
+        </link>
+        <updated>2021-12-09T06:10:43.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>到目前为止，我们已经了解了一些二叉树遍历的方法：</p>
+<ul>
+<li><a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">使用递归和迭代算法遍历二叉树</a></li>
+<li><a href="https://umeimmense.github.io/post/javascript-zhong-de-tree-shi-yong-fu-zhi-zhen-gao-xiao-bian-li/">使用父指针遍历二叉树</a><br>
+在本文中，我们将把这些知识用于 n 叉树，即 DOM。我们将看到如何使用各种 CSS 选择器定位 DOM 元素，而无需使用内置 API，如 getElementById、getElementsByClassname 或 querySelector/querySelectorAll。因此，本文将阐明这些 API 可能如何在幕后工作。</li>
+</ul>
+<h2 id="dom-遍历">DOM 遍历</h2>
+<p>借用 <a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">使用递归和迭代算法遍历二叉树</a>的思路，我们来得出DOM的前序遍历算法：</p>
+<pre><code class="language-javascript">function walkPreOrder(node){
+  if(!node) return
+
+  // do something here
+  console.log(node)
+
+  for(let child of node.children){
+     walkPreOrder(child)
+  }
+}
+</code></pre>
+<p>我们可以修改这个算法使之来返回一个迭代器：</p>
+<pre><code class="language-javascript">function* walkPreOrder(node){
+  if(!node) return
+
+  // do something here
+  yield node
+  for(let child of node.children){
+    yield* walkPreOrder(child)
+  }
+}
+
+// USAGE
+for(let node of walkPreOrder(root)){
+  console.log(node)
+}
+</code></pre>
+<p>我们可以使用任何广度优先或深度优先算法（在之前的文章中讨论过）来遍历 DOM。<br>
+我们还假设正在处理具有以下 HTML 的文档：</p>
+<pre><code class="language-html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;DOM selection algorithm&lt;/title&gt;
+  &lt;/head&gt;
+&lt;body&gt;
+
+  &lt;div class=&quot;container&quot;&gt;
+    &lt;div class=&quot;body&quot;&gt;
+      &lt;div class=&quot;row&quot;&gt;
+        &lt;img id=&quot;profile&quot; src=&quot;xyz.jpg&quot; alt=&quot;&quot;&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h2 id="通过-id-定位节点">通过 ID 定位节点</h2>
+<pre><code class="language-javascript">function locateById(nodeId){
+  // iterate through all nodes in depth first (preOrder) fashion
+  // return the node as soon as it's found
+  for(let node of walkPreOrder(document.body)){
+     if(node.id === nodeId){
+        return node
+     }
+  }
+   return null
+}
+</code></pre>
+<p>我们可以使用 locateById() 函数如下：</p>
+<pre><code class="language-javascript">const img = locateById('profile')
+// returns the image node
+</code></pre>
+<h2 id="通过classname-定位节点">通过ClassName 定位节点</h2>
+<p>浏览器提供 document.getElementsByClassName() API 来实现此结果。我们如何实现类似的东西：</p>
+<pre><code class="language-javascript">function locateAllByClassName(className){
+   const result = []
+   for(let node of walkPreOrder(document.body)){
+      if(node.classList.contains(className)){
+        result.push(node)
+      }
+   }
+   return result
+}
+
+// USAGE
+const elements = locateAllByClassName('row')
+</code></pre>
+<h2 id="浏览器如何优化选择查询">浏览器如何优化选择查询</h2>
+<p>选择 DOM 节点是 Web 应用程序相当常见的操作。为同一个选择器多次遍历树似乎不是最佳选择。浏览器通过使用记忆优化选择。<br>
+查看 <a href="https://searchfox.org/mozilla-central/source/parser/html/javasrc/TreeBuilder.java#1467">mozilla 解析器的源代码</a>，即函数 startTag 的摘录：</p>
+<pre><code class="language-javascript"> // ID uniqueness
+ @IdType String id = attributes.getId();
+ if (id != null) {
+      LocatorImpl oldLoc = idLocations.get(id);
+      if (oldLoc != null) {
+            err(&quot;Duplicate ID \u201C&quot; + id + &quot;\u201D.&quot;);
+            errorHandler.warning(new SAXParseException(
+                  &quot;The first occurrence of ID \u201C&quot; + id
+                  + &quot;\u201D was here.&quot;, oldLoc));
+       } else {
+            idLocations.put(id, new LocatorImpl(tokenizer));
+       }
+ }
+</code></pre>
+<p>我们可以看到这些节点 ID 保存在一个简单的哈希映射中。我们可以使用类似的方法来确保对同一 ID 的重复查询不需要完全遍历，相反，我们可以从 hashMap 中查找并返回它。<br>
+以下是我们的解决方案：</p>
+<pre><code class="language-javascript">function getSelectors(){
+  const idLocations = {}
+  const classLocations = {}
+
+  // updated selector functions  
+  function locateById(nodeId){
+    if(idLocations.hasOwnProperty(nodeId)) 
+       return idLocations[nodeId]
+
+    for(let node of walkPreOrder(document.body)){
+       if(node.id === nodeId){
+          idLocations[nodeId]= node //memoize
+          return node
+       }
+     }
+    idLocations[nodeId]= null // memoize
+    return null
+  }
+
+  function locateAllByClassName(className){
+    if(classLocations.hasOwnProperty(className)) 
+         return classLocations[className]
+
+    const result = []
+    for(let node of walkPreOrder(document.body)){
+       if(node.classList.contains(className)){
+          result.push(node)
+        }
+     }
+     classLocations[nodeId]= result
+     return result
+  }
+
+  return {
+       locateById,
+       locateAllByClassName
+    }
+
+} 
+
+  // USAGE
+  const {locateById, locateAllByClassName} = getSelectors();
+  const result = locateAllByClassName('row') // returns array of elements
+  const img = locateById('profile') // returns an element, if found
+</code></pre>
+<h2 id="处理更复杂的选择器">处理更复杂的选择器</h2>
+<p>让我们尝试实现类似 element.querySelector 的方法。以下是 MDN 的描述：</p>
+<blockquote>
+<p>The querySelector() method of the Element interface returns the first element that is a descendant of the element on which it is invoked that matches the specified group of selectors.</p>
+</blockquote>
+<h3 id="样例">样例</h3>
+<pre><code class="language-javascript">const firstRow = document.querySelector('.container .row:first-child')
+</code></pre>
+<p>在这种情况下，我们可以将任何 CSS 选择器传递给函数，它应该能够遍历 DOM 为我们找到该元素。让我们看看它是如何实现的：</p>
+<pre><code class="language-javascript">// given a selector and root node, find that selector within the root node
+function select(selector, root){
+  for(let node of walkPreOrder(root)){
+      if(node.matches(selector)){
+        return node
+     }
+   }
+  return null;
+}
+
+
+function myQuerySelector(path, node){
+  // if path is empty, nothing to find
+  if(path.length === 0) return null;
+
+  // if node is not provided, let's assume user wants to search within document.body
+  let root = node || document.body;  
+  const selector = path[0];
+
+  // if there's only one selector in the path, just traverse using select function above
+  if(path.length === 1) return select(selector, root);
+
+   // else, either the current node matches the first selector in path or not
+   // if first selector matches with current node, look through it's children for subsequent selectors only
+   // else, look through it's children for the whole path
+  const newPath = root.matches(selector) ? path.slice(1): path;
+  for(let child of root.children){
+    const ans = myQuerySelector(newPath, child);
+    if(ans) return ans
+  }
+
+  // nothing found
+  return null;
+}
+
+
+// USAGE:
+const firstRow = myQuerySelector([&quot;.container&quot;, &quot;.row&quot;])
+</code></pre>
+<p>myQuerySelectorAll 的实现（类似于 element.querySelectorAll）也遵循相同的方法，稍作修改：</p>
+<pre><code class="language-javascript">function selectAll(selector, root){
+  let result = []
+  for(let node of walkPreOrder(root)){
+      if(node.matches(selector)){
+        result.push(node)
+     }
+   }
+  return result;
+}
+
+function myQuerySelectorAll(path, node){
+  let result = [];
+  if(path.length === 0) return result;
+
+  let root = node || document.body;  
+  const selector = path[0];
+
+  if(path.length === 1) return selectAll(selector, root);
+
+  const newPath = root.matches(selector) ? path.slice(1): path;
+  for(let child of root.children){
+    result = [...result, ...myQuerySelectorAll(newPath, child)]
+
+  }
+
+  return result;
+}
+</code></pre>
+<h2 id="进阶">进阶</h2>
+<p>我们可以使用本文开头描述的递归前序遍历方法来克隆任何树。让我们看看我们如何使用它来克隆任何 DOM 树，类似于 element.cloneNode(true) 所做的：</p>
+<ul>
+<li>通过创建具有相同 tagName 的新节点然后复制属性来创建源节点的克隆。</li>
+<li>对源节点的所有子节点递归调用 cloneTree 方法，并将返回的节点作为子节点附加到克隆节点。</li>
+</ul>
+<pre><code class="language-javascript">function cloneTree(node){
+  if(!node) return
+
+  const clonedNode = document.createElement(node.tagName.toLowerCase())
+  const attributes = node.getAttributeNames()
+
+  attributes.forEach(attribute =&gt; {
+     clonedNode.setAttribute(attribute, node.getAttribute(attribute))
+  })
+
+  for(const child of node.children){
+      clonedNode.append(cloneTree(child))
+  }
+
+  return clonedNode
+}
+</code></pre>
 ]]></content>
     </entry>
     <entry>
