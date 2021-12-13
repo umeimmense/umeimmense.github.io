@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-12-13T09:36:16.614Z</updated>
+    <updated>2021-12-13T09:40:03.574Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -272,7 +272,7 @@ trie.search(&quot;DOG&quot;) // true
 <ul>
 <li>自动完成和预先输入：如果您在文本框中键入内容，并且看到具有相同前缀的潜在搜索列表，即自动完成小部件，那么这可能是由后台的 Trie 处理的。同样，<a href="https://en.wikipedia.org/wiki/Typeahead">Typeahead</a> 也可以使用 Trie 来实现。</li>
 <li>拼写检查器：我们可以使用 trie 创建拼写检查器，即给定一个单词列表，我们可以检查给定单词的拼写是否正确。</li>
-<li>IP 路由（最长前缀匹配）：Internet 由多个路由器节点组成，它们决定应该发送的目标数据包。 Internet 上的每个路由器都需要将数据包发送到由给定 IP 目的地决定的适当目标节点。但是每个路由器如何使用给定的 IP 地址决定下一个目标路由器呢？这个问题可以使用IP路由来解决。这是一篇深入探讨这个主题的好文章。</li>
+<li>IP 路由（最长前缀匹配）：Internet 由多个路由器节点组成，它们决定应该发送的目标数据包。 Internet 上的每个路由器都需要将数据包发送到由给定 IP 目的地决定的适当目标节点。但是每个路由器如何使用给定的 IP 地址决定下一个目标路由器呢？这个问题可以使用IP路由来解决。<a href="https://www.lewuathe.com/longest-prefix-match-with-trie-tree.html">这是一篇深入探讨这个主题的好文章</a>。</li>
 </ul>
 ]]></content>
     </entry>
