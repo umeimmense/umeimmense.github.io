@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-12-13T09:40:03.574Z</updated>
+    <updated>2021-12-13T09:41:54.034Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -120,6 +120,23 @@ names.forEach(name =&gt; {
 <li>当增加 <code>array.length</code> 属性时</li>
 </ul>
 <p>稀疏数组的问题在于某些 JavaScript 函数（如 <code>array.forEach()</code>、<code>array.map()</code> 等）在迭代数组项时会跳过空缺值。</p>
+<h2 id="拓展">拓展</h2>
+<p>稀疏数组在访问元素的速度上比密集数组慢</p>
+<pre><code class="language-javascript">const arr = new Array(200000)
+arr[19999] = 88
+console.time('using[]')
+arr[19999]
+console.timeEnd('using[]')
+// using[]: 0.031982421875ms
+
+const ddd = [...new Array(200000)]
+ddd[19999] = 88
+console.time('using[]')
+ddd[19999]
+console.timeEnd('using[]')
+// using[]: 0.010009765625ms 
+</code></pre>
+<p>具体原因是，对于稀疏数组 V8 引擎访问对象是使用 散列表模式的，该种模式在访问时需要计算一遍哈希值，所以会比较慢，但散列表对于空间利用来说，效率更高。而密集数组，它是申请一段连续的内存空间，访问时可以直接通过「索引」来访问，所以速度比较快。</p>
 ]]></content>
     </entry>
     <entry>
