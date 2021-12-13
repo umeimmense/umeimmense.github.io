@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-12-13T03:52:26.731Z</updated>
+    <updated>2021-12-13T06:10:22.652Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -14,7 +14,7 @@
         <id>https://umeimmense.github.io/post/javascript-zhong-de-xi-shu-shu-zu-yu-mi-ji-shu-zu-de-qu-bie</id>
         <link href="https://umeimmense.github.io/post/javascript-zhong-de-xi-shu-shu-zu-yu-mi-ji-shu-zu-de-qu-bie">
         </link>
-        <updated>2021-12-10T08:02:13.000Z</updated>
+        <updated>2021-12-12T08:02:13.000Z</updated>
         <content type="html"><![CDATA[<h2 id="前言">前言</h2>
 <p>JavaScript 中的数组非常易于使用。但是，你应该注意一个细微差别：某些数组中可能存在漏洞。<br>
 在这篇文章中，我将描述 JavaScript 中稀疏数组和密集数组之间的区别。此外，你将找到创建稀疏数组的常用方法。</p>
