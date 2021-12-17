@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-12-17T08:25:30.898Z</updated>
+    <updated>2021-12-17T09:25:48.087Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -92,9 +92,9 @@ function heappop(heap){}
 }
 </code></pre>
 <h3 id="实现-heappop">实现 heappop()</h3>
-<p>使用 <code>heappop()</code> 我们需要删除堆的最顶层项目。意思是，对于最小堆，最小键将被删除，而对于最大堆，最大键将被删除。从数组的角度来看，它只是意味着我们应该删除数组的第一项。但是哪个节点应该成为根？如果我们随机选择被移除节点的左孩子或右孩子作为新的根节点，则不能保证遵循堆属性。我们可以按照以下步骤（对于最小堆）：</p>
+<p>使用 <code>heappop()</code> 我们需要删除堆的最顶层元素。意思是，对于最小堆，最小键将被删除，而对于最大堆，最大键将被删除。从数组的角度来看，它只是意味着我们应该删除数组的第一项。但是哪个节点应该成为根？如果我们随机选择被移除节点的左孩子或右孩子作为新的根节点，则不能保证遵循堆属性。我们可以按照以下步骤（对于最小堆）：</p>
 <ol>
-<li>将根节点与最后一个节点交换（数组中的第一个项目与最后一个项目）</li>
+<li>将根节点与最后一个节点交换（数组中的第一个元素与最后一个元素）</li>
 <li>通过从数组中弹出最后一项来删除根节点</li>
 <li>将新根节点的键与其子节点进行比较：</li>
 </ol>
@@ -145,7 +145,7 @@ function heappop(heap){}
   return heap;
 }
 </code></pre>
-<p>但是我们可以在这里做得更好吗？是的。首先，我们可以完全避免为新堆使用额外的空间。为什么不重新排列数组本身的项目，使其满足堆属性？为此，我们可以遵循与堆弹出类似的逻辑。我们可以查看第一个节点并与它的子节点进行比较，看看它是否是最小的节点，如果不是与较小的子节点交换。下面我们来实现一下：</p>
+<p>但是我们可以在这里做得更好吗？是的。首先，我们可以完全避免为新堆使用额外的空间。为什么不重新排列数组本身的元素，使其满足堆属性？为此，我们可以遵循与堆弹出类似的逻辑。我们可以查看第一个节点并与它的子节点进行比较，看看它是否是最小的节点，如果不是与较小的子节点交换。下面我们来实现一下：</p>
 <pre><code class="language-javascript">// follows pretty much the same logic as heappush, except minor modifications
 function percolateDown(heap, index){
   let curr = index;
@@ -163,7 +163,7 @@ function percolateDown(heap, index){
     }
 }
 </code></pre>
-<p>我们可以对数组中的所有项目使用 percolateDown() 函数，按照堆属性将所有项目按正确顺序排列：</p>
+<p>我们可以对数组中的所有元素使用 percolateDown() 函数，按照堆属性将所有元素按正确顺序排列：</p>
 <pre><code class="language-javascript">function heapify(heap){
   for(let i in heap){
      percolateDown(heap, i)
