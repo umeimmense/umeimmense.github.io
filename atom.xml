@@ -2,13 +2,264 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2021-12-19T05:44:55.859Z</updated>
+    <updated>2021-12-19T17:24:09.400Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[React Router 6：嵌套路由]]></title>
+        <id>https://umeimmense.github.io/post/react-router-6qian-tao-lu-you</id>
+        <link href="https://umeimmense.github.io/post/react-router-6qian-tao-lu-you">
+        </link>
+        <updated>2021-12-14T03:28:09.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>本文教你如何在 React Router 6 中使用嵌套路由。嵌套路由是一个强大的功能。虽然大多数人认为 React Router 只会在页面之间路由使用，但它也允许用户根据当前路由交换视图的特定片段。例如，在用户页面上，会显示多个选项卡（例如个人资料、帐户）以浏览用户信息。通过单击这些选项卡，浏览器中的 URL 会发生变化，但不会替换整个页面，只会替换选项卡的内容。<br>
+<img src="https://umeimmense.github.io/post-images/1639933512952.webp" alt="" loading="lazy"><br>
+下面我们将使用 React Router 重新创建这个场景。为了说明这是如何工作的，以及如何自己在 React 中逐步实现嵌套路由，我们将从以下示例开始：</p>
+<pre><code class="language-jsx">import { Routes, Route, Link } from 'react-router-dom';
+
+const App = () =&gt; {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;React Router&lt;/h1&gt;
+
+      &lt;nav&gt;
+        &lt;Link to=&quot;/home&quot;&gt;Home&lt;/Link&gt;
+        &lt;Link to=&quot;/user&quot;&gt;User&lt;/Link&gt;
+      &lt;/nav&gt;
+
+      &lt;Routes&gt;
+        &lt;Route index element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=&quot;home&quot; element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=&quot;user&quot; element={&lt;User /&gt;} /&gt;
+        &lt;Route path=&quot;*&quot; element={&lt;NoMatch /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>在这个函数组件中，我们使用了 React Router 中的 Link 和 Route 组件，用于 home/ 和 user/ 路由。此外，我们有一个加载了 Home 组件的所谓的索引路由和一个加载了 NoMatch 组件的所谓的 No Match 路由。两者都作为备选路线。从这里开始，我们将了解嵌套路由的概念。</p>
+<h2 id="react-router-中的嵌套路由">React Router 中的嵌套路由</h2>
+<p>我们将继续处理 User 组件，这是我们希望通过选项卡进行嵌套路由的地方。因此，我们将实例化一组新的 Link 组件（将是我们的无样式选项卡），用于将用户导航到他们的个人资料和他们的帐户。</p>
+<pre><code class="language-jsx">const User = () =&gt; {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;User&lt;/h1&gt;
+
+      &lt;nav&gt;
+        &lt;Link to=&quot;/user/profile&quot;&gt;Profile&lt;/Link&gt;
+        &lt;Link to=&quot;/user/account&quot;&gt;Account&lt;/Link&gt;
+      &lt;/nav&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>我们在这里使用绝对路径将用户从他们的个人资料导航到他们的帐户，反之亦然，但是，我们也可以使用相对路径作为最佳实践。因为 User 组件位于 /user 路由中，所以 Link 组件可以预测它们的父路由（这里是：/user），并且只需将相对路径（这里：profile 和 account）附加到它（例如 /user/profile）：</p>
+<pre><code class="language-jsx">const User = () =&gt; {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;User&lt;/h1&gt;
+
+      &lt;nav&gt;
+        &lt;Link to=&quot;profile&quot;&gt;Profile&lt;/Link&gt;
+        &lt;Link to=&quot;account&quot;&gt;Account&lt;/Link&gt;
+      &lt;/nav&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>此时，当我们尝试在 React 应用程序中单击这些链接之一时，我们将被困在我们的 No Match Route 中。这告诉我们，我们还没有将这些路由（此处：/user/profile 和 /user/account）映射到任何实际的路由组件。因此，我们将这两个新路由作为所谓的嵌套路由添加到我们的 /user 路由中：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;React Router&lt;/h1&gt;
+
+      &lt;nav&gt;
+        &lt;Link to=&quot;/home&quot;&gt;Home&lt;/Link&gt;
+        &lt;Link to=&quot;/user&quot;&gt;User&lt;/Link&gt;
+      &lt;/nav&gt;
+
+      &lt;Routes&gt;
+        &lt;Route index element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=&quot;home&quot; element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=&quot;user&quot; element={&lt;User /&gt;}&gt;
+          &lt;Route path=&quot;profile&quot; element={&lt;Profile /&gt;} /&gt;
+          &lt;Route path=&quot;account&quot; element={&lt;Account /&gt;} /&gt;
+        &lt;/Route&gt;
+        &lt;Route path=&quot;*&quot; element={&lt;NoMatch /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>Route 组件现在以一对一的关系映射到 Link 组件。但是，可以有多个 Link 组件链接到同一个路由，因此它实际上是一对多的关系。</p>
+<p>在浏览器中对此进行测试时，我们将看到仅显示 User 组件，而不会显示其嵌套的 Profile 组件，也不会显示其嵌套的 Account 组件。我们缺少 React Router 的关键 Outlet 组件：</p>
+<pre><code class="language-jsx">import { Routes, Route, Link, Outlet } from 'react-router-dom';
+
+...
+
+const User = () =&gt; {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;User&lt;/h1&gt;
+
+      &lt;nav&gt;
+        &lt;Link to=&quot;profile&quot;&gt;Profile&lt;/Link&gt;
+        &lt;Link to=&quot;account&quot;&gt;Account&lt;/Link&gt;
+      &lt;/nav&gt;
+
+      &lt;Outlet /&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>Outlet 组件从父 Routes 的 Route 组件集合中使用其各自的组件（此处为 Profile 或 Account 组件）呈现匹配的子路由。<br>
+<img src="https://umeimmense.github.io/post-images/1639933949387.webp" alt="" loading="lazy"><br>
+如果没有 /profile 和 /account 路由匹配（例如 /user/settings），你将只看到 User 组件出现。为避免这种情况，你可以添加索引和无匹配路由的组合。之后，默认路由将是 /profile 路由：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;React Router&lt;/h1&gt;
+
+      &lt;nav&gt;
+        &lt;Link to=&quot;/home&quot;&gt;Home&lt;/Link&gt;
+        &lt;Link to=&quot;/user&quot;&gt;User&lt;/Link&gt;
+      &lt;/nav&gt;
+
+      &lt;Routes&gt;
+        &lt;Route index element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=&quot;home&quot; element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=&quot;user&quot; element={&lt;User /&gt;}&gt;
+          &lt;Route index element={&lt;Profile /&gt;} /&gt;
+          &lt;Route path=&quot;profile&quot; element={&lt;Profile /&gt;} /&gt;
+          &lt;Route path=&quot;account&quot; element={&lt;Account /&gt;} /&gt;
+          &lt;Route path=&quot;*&quot; element={&lt;NoMatch /&gt;} /&gt;
+        &lt;/Route&gt;
+        &lt;Route path=&quot;*&quot; element={&lt;NoMatch /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>虽然 User 组件总是将选项卡呈现为导航，但其内容（Outlet）被匹配的嵌套路由（基于 /user/profile 或 /user/account 路由的 Profile 或 Account 组件）替换。如果在访问 /user 路由时这些路由都不匹配，应用程序将显示 Profile 组件（如果路由与 /user 完全匹配）或 NoMatch 组件（如果路由不匹配，例如 /user/setting）出现。</p>
+<h2 id="react-router-中的-动态嵌套路由">React router 中的 动态嵌套路由</h2>
+<p>在嵌套路由的下一个示例中，我们将从 App 组件中开始。这次我们不想像之前那样渲染静态嵌套路由（例如 /user/profile），而是基于标识符的动态嵌套路由（例如 /users/1 用于显示具有标识符 1 并因此匹配此路由的用户）。因此，我们将示例从单用户路由 (/user) 调整为多用户路由 (/user)。</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const users = [
+    { id: '1', fullName: 'Robin Wieruch' },
+    { id: '2', fullName: 'Sarah Finnley' },
+  ];
+
+  return (
+    &lt;&gt;
+      &lt;h1&gt;React Router&lt;/h1&gt;
+
+      &lt;nav&gt;
+        &lt;Link to=&quot;/home&quot;&gt;Home&lt;/Link&gt;
+        &lt;Link to=&quot;/users&quot;&gt;Users&lt;/Link&gt;
+      &lt;/nav&gt;
+
+      &lt;Routes&gt;
+        &lt;Route element={&lt;Layout /&gt;}&gt;
+          &lt;Route index element={&lt;Home /&gt;} /&gt;
+          &lt;Route path=&quot;home&quot; element={&lt;Home /&gt;} /&gt;
+          &lt;Route path=&quot;users&quot; element={&lt;Users users={users} /&gt;} /&gt;
+          &lt;Route path=&quot;*&quot; element={&lt;NoMatch /&gt;} /&gt;
+        &lt;/Route&gt;
+      &lt;/Routes&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>Users 组件成为 React 中的列表组件，因为它遍历每个用户并为其返回 JSX。在这种情况下，它不仅仅是一个列表，因为我们将 React Router 的 Link 组件添加到组合中。 Link 组件中的相对路径提示相应的嵌套（此处：/<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mrow><mi>u</mi><mi>s</mi><mi>e</mi><mi>r</mi><mi mathvariant="normal">.</mi><mi>i</mi><mi>d</mi></mrow><mi mathvariant="normal">嵌</mi><mi mathvariant="normal">套</mi><mi mathvariant="normal">在</mi><mi mathvariant="normal">/</mi><mi>u</mi><mi>s</mi><mi>e</mi><mi>r</mi><mi>s</mi><mi mathvariant="normal">中</mi><mi mathvariant="normal">）</mi><mi mathvariant="normal">但</mi><mi mathvariant="normal">动</mi><mi mathvariant="normal">态</mi><mi mathvariant="normal">（</mi><mi mathvariant="normal">此</mi><mi mathvariant="normal">处</mi><mi mathvariant="normal">：</mi><mi mathvariant="normal">/</mi></mrow><annotation encoding="application/x-tex">{user.id} 嵌套在 /users 中）但动态（此处：/</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault">u</span><span class="mord mathdefault">s</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord">.</span><span class="mord mathdefault">i</span><span class="mord mathdefault">d</span></span><span class="mord cjk_fallback">嵌</span><span class="mord cjk_fallback">套</span><span class="mord cjk_fallback">在</span><span class="mord">/</span><span class="mord mathdefault">u</span><span class="mord mathdefault">s</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">s</span><span class="mord cjk_fallback">中</span><span class="mord cjk_fallback">）</span><span class="mord cjk_fallback">但</span><span class="mord cjk_fallback">动</span><span class="mord cjk_fallback">态</span><span class="mord cjk_fallback">（</span><span class="mord cjk_fallback">此</span><span class="mord cjk_fallback">处</span><span class="mord cjk_fallback">：</span><span class="mord">/</span></span></span></span>{user.id}）路由：</p>
+<pre><code class="language-jsx">const Users = ({ users }) =&gt; {
+  return (
+    &lt;&gt;
+      &lt;h2&gt;Users&lt;/h2&gt;
+
+      &lt;ul&gt;
+        {users.map((user) =&gt; (
+          &lt;li key={user.id}&gt;
+            &lt;Link to={user.id}&gt;
+              {user.fullName}
+            &lt;/Link&gt;
+          &lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>通过拥有这个新的动态嵌套路由，我们需要在 App 组件中为它创建一个匹配的嵌套路由组件。首先，由于它是 /users 路由的所谓嵌套路由（或子路由），我们可以将它嵌套在相应的父路由组件中。此外，由于它是所谓的动态路由，它使用定义为 :userId 的动态路由，而用户的标识符则动态匹配（例如，id 为 '1' 的用户将与 /users/1 匹配）：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const users = [
+    { id: '1', fullName: 'Robin Wieruch' },
+    { id: '2', fullName: 'Sarah Finnley' },
+  ];
+
+  return (
+    &lt;h1&gt;React Router&lt;/h1&gt;
+
+    &lt;nav&gt;...&lt;/nav&gt;
+
+    &lt;Routes&gt;
+      &lt;Route element={&lt;Layout /&gt;}&gt;
+        &lt;Route index element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=&quot;home&quot; element={&lt;Home /&gt;} /&gt;
+        &lt;Route path=&quot;users&quot; element={&lt;Users users={users} /&gt;}&gt;
+          &lt;Route path=&quot;:userId&quot; element={&lt;User /&gt;} /&gt;
+        &lt;/Route&gt;
+        &lt;Route path=&quot;*&quot; element={&lt;NoMatch /&gt;} /&gt;
+      &lt;/Route&gt;
+    &lt;/Routes&gt;
+  );
+};
+</code></pre>
+<p>这样，User 组件就变成了 Users 组件的嵌套路由。因此，再次在 Outlet 组件的帮助下渲染其嵌套路由是用户组件的责任——再次渲染匹配的子路由：</p>
+<pre><code class="language-jsx">import { Routes, Route, Link, Outlet } from 'react-router-dom';
+
+...
+
+const Users = ({ users }) =&gt; {
+  return (
+    &lt;&gt;
+      &lt;h2&gt;Users&lt;/h2&gt;
+
+      &lt;ul&gt;...&lt;/ul&gt;
+
+      &lt;Outlet /&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>接下来，我们将声明缺少的 User 组件，只要用户的标识符在 URL 中匹配，该组件就会通过 Users 组件中的 Outlet 嵌套。在这个新组件中，我们可以使用 React Router 的 useParams Hook 从 URL 中获取相应的 userId（等于 :userId）：</p>
+<pre><code class="language-jsx">import {
+  ...
+  useParams,
+} from 'react-router-dom';
+
+...
+
+const User = () =&gt; {
+  const { userId } = useParams();
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;User: {userId}&lt;/h2&gt;
+
+      &lt;Link to=&quot;/users&quot;&gt;Back to Users&lt;/Link&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>我们已经看到了如何通过将一个 Route 组件（或多个 Route 组件）嵌套在另一个 Route 组件中来创建嵌套路由。前者是嵌套的子路由，后者是渲染封闭组件的父路由，该组件必须使用 Outlet 组件来渲染实际匹配的子路由。</p>
+<p>此外，我们还看到了如何通过在路由的路径属性中使用冒号（例如：userId）来创建动态路由。本质上， :userId 充当任何标识符的星号。在我们的例子中，我们使用 Link 组件将用户导航到 /users/:userId 路由，其中​​ :userId 代表实际用户的标识符。最后，我们总是可以通过使用 React Router 的 useParams Hook 从 URL 中获取动态路径（称为参数或 params）。</p>
+<p>如果你碰巧将 React Router 用于你的 React 应用程序，嵌套路由可以通过让你的用户访问你的应用程序非常特定的部分，同时将这些部分作为 URL 共享，从而极大地提升你的用户体验。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ JavaScript 中的 Heap]]></title>
         <id>https://umeimmense.github.io/post/javascript-zhong-de-dui</id>
@@ -2463,159 +2714,6 @@ const App = (props) =&gt; {
 <p>当你点击更改主题按钮时，状态和本地存储中的值都会更新。页面刷新后，你将获得存储在本地存储中的最后一个值。</p>
 <h2 id="结语">结语</h2>
 <p>感谢你阅读到最后。我希望这些自定义hook对你有用。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[10个常用的JavaScript使用技巧]]></title>
-        <id>https://umeimmense.github.io/post/shi-ge-chang-yong-de-javascript-shi-yong-ji-qiao</id>
-        <link href="https://umeimmense.github.io/post/shi-ge-chang-yong-de-javascript-shi-yong-ji-qiao">
-        </link>
-        <updated>2021-11-23T07:48:55.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>编写简短、简洁和干净的 JavaScript 代码的技巧😎<br>
-<img src="https://umeimmense.github.io/post-images/1638169801723.png" alt="" loading="lazy"><br>
-JavaScript 有很多很酷的特性，大多数初学者和中级开发人员都不知道。我挑选了 10 个我在日常 JavaScript 项目中使用的技巧。</p>
-<h2 id="1-有条件的向对象中添加属性">1. 有条件的向对象中添加属性</h2>
-<p>我们可以使用扩展运算符 <code>...</code> 来有条件地向 JavaScript 对象快速添加属性。</p>
-<pre><code class="language-javascript">const condition = true;
-const person = {
-  id: 1,
-  name: 'John Doe',
-  ...(condition &amp;&amp; { age: 16 }),
-};
-</code></pre>
-<p>如果每个操作数的计算结果都为true， &amp;&amp; 运算符将返回最后计算的表达式。因此返回一个对象 { age: 16 }，然后将其作为 person 对象的一部分。</p>
-<p>如果条件为 false，则 JavaScript 将执行以下操作：</p>
-<pre><code class="language-javascript">const person = {
-  id: 1,
-  name: 'John Doe',
-  ...(false), // evaluates to false
-};
-// spreading false has no effect on the object
-console.log(person); // { id: 1, name: 'John Doe' }
-</code></pre>
-<h2 id="2-检查一个属性是否存在于一个对象中">2. 检查一个属性是否存在于一个对象中</h2>
-<p>我们可以使用<code>in</code>关键字来检查 JavaScript 对象中是否存在属性</p>
-<pre><code class="language-javascript">const person = { name: 'John Doe', salary: 1000 };
-console.log('salary' in person); // returns true
-console.log('age' in person); // returns false
-</code></pre>
-<h2 id="3-对象中的动态属性名称">3. 对象中的动态属性名称</h2>
-<p>使用动态键设置对象属性很简单。只需使用 ['key_name'] 符号添加属性</p>
-<pre><code class="language-javascript">const dynamic = 'flavour';
-var item = {
-  name: 'Biscuit',
-  [dynamic]: 'Chocolate'
-}
-console.log(item); // { name: 'Biscuit', flavour: 'Chocolate' }
-</code></pre>
-<p>同样的技巧也可用于使用动态键引用对象属性：</p>
-<pre><code class="language-javascript">const keyName = 'name';
-console.log(item[keyName]); // returns 'Biscuit'
-</code></pre>
-<h2 id="4-使用动态键进行对象解构">4. 使用动态键进行对象解构</h2>
-<p>你可能知道你可以解构一个变量并立即用 : 符号重命名它。但是你知道当你不知道键名或键名是动态的时，你也可以解构对象的属性吗？<br>
-首先，让我们看看如何在解构（用别名解构）时重命名变量。</p>
-<pre><code class="language-javascript">const person = { id: 1, name: 'John Doe' };
-const { name: personName } = person;
-console.log(personName); // returns 'John Doe'
-</code></pre>
-<p>现在，让我们使用动态键来解构属性：</p>
-<pre><code class="language-javascript">const templates = {
-  'hello': 'Hello there',
-  'bye': 'Good bye'
-};
-const templateName = 'bye';
-const { [templateName]: template } = templates;
-console.log(template) // returns 'Good bye'
-</code></pre>
-<h2 id="5-运算符">5. ?? 运算符</h2>
-<p>这 <code>??</code>当你要检查变量是 null 还是 undefined 时，运算符很有用。当其左侧操作数为空或未定义时，它返回右侧操作数，否则返回其左侧操作数。</p>
-<pre><code class="language-javascript">const foo = null ?? 'Hello';
-console.log(foo); // returns 'Hello'
-const bar = 'Not null' ?? 'Hello';
-console.log(bar); // returns 'Not null'
-const baz = 0 ?? 'Hello';
-console.log(baz); // returns 0
-</code></pre>
-<p>在第三个示例中，返回 0 是因为即使 0 在 JavaScript 中被认为是假的，但它不是 null 或未定义的。你可能认为我们可以使用 ||运算符在这里，但这两者之间存在差异：</p>
-<pre><code class="language-javascript">const cannotBeZero = 0 || 5;
-console.log(cannotBeZero); // returns 5
-const canBeZero = 0 ?? 5;
-console.log(canBeZero); // returns 0
-</code></pre>
-<h2 id="6-可选链">6. ?. 可选链</h2>
-<p>我们都可能曾经遇到过TypeError：无法读取 null 的属性“foo”之类的错误。这对每个 JavaSript 开发人员来说都是头疼的问题。引入了可选链就是为了解决这个问题。让我们来看看：</p>
-<pre><code class="language-javascript">const book = { id:1, title: 'Title', author: null };
-// normally, you would do this
-console.log(book.author.age) // throws error
-console.log(book.author &amp;&amp; book.author.age); // returns null (no error)
-// with optional chaining
-console.log(book.author?.age); // returns undefined
-// or deep optional chaining
-console.log(book.author?.address?.city); // returns undefined
-</code></pre>
-<p>你还可以使用具有以下功能的可选链：</p>
-<pre><code class="language-javascript">const person = {
-  firstName: 'Haseeb',
-  lastName: 'Anwar',
-  printName: function () {
-    return `${this.firstName} ${this.lastName}`;
-  },
-};
-console.log(person.printName()); // returns 'Haseeb Anwar'
-console.log(persone.doesNotExist?.()); // returns undefined
-</code></pre>
-<h2 id="7-使用-的布尔转换符">7. 使用 !! 的布尔转换符</h2>
-<p>这 <code>!!</code>运算符可用于将表达式的结果快速转换为布尔值 <code>true</code> 或 <code>false</code>。就是这样：</p>
-<pre><code class="language-javascript">const greeting = 'Hello there!';
-console.log(!!greeting) // returns true
-const noGreeting = '';
-console.log(!!noGreeting); // returns false
-</code></pre>
-<h2 id="8-字符串和整数转换">8. 字符串和整数转换</h2>
-<p>使用 + 运算符快速将字符串转换为数字，如下所示：</p>
-<pre><code class="language-javascript">const stringNumer = '123';
-console.log(+stringNumer); // returns integer 123
-console.log(typeof +stringNumer); // returns 'number'
-</code></pre>
-<p>要将数字快速转换为字符串，请使用 + 运算符后跟空字符串 &quot;&quot;：</p>
-<pre><code class="language-javascript">const myString = 25 + '';
-console.log(myString); // returns '25'
-console.log(typeof myString); // returns 'string'
-</code></pre>
-<p>这些类型转换非常方便，但它们的清晰度和代码可读性较差。因此，在生产中使用它们之前，你可能需要考虑一下。不过可以用才<code>code golf</code>中。</p>
-<h2 id="9-检查数组中的假值">9. 检查数组中的假值</h2>
-<p>你熟悉 filter、some 和 every 数组方法。但你也应该知道，你可以仅使用布尔方法来测试真值：</p>
-<pre><code class="language-javascript">const myArray = [null, false, 'Hello', undefined, 0];
-// filter falsy values
-const filtered = myArray.filter(Boolean);
-console.log(filtered); // returns ['Hello']
-// check if at least one value is truthy
-const anyTruthy = myArray.some(Boolean);
-console.log(anyTruthy); // returns true
-// check if all values are truthy
-const allTruthy = myArray.every(Boolean);
-console.log(allTruthy); // returns false
-</code></pre>
-<p>这是它的工作原理。众所周知，这些数组方法采用回调函数，因此我们将布尔值作为回调函数传递。 <code>Boolean</code> 本身接受一个参数并根据参数的真实性返回<code>true</code>或 <code>false</code>。所以我们可以这样说：</p>
-<pre><code class="language-javascript">myArray.filter(val =&gt; Boolean(val));
-</code></pre>
-<p>是不是和这个一样：</p>
-<pre><code class="language-javascript">myArray.filter(Boolean);
-</code></pre>
-<h2 id="10展平数组">10.展平数组</h2>
-<p>原型 Array 上有一个方法 flat 可以让你从数组的数组中创建一个数组：</p>
-<pre><code class="language-javascript">const myArray = [{ id: 1 }, [{ id: 2 }], [{ id: 3 }]];
-const flattedArray = myArray.flat(); 
-// returns [ { id: 1 }, { id: 2 }, { id: 3 } 
-</code></pre>
-<p>你还可以定义一个深度级别，指定嵌套数组结构应展平的深度。例如：</p>
-<pre><code class="language-javascirpt">const arr = [0, 1, 2, [[[3, 4]]]];
-console.log(arr.flat(2)); // returns [0, 1, 2, [3,4]]
-</code></pre>
-<h2 id="结语">结语</h2>
-<p>感谢你阅读到最后。我希望这些技巧对你有用。</p>
 ]]></content>
     </entry>
 </feed>
