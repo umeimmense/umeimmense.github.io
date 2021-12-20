@@ -3,10 +3,10 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> JavaScript 中的 Heap | Cool Coding</title>
-<link rel="shortcut icon" href="http://localhost:4000/favicon.ico?v=1639982967433">
+<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1639983680973">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
-<link rel="stylesheet" href="http://localhost:4000/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title=" JavaScript 中的 Heap | Cool Coding - Atom Feed" href="http://localhost:4000/atom.xml">
+<link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title=" JavaScript 中的 Heap | Cool Coding - Atom Feed" href="https://umeimmense.github.io/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -24,8 +24,8 @@
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="http://localhost:4000">
-  <img class="avatar" src="http://localhost:4000/images/avatar.png?v=1639982967433" alt="">
+  <a href="https://umeimmense.github.io">
+  <img class="avatar" src="https://umeimmense.github.io/images/avatar.png?v=1639983680973" alt="">
   </a>
   <h1 class="site-title">
     Cool Coding
@@ -60,7 +60,7 @@
       
     
       
-        <a href="http://localhost:4000/resume/" class="menu" target="_blank">
+        <a href="https://umeimmense.github.io/resume/" class="menu" target="_blank">
           简历
         </a>
       
@@ -98,11 +98,11 @@
                 10 min read
               </span>
               
-                <a href="http://localhost:4000/tag/algorithm/" class="post-tag">
+                <a href="https://umeimmense.github.io/tag/algorithm/" class="post-tag">
                   # Algorithm
                 </a>
               
-                <a href="http://localhost:4000/tag/javascript/" class="post-tag">
+                <a href="https://umeimmense.github.io/tag/javascript/" class="post-tag">
                   # JavaScript
                 </a>
               
@@ -115,19 +115,19 @@
 <h2 id="什么是堆">什么是堆？</h2>
 <p>堆是树数据结构的一种变体，具有两个附加属性：<br>
 1.它是一棵完全二叉树：一棵完全二叉树的每一层都包含最大数量的节点，可能最后一层除外，它必须从左到右填充。完整的二叉树总是通过它的定义来平衡的。作为参考下图显示了什么时候可以将树称为完全二叉树：<br>
-<img src="http://localhost:4000/post-images/1639723723975.jpeg" alt="" loading="lazy"><br>
+<img src="https://umeimmense.github.io/post-images/1639723723975.jpeg" alt="" loading="lazy"><br>
 2.每个节点都满足“堆属性”：堆属性本质上意味着对于任何给定的节点 C，如果 P 是 C 的父节点，则：</p>
 <ul>
 <li>对于最大堆：P 的键应该大于或等于 C 的键。</li>
 <li>对于最小堆：P 的键应该小于或等于 C 的键。<br>
-<img src="http://localhost:4000/post-images/1639723881691.jpeg" alt="" loading="lazy"></li>
+<img src="https://umeimmense.github.io/post-images/1639723881691.jpeg" alt="" loading="lazy"></li>
 </ul>
 <h2 id="如何表示堆">如何表示堆？</h2>
 <p>我们通常从节点的类表示开始实现，然后将其与实际数据结构本身的类表示联系起来。我们也可以对堆做同样的事情。但是，有一种更简单的方法可以解决此问题，这是因为所有堆都必须遵守以下两个属性之一：</p>
 <blockquote>
 <p>所有堆必须是完全二叉树<br>
 由于所有堆都必须是完全二叉树，并且我们知道完全二叉树中除最后一层外的所有级别都必须完全填充。此外，对于最后一层，所有子项必须从左到右方向填充，没有任何间隙。这个定义确保了一个由 n 个节点组成的完全二叉树只能有 1 种可能的形状。反过来，它允许我们使用数组来表示完整的二叉树。这意味着，堆也可以使用数组来表示。例如，我们可以将一个简单的堆表示为一个数组，如下图所示：<br>
-<img src="http://localhost:4000/post-images/1639724054342.jpeg" alt="" loading="lazy"><br>
+<img src="https://umeimmense.github.io/post-images/1639724054342.jpeg" alt="" loading="lazy"><br>
 这里要注意的关键是父节点和子节点之间的关系。如果仔细观察上图，我们可以推断出以下内容：</p>
 </blockquote>
 <ol>
@@ -140,7 +140,7 @@
 <ol start="2">
 <li>如果一个节点被放置在数组中的索引 i 处，它的父节点将位于第 ((i-1)/2) 个索引处。<br>
 下图可以更轻松地使用上述信息：<br>
-<img src="http://localhost:4000/post-images/1639724181146.jpeg" alt="" loading="lazy"></li>
+<img src="https://umeimmense.github.io/post-images/1639724181146.jpeg" alt="" loading="lazy"></li>
 </ol>
 <h2 id="具体实现">具体实现</h2>
 <blockquote>
@@ -162,7 +162,7 @@ function heappop(heap){}
 <h3 id="实现heappush">实现heappush()</h3>
 <p>我们如何向堆中添加一个新键？假设我们首先将新键推送到数组中。推送新键仍然让我们遵守堆的第一个要求，即它必须是一个完整的二叉树。但是，我们需要确保它也遵守“堆属性”。<br>
 我们可以通过将push的项与其父项进行比较来做到这一点。如果父项大于的push的项，那么我们知道堆属性被违反，因此我们可以交换。我们可以继续进行这种交换，直到找到一个合法的父节点或者我们已经到达堆的顶部。<br>
-<img src="http://localhost:4000/post-images/1639724511455.jpeg" alt="" loading="lazy"><br>
+<img src="https://umeimmense.github.io/post-images/1639724511455.jpeg" alt="" loading="lazy"><br>
 代码如下</p>
 <pre><code class="language-javascript">function heappush(heap, newKey){
   // push the new key 
@@ -334,7 +334,7 @@ const max = -heappop(heap)
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="http://localhost:4000/post/javascript-zhong-de-xi-shu-shu-zu-yu-mi-ji-shu-zu-de-qu-bie/">
+            <a href="https://umeimmense.github.io/post/javascript-zhong-de-xi-shu-shu-zu-yu-mi-ji-shu-zu-de-qu-bie/">
               <h3 class="post-title">
                 JavaScript 中的稀疏数组与密集数组的区别？
               </h3>
@@ -346,7 +346,7 @@ const max = -heappop(heap)
 
         <div class="site-footer">
   
-  <a class="rss" href="http://localhost:4000/atom.xml" target="_blank">
+  <a class="rss" href="https://umeimmense.github.io/atom.xml" target="_blank">
     <i class="ri-rss-line"></i> RSS
   </a>
 </div>

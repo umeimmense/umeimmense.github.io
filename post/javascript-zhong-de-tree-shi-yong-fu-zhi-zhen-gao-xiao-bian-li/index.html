@@ -3,10 +3,10 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>JavaScript 中的 Tree 使用父指针高效遍历 | Cool Coding</title>
-<link rel="shortcut icon" href="http://localhost:4000/favicon.ico?v=1639982967433">
+<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1639983680973">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
-<link rel="stylesheet" href="http://localhost:4000/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="JavaScript 中的 Tree 使用父指针高效遍历 | Cool Coding - Atom Feed" href="http://localhost:4000/atom.xml">
+<link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="JavaScript 中的 Tree 使用父指针高效遍历 | Cool Coding - Atom Feed" href="https://umeimmense.github.io/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
@@ -23,8 +23,8 @@ const ele..." />
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="http://localhost:4000">
-  <img class="avatar" src="http://localhost:4000/images/avatar.png?v=1639982967433" alt="">
+  <a href="https://umeimmense.github.io">
+  <img class="avatar" src="https://umeimmense.github.io/images/avatar.png?v=1639983680973" alt="">
   </a>
   <h1 class="site-title">
     Cool Coding
@@ -59,7 +59,7 @@ const ele..." />
       
     
       
-        <a href="http://localhost:4000/resume/" class="menu" target="_blank">
+        <a href="https://umeimmense.github.io/resume/" class="menu" target="_blank">
           简历
         </a>
       
@@ -97,11 +97,11 @@ const ele..." />
                 7 min read
               </span>
               
-                <a href="http://localhost:4000/tag/algorithm/" class="post-tag">
+                <a href="https://umeimmense.github.io/tag/algorithm/" class="post-tag">
                   # Algorithm
                 </a>
               
-                <a href="http://localhost:4000/tag/javascript/" class="post-tag">
+                <a href="https://umeimmense.github.io/tag/javascript/" class="post-tag">
                   # JavaScript
                 </a>
               
@@ -135,7 +135,7 @@ root.right = right
 right.parent = root
 </code></pre>
 <p>我们只需要确保父指针指向父节点。这是我们使用上述代码获得的最终树的视觉参考：<br>
-<img src="http://localhost:4000/post-images/1639116374962.jpeg" alt="" loading="lazy"></p>
+<img src="https://umeimmense.github.io/post-images/1639116374962.jpeg" alt="" loading="lazy"></p>
 <p>##寻找后继节点</p>
 <h3 id="前序后继">前序后继</h3>
 <p>假设每个节点都有一个parent指针，如何找出二叉树中任何节点的 前序 后继？<br>
@@ -170,7 +170,7 @@ right.parent = root
 }
 </code></pre>
 <p>可以根据下图更好的理解<br>
-<img src="http://localhost:4000/post-images/1639365381317.jpeg" alt="" loading="lazy"></p>
+<img src="https://umeimmense.github.io/post-images/1639365381317.jpeg" alt="" loading="lazy"></p>
 <h3 id="中序后继">中序后继</h3>
 <ol>
 <li>首先，我们在这里处理中序遍历，这意味着我们正在寻找以下顺序：</li>
@@ -204,7 +204,7 @@ right.parent = root
    return parent
 }
 </code></pre>
-<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1639366519214.jpeg" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="https://umeimmense.github.io/post-images/1639366519214.jpeg" alt="" loading="lazy"></figure>
 <h3 id="后序后继">后序后继</h3>
 <ol>
 <li>首先，我们在这里处理后序遍历，这意味着我们正在寻找以下顺序：</li>
@@ -233,7 +233,7 @@ right.parent = root
    return current
 }
 </code></pre>
-<figure data-type="image" tabindex="2"><img src="http://localhost:4000/post-images/1639366689014.jpeg" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://umeimmense.github.io/post-images/1639366689014.jpeg" alt="" loading="lazy"></figure>
 <h2 id="使用后继算法更好地遍历">使用后继算法更好地遍历</h2>
 <p>为什么我们需要使用父指针来提出遍历算法呢？这是一个值得思考的问题，因为我们已经提出了遍历树的递归和迭代方法，而且不需要父指针。</p>
 <p>我们这样做的原因是因为我们之前的方法增加了空间复杂性。如果你还记得上一篇文章中我们需要使用一个或两个堆栈（取决于遍历方法）来使任何遍历算法工作。即使在递归方法中，虽然我们不直接使用堆栈，但递归本身基于调用堆栈，因此那里也使用了隐藏的内存中堆栈。问题是这个堆栈的大小会随着我们树的深度而增加，因此这不是最好的解决方案，因为我们有办法在花费更少空间的情况下完成相同的任务。通过使用父指针，我们可以完全摆脱这些堆栈，为我们节省大量空间，即从 O(logN) 的空间复杂度（其中 N 表示平衡树的大小）到 O(1)。让我们看看如何实现。</p>
@@ -339,7 +339,7 @@ right.parent = root
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="http://localhost:4000/post/javascript-zhong-de-tree/">
+            <a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">
               <h3 class="post-title">
                 JavaScript 中的 Tree
               </h3>
@@ -351,7 +351,7 @@ right.parent = root
 
         <div class="site-footer">
   
-  <a class="rss" href="http://localhost:4000/atom.xml" target="_blank">
+  <a class="rss" href="https://umeimmense.github.io/atom.xml" target="_blank">
     <i class="ri-rss-line"></i> RSS
   </a>
 </div>
