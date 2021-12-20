@@ -1,116 +1,110 @@
 <html>
-<head>
-    <meta charset="utf-8"/>
-<meta name="description" content=""/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>XSS 的攻击手段与防御 | Cool Coding</title>
-
-<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1639980647942">
-
-<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1639980895403">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
-
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
-<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
-<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
-<!-- DEMO JS -->
-<!--<script src="media/scripts/index.js"></script>-->
+<link rel="alternate" type="application/atom+xml" title="XSS 的攻击手段与防御 | Cool Coding - Atom Feed" href="https://umeimmense.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
-</head>
-<body>
-<div class="main gt-bg-theme-color-first">
-    <nav class="navbar navbar-expand-lg">
-    <div class="navbar-brand">
-        <img class="user-avatar" src="/images/avatar.png" alt="头像">
-        <div class="site-name gt-c-content-color-first">
-            Cool Coding
-        </div>
-    </div>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
-            
-                <div class="nav-item">
-                    
-                        <a href="/" class="menu gt-a-link">
-                            首页
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="/archives" class="menu gt-a-link">
-                            归档
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="/tags" class="menu gt-a-link">
-                            标签
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="/post/about" class="menu gt-a-link">
-                            关于
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="https://umeimmense.github.io/resume/" class="menu gt-a-link" target="_blank">
-                            简历
-                        </a>
-                    
-                </div>
-            
-        </div>
-        <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1639980647942" action="/search/index.html">
-                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
-                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
-            </form>
-        </div>
-    </div>
-</nav>
+    <meta name="description" content="
+1. XSS 的攻击手段
+XSS（Cross-Site Scripting，跨域脚本攻击）攻击是最常见的 Web 攻击，是一种代码注入攻击。攻击者通过在目标网站上注入恶意脚本，使之在用户的浏览器上运行。利用这些恶意脚本，攻击者可获取用户的..." />
+    <meta name="keywords" content="安全" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://umeimmense.github.io">
+  <img class="avatar" src="https://umeimmense.github.io/images/avatar.png?v=1639980895403" alt="">
+  </a>
+  <h1 class="site-title">
+    Cool Coding
+  </h1>
+  <p class="site-description">
+    
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="https://umeimmense.github.io/resume/" class="menu" target="_blank">
+          简历
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/umeimmense/" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
 
-    <div class="post-container">
-        <div class="post-detail gt-bg-theme-color-second">
-            <article class="gt-post-content">
-                <h2 class="post-title">
-                    XSS 的攻击手段与防御
-                </h2>
-                <div class="post-info">
-                    <time class="post-time gt-c-content-color-first">
-                        · 2021-11-19 ·
-                    </time>
-                    
-                        <a href="https://umeimmense.github.io/tag/security" class="post-tags">
-                            # 安全
-                        </a>
-                    
-                </div>
-                <div class="post-content">
-                    <!-- more -->
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              XSS 的攻击手段与防御
+            </h2>
+            <div class="post-info">
+              <span>
+                2021-11-19
+              </span>
+              <span>
+                13 min read
+              </span>
+              
+                <a href="https://umeimmense.github.io/tag/security" class="post-tag">
+                  # 安全
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <!-- more -->
 <h2 id="1-xss-的攻击手段">1. XSS 的攻击手段</h2>
 <p><a href="https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)">XSS</a>（Cross-Site Scripting，跨域脚本攻击）攻击是最常见的 Web 攻击，是一种代码注入攻击。攻击者通过在目标网站上注入恶意脚本，使之在用户的浏览器上运行。利用这些恶意脚本，攻击者可获取用户的敏感信息如 Cookie、SessionID 等，进而危害数据安全。其重点是『<strong>跨域</strong>』和『<strong>客户端执行</strong>』。</p>
 <p>XSS 的本质：</p>
@@ -364,53 +358,108 @@ res.cookie('myCookie', 'test', {
 <li><a href="https://blog.cyeam.com/json/2017/10/27/jsonp-xss?utm_source=juejin&amp;utm_medium=article">说说 JSONP 和 XSS</a></li>
 </ul>
 
-                </div>
-            </article>
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#1-xss-%E7%9A%84%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5">1. XSS 的攻击手段</a>
+<ul>
+<li><a href="#11-reflected-xss">1.1 Reflected XSS</a></li>
+<li><a href="#12-stored-xss">1.2 Stored XSS</a></li>
+<li><a href="#13-dom-xss">1.3 DOM XSS</a></li>
+<li><a href="#14-jsonp-xss">1.4 JSONP XSS</a></li>
+</ul>
+</li>
+<li><a href="#2-xss-%E7%9A%84%E9%98%B2%E5%BE%A1%E6%96%B9%E5%BC%8F">2. XSS 的防御方式</a>
+<ul>
+<li><a href="#21-%E9%98%B2%E5%BE%A1-xss-%E7%9A%84%E6%A0%B9%E6%9C%AC%E4%B9%8B%E9%81%93">2.1 防御 XSS 的根本之道</a>
+<ul>
+<li><a href="#%E8%BE%93%E5%85%A5">输入</a></li>
+<li><a href="#%E8%BE%93%E5%87%BA">输出</a>
+<ul>
+<li><a href="#%E5%9C%A8-html-%E4%B8%AD%E7%9A%84%E8%BE%93%E5%87%BA">在 HTML 中的输出</a></li>
+<li><a href="#%E5%9C%A8-javascript-%E4%B8%AD%E7%9A%84%E8%BE%93%E5%87%BA">在 JavaScript 中的输出</a></li>
+<li><a href="#%E5%9C%A8-css-%E4%B8%AD%E7%9A%84%E8%BE%93%E5%87%BA">在 CSS 中的输出</a></li>
+<li><a href="#%E5%9C%A8-urlencode-%E4%B8%AD%E7%9A%84%E8%BE%93%E5%87%BA">在 URLEncode 中的输出</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#22-%E5%85%B6%E4%BB%96%E7%9A%84-xss-%E9%98%B2%E5%BE%A1%E6%96%B9%E5%BC%8F">2.2 其他的 XSS 防御方式</a>
+<ul>
+<li><a href="#jsonp-xss-%E7%9A%84%E9%98%B2%E5%BE%A1%E6%96%B9%E5%BC%8F">JSONP XSS 的防御方式</a></li>
+<li><a href="#web-%E5%AE%89%E5%85%A8%E5%A4%B4%E6%94%AF%E6%8C%81">Web 安全头支持</a></li>
+<li><a href="#http-only-cookie">HTTP-only Cookie</a></li>
+<li><a href="#%E6%B7%BB%E5%8A%A0%E9%AA%8C%E8%AF%81%E7%A0%81%E6%9C%BA%E5%88%B6">添加验证码机制</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-xss-%E7%9A%84%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93">3. XSS 的经验总结</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">参考资料</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
         </div>
 
         
 
         
 
-        
-
-        
-
-        <div class="site-footer gt-c-content-color-first">
-    <div class="slogan gt-c-content-color-first"></div>
-    <div class="social-container">
-        
-            
-                <a href="https://github.com/umeimmense" target="_blank">
-                    <i class="fab fa-github gt-c-content-color-first"></i>
-                </a>
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-    </div>
-    <div class="footer-info">
-        
-    </div>
-    <!-- <div>
-        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
-                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://umeimmense.github.io/atom.xml" target="_blank">RSS</a></a>
-    </div> -->
+        <div class="site-footer">
+  
+  <a class="rss" href="https://umeimmense.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
 </div>
 
-<script>
-  hljs.initHighlightingOnLoad()
-</script>
-
+      </div>
     </div>
-</div>
-</body>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
 </html>
