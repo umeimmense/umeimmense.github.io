@@ -1,120 +1,115 @@
 <html>
-<head>
-    <meta charset="utf-8"/>
-<meta name="description" content=""/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>JavaScript 中的 Tree 使用父指针高效遍历 | Cool Coding</title>
-
-<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1639982927956">
-
-<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
-
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
-<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
-<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
-<!-- DEMO JS -->
-<!--<script src="media/scripts/index.js"></script>-->
+<link rel="shortcut icon" href="http://localhost:4000/favicon.ico?v=1639982967433">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="http://localhost:4000/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="JavaScript 中的 Tree 使用父指针高效遍历 | Cool Coding - Atom Feed" href="http://localhost:4000/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
-</head>
-<body>
-<div class="main gt-bg-theme-color-first">
-    <nav class="navbar navbar-expand-lg">
-    <div class="navbar-brand">
-        <img class="user-avatar" src="/images/avatar.png" alt="头像">
-        <div class="site-name gt-c-content-color-first">
-            Cool Coding
-        </div>
-    </div>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+    <meta name="description" content="前言
+在本系列的第一部分中，我们研究了遍历二叉树的递归和迭代方法。
+在实际应用中，树节点有一个父节点是很常见的：一个指向父节点的指针，因此也称为父指针。让我们以浏览器中的 DOM 为例。假设我们使用以下命令选择任何节点：
+const ele..." />
+    <meta name="keywords" content="Algorithm,JavaScript" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="http://localhost:4000">
+  <img class="avatar" src="http://localhost:4000/images/avatar.png?v=1639982967433" alt="">
+  </a>
+  <h1 class="site-title">
+    Cool Coding
+  </h1>
+  <p class="site-description">
+    
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="http://localhost:4000/resume/" class="menu" target="_blank">
+          简历
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/umeimmense/" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              JavaScript 中的 Tree 使用父指针高效遍历
+            </h2>
+            <div class="post-info">
+              <span>
+                2021-12-08
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+                <a href="http://localhost:4000/tag/algorithm/" class="post-tag">
+                  # Algorithm
+                </a>
+              
+                <a href="http://localhost:4000/tag/javascript/" class="post-tag">
+                  # JavaScript
+                </a>
+              
+            </div>
             
-                <div class="nav-item">
-                    
-                        <a href="/" class="menu gt-a-link">
-                            首页
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="/archives" class="menu gt-a-link">
-                            归档
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="/tags" class="menu gt-a-link">
-                            标签
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="/post/about" class="menu gt-a-link">
-                            关于
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="https://umeimmense.github.io/resume/" class="menu gt-a-link" target="_blank">
-                            简历
-                        </a>
-                    
-                </div>
-            
-        </div>
-        <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1639982927956" action="/search/index.html">
-                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
-                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
-            </form>
-        </div>
-    </div>
-</nav>
-
-    <div class="post-container">
-        <div class="post-detail gt-bg-theme-color-second">
-            <article class="gt-post-content">
-                <h2 class="post-title">
-                    JavaScript 中的 Tree 使用父指针高效遍历
-                </h2>
-                <div class="post-info">
-                    <time class="post-time gt-c-content-color-first">
-                        · 2021-12-08 ·
-                    </time>
-                    
-                        <a href="https://umeimmense.github.io/tag/algorithm/" class="post-tags">
-                            # Algorithm
-                        </a>
-                    
-                        <a href="https://umeimmense.github.io/tag/javascript/" class="post-tags">
-                            # JavaScript
-                        </a>
-                    
-                </div>
-                <div class="post-content">
-                    <h2 id="前言">前言</h2>
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="前言">前言</h2>
 <p>在本系列的<a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">第一部分</a>中，我们研究了遍历二叉树的递归和迭代方法。<br>
 在实际应用中，树节点有一个父节点是很常见的：一个指向父节点的指针，因此也称为父指针。让我们以浏览器中的 DOM 为例。假设我们使用以下命令选择任何节点：</p>
 <pre><code class="language-javascript">const element = document.querySelector(&quot;#id&quot;)
@@ -140,7 +135,7 @@ root.right = right
 right.parent = root
 </code></pre>
 <p>我们只需要确保父指针指向父节点。这是我们使用上述代码获得的最终树的视觉参考：<br>
-<img src="https://umeimmense.github.io/post-images/1639116374962.jpeg" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1639116374962.jpeg" alt="" loading="lazy"></p>
 <p>##寻找后继节点</p>
 <h3 id="前序后继">前序后继</h3>
 <p>假设每个节点都有一个parent指针，如何找出二叉树中任何节点的 前序 后继？<br>
@@ -175,7 +170,7 @@ right.parent = root
 }
 </code></pre>
 <p>可以根据下图更好的理解<br>
-<img src="https://umeimmense.github.io/post-images/1639365381317.jpeg" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1639365381317.jpeg" alt="" loading="lazy"></p>
 <h3 id="中序后继">中序后继</h3>
 <ol>
 <li>首先，我们在这里处理中序遍历，这意味着我们正在寻找以下顺序：</li>
@@ -209,7 +204,7 @@ right.parent = root
    return parent
 }
 </code></pre>
-<figure data-type="image" tabindex="1"><img src="https://umeimmense.github.io/post-images/1639366519214.jpeg" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1639366519214.jpeg" alt="" loading="lazy"></figure>
 <h3 id="后序后继">后序后继</h3>
 <ol>
 <li>首先，我们在这里处理后序遍历，这意味着我们正在寻找以下顺序：</li>
@@ -238,7 +233,7 @@ right.parent = root
    return current
 }
 </code></pre>
-<figure data-type="image" tabindex="2"><img src="https://umeimmense.github.io/post-images/1639366689014.jpeg" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="http://localhost:4000/post-images/1639366689014.jpeg" alt="" loading="lazy"></figure>
 <h2 id="使用后继算法更好地遍历">使用后继算法更好地遍历</h2>
 <p>为什么我们需要使用父指针来提出遍历算法呢？这是一个值得思考的问题，因为我们已经提出了遍历树的递归和迭代方法，而且不需要父指针。</p>
 <p>我们这样做的原因是因为我们之前的方法增加了空间复杂性。如果你还记得上一篇文章中我们需要使用一个或两个堆栈（取决于遍历方法）来使任何遍历算法工作。即使在递归方法中，虽然我们不直接使用堆栈，但递归本身基于调用堆栈，因此那里也使用了隐藏的内存中堆栈。问题是这个堆栈的大小会随着我们树的深度而增加，因此这不是最好的解决方案，因为我们有办法在花费更少空间的情况下完成相同的任务。通过使用父指针，我们可以完全摆脱这些堆栈，为我们节省大量空间，即从 O(logN) 的空间复杂度（其中 N 表示平衡树的大小）到 O(1)。让我们看看如何实现。</p>
@@ -311,60 +306,98 @@ right.parent = root
 <h2 id="进阶">进阶</h2>
 <p>如果每个节点都有一个父指针，你能想出算法来寻找前任（inOrder、preOrder 和 postOrder）吗？</p>
 
-                </div>
-            </article>
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
+<li><a href="#%E6%9B%B4%E6%96%B0%E8%8A%82%E7%82%B9%E5%AE%9A%E4%B9%89">更新节点定义</a>
+<ul>
+<li><a href="#%E5%89%8D%E5%BA%8F%E5%90%8E%E7%BB%A7">前序后继</a></li>
+<li><a href="#%E4%B8%AD%E5%BA%8F%E5%90%8E%E7%BB%A7">中序后继</a></li>
+<li><a href="#%E5%90%8E%E5%BA%8F%E5%90%8E%E7%BB%A7">后序后继</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E5%90%8E%E7%BB%A7%E7%AE%97%E6%B3%95%E6%9B%B4%E5%A5%BD%E5%9C%B0%E9%81%8D%E5%8E%86">使用后继算法更好地遍历</a>
+<ul>
+<li><a href="#%E5%89%8D%E5%BA%8F%E9%81%8D%E5%8E%86">前序遍历</a></li>
+<li><a href="#%E4%B8%AD%E5%BA%8F%E9%81%8D%E5%8E%86">中序遍历</a></li>
+<li><a href="#%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86">后序遍历</a></li>
+</ul>
+</li>
+<li><a href="#%E8%BF%9B%E9%98%B6">进阶</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
         </div>
 
         
-            <div class="next-post">
-                <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/" class="post-title gt-a-link">
-                    JavaScript 中的 Tree
-                </a>
-            </div>
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="http://localhost:4000/post/javascript-zhong-de-tree/">
+              <h3 class="post-title">
+                JavaScript 中的 Tree
+              </h3>
+            </a>
+          </div>
         
 
         
 
-        
-
-        
-
-        <div class="site-footer gt-c-content-color-first">
-    <div class="slogan gt-c-content-color-first"></div>
-    <div class="social-container">
-        
-            
-                <a href="https://github.com/umeimmense" target="_blank">
-                    <i class="fab fa-github gt-c-content-color-first"></i>
-                </a>
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-    </div>
-    <div class="footer-info">
-        
-    </div>
-    <!-- <div>
-        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
-                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://umeimmense.github.io/atom.xml" target="_blank">RSS</a></a>
-    </div> -->
+        <div class="site-footer">
+  
+  <a class="rss" href="http://localhost:4000/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
 </div>
 
-<script>
-  hljs.initHighlightingOnLoad()
-</script>
-
+      </div>
     </div>
-</div>
-</body>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
 </html>

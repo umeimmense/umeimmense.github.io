@@ -1,137 +1,133 @@
 <html>
-<head>
-    <meta charset="utf-8"/>
-<meta name="description" content=""/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> JavaScript 中的 Heap | Cool Coding</title>
-
-<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1639982927956">
-
-<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
-
-<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
-<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
-<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
-<!-- DEMO JS -->
-<!--<script src="media/scripts/index.js"></script>-->
+<link rel="shortcut icon" href="http://localhost:4000/favicon.ico?v=1639982967433">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="http://localhost:4000/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title=" JavaScript 中的 Heap | Cool Coding - Atom Feed" href="http://localhost:4000/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
-</head>
-<body>
-<div class="main gt-bg-theme-color-first">
-    <nav class="navbar navbar-expand-lg">
-    <div class="navbar-brand">
-        <img class="user-avatar" src="/images/avatar.png" alt="头像">
-        <div class="site-name gt-c-content-color-first">
-            Cool Coding
-        </div>
-    </div>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+    <meta name="description" content="前言
+之前我们已经研究了树数据结构的实现以及它的一些变体，例如 trie。在这篇文章中，我们将深入研究堆。它也称为优先级队列。
+什么是堆？
+堆是树数据结构的一种变体，具有两个附加属性：
+1.它是一棵完全二叉树：一棵完全二叉树的每一层都包含最..." />
+    <meta name="keywords" content="Algorithm,JavaScript" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="http://localhost:4000">
+  <img class="avatar" src="http://localhost:4000/images/avatar.png?v=1639982967433" alt="">
+  </a>
+  <h1 class="site-title">
+    Cool Coding
+  </h1>
+  <p class="site-description">
+    
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+      
+        <a href="http://localhost:4000/resume/" class="menu" target="_blank">
+          简历
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/umeimmense/" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               JavaScript 中的 Heap
+            </h2>
+            <div class="post-info">
+              <span>
+                2021-12-13
+              </span>
+              <span>
+                10 min read
+              </span>
+              
+                <a href="http://localhost:4000/tag/algorithm/" class="post-tag">
+                  # Algorithm
+                </a>
+              
+                <a href="http://localhost:4000/tag/javascript/" class="post-tag">
+                  # JavaScript
+                </a>
+              
+            </div>
             
-                <div class="nav-item">
-                    
-                        <a href="/" class="menu gt-a-link">
-                            首页
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="/archives" class="menu gt-a-link">
-                            归档
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="/tags" class="menu gt-a-link">
-                            标签
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="/post/about" class="menu gt-a-link">
-                            关于
-                        </a>
-                    
-                </div>
-            
-                <div class="nav-item">
-                    
-                        <a href="https://umeimmense.github.io/resume/" class="menu gt-a-link" target="_blank">
-                            简历
-                        </a>
-                    
-                </div>
-            
-        </div>
-        <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1639982927956" action="/search/index.html">
-                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
-                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
-            </form>
-        </div>
-    </div>
-</nav>
-
-    <div class="post-container">
-        <div class="post-detail gt-bg-theme-color-second">
-            <article class="gt-post-content">
-                <h2 class="post-title">
-                     JavaScript 中的 Heap
-                </h2>
-                <div class="post-info">
-                    <time class="post-time gt-c-content-color-first">
-                        · 2021-12-13 ·
-                    </time>
-                    
-                        <a href="https://umeimmense.github.io/tag/algorithm/" class="post-tags">
-                            # Algorithm
-                        </a>
-                    
-                        <a href="https://umeimmense.github.io/tag/javascript/" class="post-tags">
-                            # JavaScript
-                        </a>
-                    
-                </div>
-                <div class="post-content">
-                    <h2 id="前言">前言</h2>
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="前言">前言</h2>
 <p>之前我们已经研究了树数据结构的实现以及它的一些变体，例如 trie。在这篇文章中，我们将深入研究堆。它也称为优先级队列。</p>
 <h2 id="什么是堆">什么是堆？</h2>
 <p>堆是树数据结构的一种变体，具有两个附加属性：<br>
 1.它是一棵完全二叉树：一棵完全二叉树的每一层都包含最大数量的节点，可能最后一层除外，它必须从左到右填充。完整的二叉树总是通过它的定义来平衡的。作为参考下图显示了什么时候可以将树称为完全二叉树：<br>
-<img src="https://umeimmense.github.io/post-images/1639723723975.jpeg" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1639723723975.jpeg" alt="" loading="lazy"><br>
 2.每个节点都满足“堆属性”：堆属性本质上意味着对于任何给定的节点 C，如果 P 是 C 的父节点，则：</p>
 <ul>
 <li>对于最大堆：P 的键应该大于或等于 C 的键。</li>
 <li>对于最小堆：P 的键应该小于或等于 C 的键。<br>
-<img src="https://umeimmense.github.io/post-images/1639723881691.jpeg" alt="" loading="lazy"></li>
+<img src="http://localhost:4000/post-images/1639723881691.jpeg" alt="" loading="lazy"></li>
 </ul>
 <h2 id="如何表示堆">如何表示堆？</h2>
 <p>我们通常从节点的类表示开始实现，然后将其与实际数据结构本身的类表示联系起来。我们也可以对堆做同样的事情。但是，有一种更简单的方法可以解决此问题，这是因为所有堆都必须遵守以下两个属性之一：</p>
 <blockquote>
 <p>所有堆必须是完全二叉树<br>
 由于所有堆都必须是完全二叉树，并且我们知道完全二叉树中除最后一层外的所有级别都必须完全填充。此外，对于最后一层，所有子项必须从左到右方向填充，没有任何间隙。这个定义确保了一个由 n 个节点组成的完全二叉树只能有 1 种可能的形状。反过来，它允许我们使用数组来表示完整的二叉树。这意味着，堆也可以使用数组来表示。例如，我们可以将一个简单的堆表示为一个数组，如下图所示：<br>
-<img src="https://umeimmense.github.io/post-images/1639724054342.jpeg" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1639724054342.jpeg" alt="" loading="lazy"><br>
 这里要注意的关键是父节点和子节点之间的关系。如果仔细观察上图，我们可以推断出以下内容：</p>
 </blockquote>
 <ol>
@@ -144,7 +140,7 @@
 <ol start="2">
 <li>如果一个节点被放置在数组中的索引 i 处，它的父节点将位于第 ((i-1)/2) 个索引处。<br>
 下图可以更轻松地使用上述信息：<br>
-<img src="https://umeimmense.github.io/post-images/1639724181146.jpeg" alt="" loading="lazy"></li>
+<img src="http://localhost:4000/post-images/1639724181146.jpeg" alt="" loading="lazy"></li>
 </ol>
 <h2 id="具体实现">具体实现</h2>
 <blockquote>
@@ -166,7 +162,7 @@ function heappop(heap){}
 <h3 id="实现heappush">实现heappush()</h3>
 <p>我们如何向堆中添加一个新键？假设我们首先将新键推送到数组中。推送新键仍然让我们遵守堆的第一个要求，即它必须是一个完整的二叉树。但是，我们需要确保它也遵守“堆属性”。<br>
 我们可以通过将push的项与其父项进行比较来做到这一点。如果父项大于的push的项，那么我们知道堆属性被违反，因此我们可以交换。我们可以继续进行这种交换，直到找到一个合法的父节点或者我们已经到达堆的顶部。<br>
-<img src="https://umeimmense.github.io/post-images/1639724511455.jpeg" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1639724511455.jpeg" alt="" loading="lazy"><br>
 代码如下</p>
 <pre><code class="language-javascript">function heappush(heap, newKey){
   // push the new key 
@@ -309,60 +305,94 @@ for(let el of x) heappush(heap, -el);
 const max = -heappop(heap)
 </code></pre>
 
-                </div>
-            </article>
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%A0%86">什么是堆？</a></li>
+<li><a href="#%E5%A6%82%E4%BD%95%E8%A1%A8%E7%A4%BA%E5%A0%86">如何表示堆？</a></li>
+<li><a href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0">具体实现</a>
+<ul>
+<li><a href="#%E5%AE%9E%E7%8E%B0heappush">实现heappush()</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0-heappop">实现 heappop()</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E7%8E%B0%E6%9C%89%E6%95%B0%E7%BB%84%E5%88%9B%E5%BB%BA%E5%A0%86">使用现有数组创建堆</a></li>
+<li><a href="#%E6%97%B6%E9%97%B4%E5%92%8C%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6">时间和空间复杂度</a></li>
+<li><a href="#%E6%9C%80%E5%A4%A7%E5%A0%86">最大堆</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
         </div>
 
         
-            <div class="next-post">
-                <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://umeimmense.github.io/post/javascript-zhong-de-xi-shu-shu-zu-yu-mi-ji-shu-zu-de-qu-bie/" class="post-title gt-a-link">
-                    JavaScript 中的稀疏数组与密集数组的区别？
-                </a>
-            </div>
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="http://localhost:4000/post/javascript-zhong-de-xi-shu-shu-zu-yu-mi-ji-shu-zu-de-qu-bie/">
+              <h3 class="post-title">
+                JavaScript 中的稀疏数组与密集数组的区别？
+              </h3>
+            </a>
+          </div>
         
 
         
 
-        
-
-        
-
-        <div class="site-footer gt-c-content-color-first">
-    <div class="slogan gt-c-content-color-first"></div>
-    <div class="social-container">
-        
-            
-                <a href="https://github.com/umeimmense" target="_blank">
-                    <i class="fab fa-github gt-c-content-color-first"></i>
-                </a>
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-    </div>
-    <div class="footer-info">
-        
-    </div>
-    <!-- <div>
-        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
-                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://umeimmense.github.io/atom.xml" target="_blank">RSS</a></a>
-    </div> -->
+        <div class="site-footer">
+  
+  <a class="rss" href="http://localhost:4000/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
 </div>
 
-<script>
-  hljs.initHighlightingOnLoad()
-</script>
-
+      </div>
     </div>
-</div>
-</body>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
 </html>
