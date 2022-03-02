@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Cool Coding</title>
+<title>探索 React 18 的三个新 API | Cool Coding</title>
 
 <link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1646247253705">
 
@@ -25,11 +25,11 @@
 
 
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
-    <div class="main-content">
-        <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -93,31 +93,57 @@
     </div>
 </nav>
 
-        <div class="post-container">
-            <div class="post-detail gt-bg-theme-color-first">
-                <article class="gt-post-content">
-                    <h2 class="post-title">标签</h2>
-        <div class="tags-container">
-            
-                <a class="tag gt-c-content-color-first gt-a-link"
-                   href="https://umeimmense.github.io/tag/react-router">#React Router</a>
-            
-                <a class="tag gt-c-content-color-first gt-a-link"
-                   href="https://umeimmense.github.io/tag/react">#React</a>
-            
-                <a class="tag gt-c-content-color-first gt-a-link"
-                   href="https://umeimmense.github.io/tag/algorithm">#Algorithm</a>
-            
-                <a class="tag gt-c-content-color-first gt-a-link"
-                   href="https://umeimmense.github.io/tag/javascript">#JavaScript</a>
-            
-                <a class="tag gt-c-content-color-first gt-a-link"
-                   href="https://umeimmense.github.io/tag/browser">#Browser</a>
-            
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    探索 React 18 的三个新 API
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-03-03 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="前言">前言</h2>
+<p>目前 React 生态系统中最大的话题是 React 18 及其备受期待的并发渲染功能的完整发布。 2021 年 6 月，React 团队宣布了 React 18 的计划以及即将发生的事情。 2021年 12 月，React Conf 2021 的主题是所有新发布的并发渲染功能。</p>
+<p>与 React 18 一起发布的几个新 API 允许用户充分利用 React 的并发渲染功能。 这些hook是：</p>
+<ul>
+<li><a href="#the-usesyncexternalstore-hook">useSyncExternalStore</a></li>
+<li><a href="#the-useid-hook">useId</a></li>
+<li><a href="#the-useinsertioneffect-hook">useInsertionEffect</a></li>
+</ul>
+<p>本文将介绍这三个新 API、它们的用例、它们解决的问题、添加它们的原因以及它们如何集成到并发渲染领域。</p>
+<h1 id="the-usesyncexternalstore-hook">the-usesyncexternalstore-hook</h1>
+<p>在 React v16.14.0 中引入的用于适应并发渲染的 API 之一是 useMutableSource，它旨在允许 React 组件在并发渲染期间安全有效地与外部可变源集成。</p>
+<p>Hook 将附加到数据源，等待更改，并相应地安排更新。 所有这一切都会以一种防止撕裂的方式发生，即当出现视觉不一致时，因为同一状态有多个值。</p>
+<p>这对于新的并发渲染特性来说是一个特别突出的问题，因为状态流可以很快地交织在一起。 然而，采用 useMutableSource 被证明是困难的，原因如下：</p>
+<ol>
+<li>Hook 是异步的<br>
+Hook 不知道如果选择器函数的结果值发生变化，它是否可以重用它。 唯一的解决方案是重新订阅提供的数据源并再次检索快照，这可能会导致性能问题，因为它发生在每次渲染上。</li>
+</ol>
+<p>对于用户和库（如 Redux），这意味着他们必须记住项目中的每个选择器，并且无法内联定义选择器函数，因为它们的引用不稳定。</p>
+
+                </div>
+            </article>
         </div>
-    </article>
-</div>
-</div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/concurrent-rendering" class="post-title gt-a-link">
+                    React 18 并发（Concurrent）渲染的入门指南
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
         <div class="site-footer gt-c-content-color-first">
     <div class="slogan gt-c-content-color-first"></div>
     <div class="social-container">
