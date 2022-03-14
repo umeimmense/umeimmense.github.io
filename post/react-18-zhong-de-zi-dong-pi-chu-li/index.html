@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>React 18 中的自动批处理 | Cool Coding</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1647265956397">
+<link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="前言
+React 18 支持对状态更新的自动批处理支持。 这有助于避免在 Promise、setTimeout、setInterval、原生事件处理程序以及react事件处理程序中多次渲染状态更新。 因此，由于自动批处理，我们在React ..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://umeimmense.github.io">
+        <img src="https://umeimmense.github.io/images/avatar.png?v=1647265956397" class="site-logo">
+        <h1 class="site-title">Cool Coding</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="https://umeimmense.github.io/resume/" class="site-nav" target="_blank">
+            简历
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://umeimmense.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">React 18 中的自动批处理</h2>
+            <div class="post-date">2022-03-14</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="前言">前言</h2>
+<p><code>React 18</code> 支持对状态更新的自动批处理支持。 这有助于避免在 <code>Promise</code>、<code>setTimeout</code>、<code>setInterval</code>、原生事件处理程序以及<code>react</code>事件处理程序中多次渲染状态更新。 因此，由于自动批处理，我们在<code>React</code> 应用程序中获得了开箱即用的性能改进。</p>
+<h2 id="什么是自动批处理">什么是（自动）批处理？</h2>
+<p>批处理是将多个状态更新分组为单个更新的过程。 如果我们有多个调用来设置组件的状态，<code>React</code> 会将这些更新组合在一个更新调用（称为批处理）中，从而导致组件的一次重新渲染。 当 <code>React</code> 自动计算出这一点并批量更新状态时，它被称为自动批处理，下面让我们通过探究更新状态的各种方式来看看它是如何工作的？</p>
+<h2 id="react-17-及之前的事件处理程序的状态更新">React 17 及之前的事件处理程序的状态更新</h2>
+<p>让我们举个例子来了解在 <code>React 17</code> 中事件处理程序上的状态更新时渲染是如何发生的？</p>
+<pre><code class="language-jsx">const Counter = () =&gt; {
+  const [count, setCount] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleClick = () =&gt; {
+    setCount(count + 1);
+    setShowModal((prev) =&gt; !prev);
+    // React renders once at the end (that's batching)
+  };
+
+  console.log('rendered component');
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;You clicked {count} times&lt;/p&gt;
+      &lt;p&gt;{`Show modal? ${showModal}`}&lt;/p&gt;
+      &lt;button onClick={handleClick}&gt;Click me&lt;/button&gt;
+      &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>现在，我们可以看到有两个状态更新调用。 一个用于 <code>setCount</code>，另一个用于 <code>setShowModal</code>。 但是，<code>react</code> 确保最后只调用一个渲染。<br>
+如果更新不是批处理的，它会以不成熟方式渲染组件，导致 UI 闪烁。 即我们希望我们的组件仅在更新计数和更新 <code>showModal</code> 标志后才呈现。</p>
+<h2 id="react-17-及之前的-promise-和原生事件处理程序的状态更新">React 17 及之前的 Promise 和原生事件处理程序的状态更新</h2>
+<p>自动批处理不适用于<code>promise</code>/非<code>react</code>处理程序（如 <code>setTimeout</code>、<code>setInterval</code> 等）中的状态更新。</p>
+<pre><code class="language-jsx">const Counter = () =&gt; {
+  const [count, setCount] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleClick = () =&gt; {
+    console.log('fetch called');
+
+    fetch('https://jsonplaceholder.typicode.com/todos/1')
+      .then(() =&gt; {
+        setCount(count + 1); // Re-render is called
+        setShowModal((prev) =&gt; !prev); // Re-render is called
+      })
+  };
+
+  console.log('rendered component');
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;You clicked {count} times&lt;/p&gt;
+      &lt;p&gt;{`Show modal? ${showModal}`}&lt;/p&gt;
+      &lt;button onClick={handleClick}&gt;Click me now&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>通常，我们调用 API 请求来获取某些内容并根据 API 请求的响应在回调中执行状态更新。 正如我们在上面的示例中看到的，有 2 次调用来设置回调中的状态，导致 2 次重新渲染。<br>
+这是一个性能瓶颈。 这可能会导致 UI 闪烁，从而呈现部分状态更新的结果。</p>
+<h2 id="react-18-中-promise-和原生事件处理程序的状态更新">React 18+ 中 Promise 和原生事件处理程序的状态更新</h2>
+<p><code>React</code> 通过为 <code>Promise</code>、<code>setTimeou</code>t 和 <code>setInterval</code>、原生事件处理程序以及默认的 <code>react</code> 事件处理程序中的状态更新提供自动批处理支持来解决此问题。<br>
+注意：对于这个例子，我们已经更新了如下所示的 <code>react</code> 和 <code>react-dom</code> 库版本。</p>
+<pre><code class="language-shell">https://unpkg.com/react@18.0.0-beta-24dd07bd2-20211208/umd/react.development.js
+https://unpkg.com/react-dom@18.0.0-beta-24dd07bd2-20211208/umd/react-dom.development.js
+</code></pre>
+<p>如果我们采用与上面给出的相同示例，我们可以在下面看到渲染的数量。</p>
+<pre><code class="language-jsx">const Counter = () =&gt; {
+  const [count, setCount] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleClick = () =&gt; {
+    console.log('fetch called');
+
+    fetch('https://jsonplaceholder.typicode.com/todos/1')
+      .then(() =&gt; {
+        setCount(count + 1);
+        setShowModal((prev) =&gt; !prev);
+        // React 18 renders once at the end (that's automatic batching)
+      })
+  };
+
+  console.log('rendered component');
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;You clicked {count} times&lt;/p&gt;
+      &lt;p&gt;{`Show modal? ${showModal}`}&lt;/p&gt;
+      &lt;button onClick={handleClick}&gt;Click me&lt;/button&gt;
+      &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>注意：我们需要将渲染升级为<code>createRoot</code>。 对于上面给出的示例，我们渲染了 <code>Counter</code> 组件，如下所示。 我们使用 <code>ReactDOM.createRoot</code> 创建了根，然后在其上渲染了 <code>Counter</code> 组件。</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://umeimmense.github.io/post/tan-suo-react-18-de-san-ge-xin-api">
+                  <h3 class="post-title">
+                    探索 React 18 的三个新 API
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>
