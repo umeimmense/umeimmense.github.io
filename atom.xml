@@ -2,13 +2,145 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-03-14T13:52:38.959Z</updated>
+    <updated>2022-03-21T19:29:44.475Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[React Suspense 基本指南]]></title>
+        <id>https://umeimmense.github.io/post/react-suspense-ji-ben-zhi-nan</id>
+        <link href="https://umeimmense.github.io/post/react-suspense-ji-ben-zhi-nan">
+        </link>
+        <updated>2022-03-21T19:16:27.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>在 React 18 中发布的另一个重要特性是 Suspense。如果你在之前使用过 React ，那么你就会知道 Suspense 功能并不是特别新。早在 2018 年，Suspense 作为 React 16.6 版的一部分作为实验性功能发布。然后，它主要针对与React.lazy。</p>
+<p>但是现在，有了 React 18，Suspense 的正式发布就在我们面前。伴随着并发渲染的发布，Suspense 的真正威力终于解锁了。Suspense 和并发渲染之间的交互为改善用户体验开辟了广阔的世界。</p>
+<p>但就像所有功能一样，就像并发渲染一样，从基础开始很重要。Suspense 到底是什么？为什么我们首先需要Suspense ？Suspense 如何解决这个问题？有什么好处？为了帮助你理解这些基础知识，本文将详细介绍这些问题，并为你提供有关 Suspense 的知识基础。</p>
+<h2 id="什么是suspense">什么是Suspense？</h2>
+<p>本质上，Suspense 是 React 开发人员向 React 指示组件正在等待数据准备好的一种机制。然后 React 知道它应该等待该数据被获取。同时，将向用户显示一个反馈，并且 React 将继续渲染应用程序的其余部分。数据准备好后，React 会返回到那个特定的 UI 并相应地更新它。</p>
+<p>从根本上说，这听起来与 React 开发人员必须实现数据获取流程的当前方式没有太大区别：使用某种状态来指示组件是否仍在等待数据，useEffect开始获取数据，显示加载状态基于数据的状态，并在数据准备好后更新 UI。</p>
+<p>但在实践中，Suspense 使这在技术上完全不同。与上面提到的数据获取流程相反，Suspense 与 React 深度集成，允许开发人员更直观地编排加载状态，并避免竞争条件。为了更好地理解这些细节，了解我们为什么需要 Suspense 很重要。</p>
+<h2 id="为什么我们需要suspense">为什么我们需要Suspense？</h2>
+<p>在没有 Suspense 的情况下，实现数据获取流程的主要方法有两种：<strong>渲染时获取</strong>和<strong>渲染后获取</strong>。但是，这些传统的数据获取流程存在一些问题。要了解 Suspense，我们必须深入研究这些流程的问题和局限性。</p>
+<h3 id="渲染时获取">渲染时获取</h3>
+<p>useEffect大多数人将使用和状态变量来实现前面提到的数据获取流程。这意味着只有在组件呈现时才开始获取数据。所有数据获取都发生在组件的副作用和生命周期方法中。</p>
+<p>这种方法的主要问题是:组件仅在渲染时触发数据获取，异步特性迫使组件必须等待其他组件的数据请求。</p>
+<p>假设我们有一个ComponentA获取一些数据并具有加载状态的组件。在内部，ComponentA还呈现另一个组件ComponentB，该组件也自己执行一些数据获取。但是由于数据获取的实现方式，ComponentB只有在渲染时才开始获取数据。这意味着它必须等到ComponentA完成获取数据然后渲染ComponentB。</p>
+<p>这导致了瀑布式方法，其中组件之间的数据获取顺序发生，这实质上意味着它们相互阻塞。</p>
+<pre><code class="language-jsx">function ComponentA() {
+  const [data, setData] = useState(null);
+
+  useEffect(() =&gt; {
+    fetchAwesomeData().then(data =&gt; setData(data));
+  }, []);
+
+  if (user === null) {
+    return &lt;p&gt;Loading data...&lt;/p&gt;;
+  }
+
+  return (
+    &lt;&gt;
+      &lt;h1&gt;{data.title}&lt;/h1&gt;
+      &lt;ComponentB /&gt;
+    &lt;/&gt;
+  );
+}
+
+function ComponentB() {
+  const [data, setData] = useState(null);
+
+  useEffect(() =&gt; {
+    fetchGreatData().then(data =&gt; setData(data));
+  }, []);
+
+  return data === null ? &lt;h2&gt;Loading data...&lt;/h2&gt; : &lt;SomeComponent data={data} /&gt;;
+}
+</code></pre>
+<h3 id="渲染后获取">渲染后获取</h3>
+<p>为了防止组件之间数据获取的顺序阻塞，一种替代方法是尽早开始所有数据获取。因此，与其让组件负责处理渲染时的数据获取，而且数据请求都单独发生，而是在树开始渲染之前启动所有请求。</p>
+<p>这种方法的优点是所有数据请求都是一起发起的，因此ComponentB不必等待ComponentA完成。这解决了组件顺序阻塞彼此数据流的问题。但是，它引入了另一个问题，我们必须等待所有数据请求完成，然后才能为用户呈现任何内容。可以想象，这不是最佳体验。</p>
+<pre><code class="language-jsx">// Start fetching before rendering the entire tree
+function fetchAllData() {
+  return Promise.all([
+		fetchAwesomeData(),
+		fetchGreatData()
+  ]).then(([awesomeData, greatData]) =&gt; ({
+    awesomeData,
+		greatData
+  }))
+}
+
+const promise = fetchAllData();
+
+function ComponentA() {
+  const [awesomeData, setAwesomeData] = useState(null);
+  const [greatData, setGreatData] = useState(null);
+
+  useEffect(() =&gt; {
+    promise.then(({ awesomeData, greatData }) =&gt; {
+      setAwesomeData(awesomeData);
+      setGreatData(greatData);
+    });
+  }, []);
+
+  if (user === null) {
+    return &lt;p&gt;Loading data...&lt;/p&gt;;
+  }
+
+  return (
+    &lt;&gt;
+      &lt;h1&gt;{data.title}&lt;/h1&gt;
+      &lt;ComponentB /&gt;
+    &lt;/&gt;
+  );
+}
+
+function ComponentB({data}) {
+  return data === null ? &lt;h2&gt;Loading data...&lt;/h2&gt; : &lt;SomeComponent data={data} /&gt;;
+}
+</code></pre>
+<h2 id="suspense-如何解决数据获取问题">Suspense 如何解决数据获取问题？</h2>
+<p>从本质上讲，**fetch-on-render **和 <strong>fetch-then-render</strong> 的主要问题归结为我们试图强制同步两个不同的流程，即数据获取流程和 React 生命周期。借助 Suspense，我们获得了一种不同类型的数据获取方法，即所谓的 <strong>render-as-you-fetch</strong> 方法。</p>
+<pre><code class="language-jsx">const specialSuspenseResource = fetchAllDataSuspense();
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;h1&gt;Loading data...&lt;/h1&gt;}&gt;
+      &lt;ComponentA /&gt;
+      &lt;Suspense fallback={&lt;h2&gt;Loading data...&lt;/h2&gt;}&gt;
+        &lt;ComponentB /&gt;
+      &lt;/Suspense&gt;
+    &lt;/Suspense&gt;
+  );
+}
+
+function ComponentA() {
+  const data = specialSuspenseResource.awesomeData.read();
+  return &lt;h1&gt;{data.title}&lt;/h1&gt;;
+}
+
+function ComponentB() {
+	const data = specialSuspenseResource.greatData.read();
+  return &lt;SomeComponent data={data} /&gt;;
+}
+</code></pre>
+<p>与之前实现的不同之处在于它允许组件在 React 到达它的那一刻启动数据获取。这甚至发生在组件渲染之前，并且 React 并没有就此停止。然后它继续评估组件的子树，并在等待数据获取完成时继续尝试渲染它。</p>
+<p>这意味着 Suspense 不会阻塞渲染，这意味着子组件不必等待父组件完成后再发起其数据获取请求。React 尝试尽可能多地渲染，同时启动适当的数据获取请求。请求完成后，React 将重新访问相应的组件并使用新接收的数据相应地更新 UI。</p>
+<h2 id="suspense有什么好处">Suspense有什么好处？</h2>
+<ul>
+<li>尽早开始获取数据。Suspense 引入的 render-as-you-fetch 方法最大和最直接的好处是数据获取尽早启动。这意味着用户必须等待的时间更少，应用程序更快，这对任何前端应用程序都是普遍有益的。</li>
+<li>更直观的加载状态。使用 Suspense，组件不必再包含大量的 if 语句或单独跟踪状态来实现加载状态。相反，加载状态被集成到它所属的组件本身中。这使得组件更直观，通过保持加载代码接近相关代码，并且更可重用，因为加载状态包含在组件中。</li>
+<li>避免竞争条件。我没有在本文中深入讨论的现有数据获取实现的问题之一是竞争条件。在某些情况下，传统的 fetch-on-render 和 fetch-then-render 实现可能会导致竞争条件，具体取决于时间、用户输入和参数化数据请求等不同因素。主要的潜在问题是我们试图强制同步两个不同的进程，React 和数据获取。但是使用 Suspense，这可以更优雅、更集成地完成，从而避免了上述问题。</li>
+<li>更集成的错误处理。使用 Suspense，我们基本上已经为数据请求流创建了边界。最重要的是，由于 Suspense 使其与组件代码的集成更加直观，它允许 React 开发人员还为 React 代码和数据请求实现更集成的错误处理。</li>
+</ul>
+<h2 id="总结">总结</h2>
+<p>React Suspense 已经被关注了 3 年多。但是随着 React 18 的发布，官方发布的时间越来越近了。除了并发渲染，它将是作为 React 版本的一部分发布的最大功能之一。就其本身而言，它可以将数据获取和加载状态实现提升到一个新的直观和优雅水平。</p>
+<p>为了帮助你了解 Suspense 的基础知识，本文介绍了几个对其很重要的问题和方面。这涉及到 Suspense 是什么，为什么我们首先需要像 Suspense 这样的东西，它如何解决某些数据获取问题以及 Suspense 带来的所有好处。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[React 18 中的自动批处理]]></title>
         <id>https://umeimmense.github.io/post/react-18-zhong-de-zi-dong-pi-chu-li</id>
@@ -2027,266 +2159,6 @@ trie.search(&quot;DOG&quot;) // true
 <li>拼写检查器：我们可以使用 trie 创建拼写检查器，即给定一个单词列表，我们可以检查给定单词的拼写是否正确。</li>
 <li>IP 路由（最长前缀匹配）：Internet 由多个路由器节点组成，它们决定应该发送的目标数据包。 Internet 上的每个路由器都需要将数据包发送到由给定 IP 目的地决定的适当目标节点。但是每个路由器如何使用给定的 IP 地址决定下一个目标路由器呢？这个问题可以使用IP路由来解决。<a href="https://www.lewuathe.com/longest-prefix-match-with-trie-tree.html">这是一篇深入探讨这个主题的好文章</a>。</li>
 </ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[JavaScript 将树遍历算法应用于 DOM]]></title>
-        <id>https://umeimmense.github.io/post/javascript-jiang-shu-bian-li-suan-fa-ying-yong-yu-dom</id>
-        <link href="https://umeimmense.github.io/post/javascript-jiang-shu-bian-li-suan-fa-ying-yong-yu-dom">
-        </link>
-        <updated>2021-12-09T06:10:43.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>到目前为止，我们已经了解了一些二叉树遍历的方法：</p>
-<ul>
-<li><a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">使用递归和迭代算法遍历二叉树</a></li>
-<li><a href="https://umeimmense.github.io/post/javascript-zhong-de-tree-shi-yong-fu-zhi-zhen-gao-xiao-bian-li/">使用父指针遍历二叉树</a><br>
-在本文中，我们将把这些知识用于 n 叉树，即 DOM。我们将看到如何使用各种 CSS 选择器定位 DOM 元素，而无需使用内置 API，如 getElementById、getElementsByClassname 或 querySelector/querySelectorAll。因此，本文将阐明这些 API 可能如何在幕后工作。</li>
-</ul>
-<h2 id="dom-遍历">DOM 遍历</h2>
-<p>借用 <a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">使用递归和迭代算法遍历二叉树</a>的思路，我们来得出DOM的前序遍历算法：</p>
-<pre><code class="language-javascript">function walkPreOrder(node){
-  if(!node) return
-
-  // do something here
-  console.log(node)
-
-  for(let child of node.children){
-     walkPreOrder(child)
-  }
-}
-</code></pre>
-<p>我们可以修改这个算法使之来返回一个迭代器：</p>
-<pre><code class="language-javascript">function* walkPreOrder(node){
-  if(!node) return
-
-  // do something here
-  yield node
-  for(let child of node.children){
-    yield* walkPreOrder(child)
-  }
-}
-
-// USAGE
-for(let node of walkPreOrder(root)){
-  console.log(node)
-}
-</code></pre>
-<p>我们可以使用任何广度优先或深度优先算法（在之前的文章中讨论过）来遍历 DOM。<br>
-我们还假设正在处理具有以下 HTML 的文档：</p>
-<pre><code class="language-html">&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;DOM selection algorithm&lt;/title&gt;
-  &lt;/head&gt;
-&lt;body&gt;
-
-  &lt;div class=&quot;container&quot;&gt;
-    &lt;div class=&quot;body&quot;&gt;
-      &lt;div class=&quot;row&quot;&gt;
-        &lt;img id=&quot;profile&quot; src=&quot;xyz.jpg&quot; alt=&quot;&quot;&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;row&quot;&gt;&lt;/div&gt;
-      &lt;div class=&quot;row&quot;&gt;&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-<h2 id="通过-id-定位节点">通过 ID 定位节点</h2>
-<pre><code class="language-javascript">function locateById(nodeId){
-  // iterate through all nodes in depth first (preOrder) fashion
-  // return the node as soon as it's found
-  for(let node of walkPreOrder(document.body)){
-     if(node.id === nodeId){
-        return node
-     }
-  }
-   return null
-}
-</code></pre>
-<p>我们可以使用 locateById() 函数如下：</p>
-<pre><code class="language-javascript">const img = locateById('profile')
-// returns the image node
-</code></pre>
-<h2 id="通过classname-定位节点">通过ClassName 定位节点</h2>
-<p>浏览器提供 document.getElementsByClassName() API 来实现此结果。我们如何实现类似的东西：</p>
-<pre><code class="language-javascript">function locateAllByClassName(className){
-   const result = []
-   for(let node of walkPreOrder(document.body)){
-      if(node.classList.contains(className)){
-        result.push(node)
-      }
-   }
-   return result
-}
-
-// USAGE
-const elements = locateAllByClassName('row')
-</code></pre>
-<h2 id="浏览器如何优化选择查询">浏览器如何优化选择查询</h2>
-<p>选择 DOM 节点是 Web 应用程序相当常见的操作。为同一个选择器多次遍历树似乎不是最佳选择。浏览器通过使用记忆优化选择。<br>
-查看 <a href="https://searchfox.org/mozilla-central/source/parser/html/javasrc/TreeBuilder.java#1467">mozilla 解析器的源代码</a>，即函数 startTag 的摘录：</p>
-<pre><code class="language-javascript"> // ID uniqueness
- @IdType String id = attributes.getId();
- if (id != null) {
-      LocatorImpl oldLoc = idLocations.get(id);
-      if (oldLoc != null) {
-            err(&quot;Duplicate ID \u201C&quot; + id + &quot;\u201D.&quot;);
-            errorHandler.warning(new SAXParseException(
-                  &quot;The first occurrence of ID \u201C&quot; + id
-                  + &quot;\u201D was here.&quot;, oldLoc));
-       } else {
-            idLocations.put(id, new LocatorImpl(tokenizer));
-       }
- }
-</code></pre>
-<p>我们可以看到这些节点 ID 保存在一个简单的哈希映射中。我们可以使用类似的方法来确保对同一 ID 的重复查询不需要完全遍历，相反，我们可以从 hashMap 中查找并返回它。<br>
-以下是我们的解决方案：</p>
-<pre><code class="language-javascript">function getSelectors(){
-  const idLocations = {}
-  const classLocations = {}
-
-  // updated selector functions  
-  function locateById(nodeId){
-    if(idLocations.hasOwnProperty(nodeId)) 
-       return idLocations[nodeId]
-
-    for(let node of walkPreOrder(document.body)){
-       if(node.id === nodeId){
-          idLocations[nodeId]= node //memoize
-          return node
-       }
-     }
-    idLocations[nodeId]= null // memoize
-    return null
-  }
-
-  function locateAllByClassName(className){
-    if(classLocations.hasOwnProperty(className)) 
-         return classLocations[className]
-
-    const result = []
-    for(let node of walkPreOrder(document.body)){
-       if(node.classList.contains(className)){
-          result.push(node)
-        }
-     }
-     classLocations[nodeId]= result
-     return result
-  }
-
-  return {
-       locateById,
-       locateAllByClassName
-    }
-
-} 
-
-  // USAGE
-  const {locateById, locateAllByClassName} = getSelectors();
-  const result = locateAllByClassName('row') // returns array of elements
-  const img = locateById('profile') // returns an element, if found
-</code></pre>
-<h2 id="处理更复杂的选择器">处理更复杂的选择器</h2>
-<p>让我们尝试实现类似 element.querySelector 的方法。以下是 MDN 的描述：</p>
-<blockquote>
-<p>The querySelector() method of the Element interface returns the first element that is a descendant of the element on which it is invoked that matches the specified group of selectors.</p>
-</blockquote>
-<h3 id="样例">样例</h3>
-<pre><code class="language-javascript">const firstRow = document.querySelector('.container .row:first-child')
-</code></pre>
-<p>在这种情况下，我们可以将任何 CSS 选择器传递给函数，它应该能够遍历 DOM 为我们找到该元素。让我们看看它是如何实现的：</p>
-<pre><code class="language-javascript">// given a selector and root node, find that selector within the root node
-function select(selector, root){
-  for(let node of walkPreOrder(root)){
-      if(node.matches(selector)){
-        return node
-     }
-   }
-  return null;
-}
-
-
-function myQuerySelector(path, node){
-  // if path is empty, nothing to find
-  if(path.length === 0) return null;
-
-  // if node is not provided, let's assume user wants to search within document.body
-  let root = node || document.body;  
-  const selector = path[0];
-
-  // if there's only one selector in the path, just traverse using select function above
-  if(path.length === 1) return select(selector, root);
-
-   // else, either the current node matches the first selector in path or not
-   // if first selector matches with current node, look through it's children for subsequent selectors only
-   // else, look through it's children for the whole path
-  const newPath = root.matches(selector) ? path.slice(1): path;
-  for(let child of root.children){
-    const ans = myQuerySelector(newPath, child);
-    if(ans) return ans
-  }
-
-  // nothing found
-  return null;
-}
-
-
-// USAGE:
-const firstRow = myQuerySelector([&quot;.container&quot;, &quot;.row&quot;])
-</code></pre>
-<p>myQuerySelectorAll 的实现（类似于 element.querySelectorAll）也遵循相同的方法，稍作修改：</p>
-<pre><code class="language-javascript">function selectAll(selector, root){
-  let result = []
-  for(let node of walkPreOrder(root)){
-      if(node.matches(selector)){
-        result.push(node)
-     }
-   }
-  return result;
-}
-
-function myQuerySelectorAll(path, node){
-  let result = [];
-  if(path.length === 0) return result;
-
-  let root = node || document.body;  
-  const selector = path[0];
-
-  if(path.length === 1) return selectAll(selector, root);
-
-  const newPath = root.matches(selector) ? path.slice(1): path;
-  for(let child of root.children){
-    result = [...result, ...myQuerySelectorAll(newPath, child)]
-
-  }
-
-  return result;
-}
-</code></pre>
-<h2 id="进阶">进阶</h2>
-<p>我们可以使用本文开头描述的递归前序遍历方法来克隆任何树。让我们看看我们如何使用它来克隆任何 DOM 树，类似于 element.cloneNode(true) 所做的：</p>
-<ul>
-<li>通过创建具有相同 tagName 的新节点然后复制属性来创建源节点的克隆。</li>
-<li>对源节点的所有子节点递归调用 cloneTree 方法，并将返回的节点作为子节点附加到克隆节点。</li>
-</ul>
-<pre><code class="language-javascript">function cloneTree(node){
-  if(!node) return
-
-  const clonedNode = document.createElement(node.tagName.toLowerCase())
-  const attributes = node.getAttributeNames()
-
-  attributes.forEach(attribute =&gt; {
-     clonedNode.setAttribute(attribute, node.getAttribute(attribute))
-  })
-
-  for(const child of node.children){
-      clonedNode.append(cloneTree(child))
-  }
-
-  return clonedNode
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
