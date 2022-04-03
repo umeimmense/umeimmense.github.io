@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-03T08:52:51.857Z</updated>
+    <updated>2022-04-03T08:54:10.961Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -14,7 +14,7 @@
         <id>https://umeimmense.github.io/post/guan-yu-typescript-never-lei-xing-de-wan-zheng-shi-yong-zhi-nan</id>
         <link href="https://umeimmense.github.io/post/guan-yu-typescript-never-lei-xing-de-wan-zheng-shi-yong-zhi-nan">
         </link>
-        <updated>2022-03-23T14:29:17.000Z</updated>
+        <updated>2022-04-03T14:29:17.000Z</updated>
         <content type="html"><![CDATA[<h2 id="前言">前言</h2>
 <p>TypeScript 的<code>never</code>类型被很少讨论，因为它不像其他类型那样无处不在或不可避免。 TypeScript 初学者可能会忽略 <code>never</code>类型，因为它只在处理高级类型（例如条件类型）或阅读其神秘的类型错误消息时出现。<br>
 <code>never</code> 类型在 TypeScript 中有很多很好的用例。但是，它也有自己需要小心的陷阱。<br>
