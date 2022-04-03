@@ -1,109 +1,116 @@
 <html>
-  <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
 <title>React Suspense 基本指南 | Cool Coding</title>
-<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1648977201485">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+
+<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1648977346886">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="React Suspense 基本指南 | Cool Coding - Atom Feed" href="https://umeimmense.github.io/atom.xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
 
 
 
-    <meta name="description" content="前言
-在 React 18 中发布的另一个重要特性是 Suspense。如果你在之前使用过 React ，那么你就会知道 Suspense 功能并不是特别新。早在 2018 年，Suspense 作为 React 16.6 版的一部分作为实..." />
-    <meta name="keywords" content="React" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
-  </head>
-  <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://umeimmense.github.io">
-  <img class="avatar" src="https://umeimmense.github.io/images/avatar.png?v=1648977201485" alt="">
-  </a>
-  <h1 class="site-title">
-    Cool Coding
-  </h1>
-  <p class="site-description">
-    
-  </p>
-  <div class="menu-container">
-    
-      
-        <a href="/" class="menu">
-          首页
-        </a>
-      
-    
-      
-        <a href="/archives" class="menu">
-          归档
-        </a>
-      
-    
-      
-        <a href="/tags" class="menu">
-          标签
-        </a>
-      
-    
-      
-        <a href="/post/about" class="menu">
-          关于
-        </a>
-      
-    
-      
-        <a href="https://umeimmense.github.io/resume/" class="menu" target="_blank">
-          简历
-        </a>
-      
-    
-  </div>
-  <div class="social-container">
-    
-      
-        <a href="https://github.com/umeimmense/" target="_blank">
-          <i class="ri-github-line"></i>
-        </a>
-      
-    
-      
-    
-      
-    
-      
-    
-      
-    
-  </div>
-</div>
-
-        <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              React Suspense 基本指南
-            </h2>
-            <div class="post-info">
-              <span>
-                2022-03-22
-              </span>
-              <span>
-                8 min read
-              </span>
-              
-                <a href="https://umeimmense.github.io/tag/react" class="post-tag">
-                  # React
-                </a>
-              
-            </div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Cool Coding
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <h2 id="前言">前言</h2>
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://umeimmense.github.io/resume/" class="menu gt-a-link" target="_blank">
+                            简历
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1648977346886" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    React Suspense 基本指南
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-03-22 ·
+                    </time>
+                    
+                        <a href="https://umeimmense.github.io/tag/react" class="post-tags">
+                            # React
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="前言">前言</h2>
 <p>在 React 18 中发布的另一个重要特性是 Suspense。如果你在之前使用过 React ，那么你就会知道 Suspense 功能并不是特别新。早在 2018 年，Suspense 作为 React 16.6 版的一部分作为实验性功能发布。然后，它主要针对与React.lazy。</p>
 <p>但是现在，有了 React 18，Suspense 的正式发布就在我们面前。伴随着并发渲染的发布，Suspense 的真正威力终于解锁了。Suspense 和并发渲染之间的交互为改善用户体验开辟了广阔的世界。</p>
 <p>但就像所有功能一样，就像并发渲染一样，从基础开始很重要。Suspense 到底是什么？为什么我们首先需要Suspense ？Suspense 如何解决这个问题？有什么好处？为了帮助你理解这些基础知识，本文将详细介绍这些问题，并为你提供有关 Suspense 的知识基础。</p>
@@ -228,93 +235,60 @@ function ComponentB() {
 <p>React Suspense 已经被关注了 3 年多。但是随着 React 18 的发布，官方发布的时间越来越近了。除了并发渲染，它将是作为 React 版本的一部分发布的最大功能之一。就其本身而言，它可以将数据获取和加载状态实现提升到一个新的直观和优雅水平。</p>
 <p>为了帮助你了解 Suspense 的基础知识，本文介绍了几个对其很重要的问题和方面。这涉及到 Suspense 是什么，为什么我们首先需要像 Suspense 这样的东西，它如何解决某些数据获取问题以及 Suspense 带来的所有好处。</p>
 
-              </div>
-              <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
-<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AFsuspense">什么是Suspense？</a></li>
-<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E4%BB%AC%E9%9C%80%E8%A6%81suspense">为什么我们需要Suspense？</a>
-<ul>
-<li><a href="#%E6%B8%B2%E6%9F%93%E6%97%B6%E8%8E%B7%E5%8F%96">渲染时获取</a></li>
-<li><a href="#%E6%B8%B2%E6%9F%93%E5%90%8E%E8%8E%B7%E5%8F%96">渲染后获取</a></li>
-</ul>
-</li>
-<li><a href="#suspense-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E6%95%B0%E6%8D%AE%E8%8E%B7%E5%8F%96%E9%97%AE%E9%A2%98">Suspense 如何解决数据获取问题？</a></li>
-<li><a href="#suspense%E6%9C%89%E4%BB%80%E4%B9%88%E5%A5%BD%E5%A4%84">Suspense有什么好处？</a></li>
-<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
-</ul>
-</li>
-</ul>
-
-              </div>
-            </div>
-          </article>
+                </div>
+            </article>
         </div>
 
         
-          <div class="next-post">
-            <div class="next">下一篇</div>
-            <a href="https://umeimmense.github.io/post/react-18-zhong-de-zi-dong-pi-chu-li">
-              <h3 class="post-title">
-                React 18 中的自动批处理
-              </h3>
-            </a>
-          </div>
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/react-18-zhong-de-zi-dong-pi-chu-li" class="post-title gt-a-link">
+                    React 18 中的自动批处理
+                </a>
+            </div>
         
 
         
 
-        <div class="site-footer">
-  
-  <a class="rss" href="https://umeimmense.github.io/atom.xml" target="_blank">
-    <i class="ri-rss-line"></i> RSS
-  </a>
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"></div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/umeimmense" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        
+    </div>
+    <!-- <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://umeimmense.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div> -->
 </div>
 
-      </div>
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
     </div>
-
-    <script>
-      hljs.initHighlightingOnLoad()
-
-      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
-      // This should probably be throttled.
-      // Especially because it triggers during smooth scrolling.
-      // https://lodash.com/docs/4.17.10#throttle
-      // You could do like...
-      // window.addEventListener("scroll", () => {
-      //    _.throttle(doThatStuff, 100);
-      // });
-      // Only not doing it here to keep this Pen dependency-free.
-
-      window.addEventListener("scroll", event => {
-        let fromTop = window.scrollY;
-
-        mainNavLinks.forEach((link, index) => {
-          let section = document.getElementById(decodeURI(link.hash).substring(1));
-          let nextSection = null
-          if (mainNavLinks[index + 1]) {
-            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-          }
-          if (section.offsetTop <= fromTop) {
-            if (nextSection) {
-              if (nextSection.offsetTop > fromTop) {
-                link.classList.add("current");
-              } else {
-                link.classList.remove("current");    
-              }
-            } else {
-              link.classList.add("current");
-            }
-          } else {
-            link.classList.remove("current");
-          }
-        });
-      });
-
-    </script>
-  </body>
+</div>
+</body>
 </html>
