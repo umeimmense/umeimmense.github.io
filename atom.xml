@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-03T08:54:10.961Z</updated>
+    <updated>2022-04-03T08:59:37.788Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -75,39 +75,40 @@ never类型的这两种行为/特征为我们稍后将看到的一些最重要�
 <p>由于我们永远不能为<code>never</code>类型赋值，我们可以使用它来对各种用例的函数施加限制。</p>
 <h4 id="确保-switch-和-if-else-语句中的详尽匹配">确保 switch 和 if-else 语句中的详尽匹配</h4>
 <p>如果一个函数只能接受一个 never 类型的参数，则永远不能使用任何 non-never 值调用该函数。</p>
-<pre><code class="language-typescript">function fn(input: never) {}
-
-</code></pre>
 </li>
 </ul>
-<p>// it only accepts <code>never</code><br>
-declare let myNever: never<br>
-fn(myNever) // ✅</p>
-<p>// passing anything else (or nothing) causes a type error<br>
-fn() // ❌  An argument for 'input' was not provided.<br>
-fn(1) // ❌ Argument of type 'number' is not assignable to parameter of type 'never'.<br>
-fn('foo') // ❌ Argument of type 'string' is not assignable to parameter of type 'never'.</p>
-<p>// cannot even pass <code>any</code><br>
-declare let myAny: any<br>
-fn(myAny) // ❌ Argument of type 'any' is not assignable to parameter of type 'never'.</p>
-<pre><code>我们可以使用这样的函数来确保 switch 和 if-else 语句中的详尽匹配：通过使用它作为默认情况，我们确保涵盖所有情况，因为剩下的必须是 never 类型。如果我们不小心遗漏了一个可能的匹配项，我们会得到一个类型错误。例如：
-```typescript
-function unknownColor(x: never): never {
-  throw new Error(&quot;unknown color&quot;);
+<pre><code class="language-typescript">function fn(input: never) {}
+
+// it only accepts `never` 
+declare let myNever: never
+fn(myNever) // ✅
+
+// passing anything else (or nothing) causes a type error 
+fn() // ❌  An argument for 'input' was not provided.
+fn(1) // ❌ Argument of type 'number' is not assignable to parameter of type 'never'.
+fn('foo') // ❌ Argument of type 'string' is not assignable to parameter of type 'never'.
+
+// cannot even pass `any` 
+declare let myAny: any
+fn(myAny) // ❌ Argument of type 'any' is not assignable to parameter of type 'never'.
+</code></pre>
+<p>我们可以使用这样的函数来确保 switch 和 if-else 语句中的详尽匹配：通过使用它作为默认情况，我们确保涵盖所有情况，因为剩下的必须是 never 类型。如果我们不小心遗漏了一个可能的匹配项，我们会得到一个类型错误。例如：</p>
+<pre><code class="language-typescript">function unknownColor(x: never): never {
+    throw new Error(&quot;unknown color&quot;);
 }
 
 
 type Color = 'red' | 'green' | 'blue'
 
 function getColorName(c: Color): string {
-  switch(c) {
-      case 'red':
-          return 'is red';
-      case 'green':
-          return 'is green';
-      default:
-          return unknownColor(c); // Argument of type 'string' is not assignable to parameter of type 'never'
-  }
+    switch(c) {
+        case 'red':
+            return 'is red';
+        case 'green':
+            return 'is green';
+        default:
+            return unknownColor(c); // Argument of type 'string' is not assignable to parameter of type 'never'
+    }
 }
 </code></pre>
 <h4 id="部分不允许结构类型">部分不允许结构类型</h4>
