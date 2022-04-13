@@ -2,13 +2,160 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-13T07:41:39.386Z</updated>
+    <updated>2022-04-13T07:56:05.431Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[如何创建自定义 React Hook ]]></title>
+        <id>https://umeimmense.github.io/post/ru-he-chuang-jian-zi-ding-yi-react-hook</id>
+        <link href="https://umeimmense.github.io/post/ru-he-chuang-jian-zi-ding-yi-react-hook">
+        </link>
+        <updated>2022-04-13T07:35:45.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>React 很久以前就引入了 Hooks。随着 Hooks 的发布，函数组件能够使用内置 Hooks 的状态和副作用，例如 React 的 useState Hook 和 React 的 useEffect Hook。<br>
+不过，React 只提供了少数内置 Hook（例如 useReducer、useCallback、useMemo、useContext）。但是，通过使用这些 Hooks 作为基础，React 开发人员可以创建自己的称为自定义 Hooks 的 Hooks。</p>
+<p>在我们创建自定义Hook之前，你需要知道创建一个有两个规则：</p>
+<ul>
+<li>自定义 Hooks 以“use”为前缀命名。例如，自定义Hook可以命名为 useLocalStorage 或 useAuthentication。在我们的例子中，自定义Hook将被命名为 useBoolean。</li>
+<li>自定义 Hooks 由内置的 React Hooks 或其他自定义 Hooks 组成。因此，自定义 Hook 始终是一个或多个 Hook 的新组合。如果自定义 Hook 在内部不使用任何Hook，则它不是自定义 Hook，不应具有前缀“use”。</li>
+</ul>
+<h2 id="自定义hook">自定义Hook</h2>
+<p>我们将创建一个名为 useBoolean 的自定义 Hook，让我们看看它为我们解决了什么问题。让我们从一个小例子开始：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+function App() {
+  const [isToggle, setToggle] = React.useState(false);
+
+  const handleToggle = () =&gt; setToggle(!isToggle);
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={handleToggle}&gt;
+        Toggle
+      &lt;/button&gt;
+
+      {isToggle.toString()}
+    &lt;/div&gt;
+  );
+}
+
+export default App;
+</code></pre>
+<p>该组件呈现一个用于切换布尔值的按钮。在React 应用程序中，要么切换它（如上一个示例），要么将其显式设置为 true 或 false（如下一个示例）：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+function App() {
+  const [isToggle, setToggle] = React.useState(false);
+
+  const handleToggle = () =&gt; setToggle(!isToggle);
+  const handleTrue = () =&gt; setToggle(true);
+  const handleFalse = () =&gt; setToggle(false);
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={handleToggle}&gt;
+        Toggle
+      &lt;/button&gt;
+      &lt;button type=&quot;button&quot; onClick={handleTrue}&gt;
+        To True
+      &lt;/button&gt;
+      &lt;button type=&quot;button&quot; onClick={handleFalse}&gt;
+        To False
+      &lt;/button&gt;
+
+      {isToggle.toString()}
+    &lt;/div&gt;
+  );
+}
+
+export default App;
+</code></pre>
+<p>一些观点可能会争辩说，我们本可以使用内联处理程序，这样就不会有事件处理程序的重复声明。然而，我个人尽量避免使用内联处理程序，因为它们向 JSX 注入了太多逻辑，而应该在组件的函数签名和返回语句之间定义。但这只是个人喜好。<br>
+无论如何，每次使用有状态布尔值时，都会遇到相同的实现细节：要么切换布尔值，要么将其设置为两个可能值之一。为了在多个 React 组件中使用有状态布尔值时屏蔽这些重复代码，我开始为它创建一个自定义Hook：</p>
+<pre><code class="language-jsx">const useBoolean = () =&gt; {
+  const [state, setState] = React.useState();
+
+  const handleTrue = () =&gt; setState(true);
+  const handleFalse = () =&gt; setState(false);
+  const handleToggle = () =&gt; setState(!state);
+
+  return [
+    state,
+    {
+      setTrue: handleTrue,
+      setFalse: handleFalse,
+      setToggle: handleToggle,
+    },
+  ];
+};
+</code></pre>
+<p>基本上所有实现细节，即状态和事件处理程序，都移到了这个名为 useBoolean 的自定义Hook中。此外，自定义Hook返回状态和更新数组中状态的函数。<br>
+从自定义Hook返回多个值时，返回一个数组是最佳实践，因为 React 的内置 Hooks（在返回多个值的情况下）利用了数组，因此也使用了数组解构。使用数组解构的好处是可以为解构的值赋予任何名称（在对象解构的情况下，代码比重命名值要少）。</p>
+<pre><code class="language-jsx">const useBoolean = (initialState = false) =&gt; {
+  const [state, setState] = React.useState(initialState);
+
+  const handleTrue = () =&gt; setState(true);
+  const handleFalse = () =&gt; setState(false);
+  const handleToggle = () =&gt; setState(!state);
+
+  return [
+    state,
+    {
+      setTrue: handleTrue,
+      setFalse: handleFalse,
+      setToggle: handleToggle,
+    },
+  ];
+};
+</code></pre>
+<p>一个很好的补充是也添加一个初始状态（如最后一个代码片段所示）。回到我们的 App 组件，我们可以通过向它传递初始状态并使用它的返回值来显示状态并更新它来使用这个新的自定义Hook：</p>
+<pre><code class="language-jsx">function App() {
+  const [isToggle, { setToggle }] = useBoolean(false);
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={setToggle}&gt;
+        Toggle
+      &lt;/button&gt;
+
+      {isToggle.toString()}
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>由于自定义Hook不仅提供了切换有状态布尔值的功能，而且还可以将其显式设置为True或False，我们也可以使用这些功能：</p>
+<pre><code class="language-jsx">function App() {
+  const [isToggle, {
+    setToggle,
+    setTrue,
+    setFalse,
+  }] = useBoolean(false);
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={setToggle}&gt;
+        Toggle
+      &lt;/button&gt;
+      &lt;button type=&quot;button&quot; onClick={setTrue}&gt;
+        To True
+      &lt;/button&gt;
+      &lt;button type=&quot;button&quot; onClick={setFalse}&gt;
+        To False
+      &lt;/button&gt;
+
+      {isToggle.toString()}
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>本质上，我们将有状态的布尔值和所有在布尔值上运行的事件处理程序提取到一个自定义Hook中。通过每次我们需要一个有状态的布尔值时使用这个自定义钩子，我们可以节省定义事件处理程序，其中包括有关如何操作布尔值的实现细节，而不是使用从钩子返回的函数。</p>
+<p>总之，我们已经学习了如何使用 React 的内置 Hook 之一（称为 useState）来创建自定义钩子。这个自定义钩子并不复杂，但是，它应该向你展示如何减少 React 项目中的复杂性和冗余。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[React Suspense 基本指南]]></title>
         <id>https://umeimmense.github.io/post/react-suspense-ji-ben-zhi-nan</id>
@@ -2005,160 +2152,6 @@ console.timeEnd('using[]')
 // using[]: 0.010009765625ms 
 </code></pre>
 <p>具体原因是，对于稀疏数组 V8 引擎访问对象是使用 散列表模式的，该种模式在访问时需要计算一遍哈希值，所以会比较慢，但散列表对于空间利用来说，效率更高。而密集数组，它是申请一段连续的内存空间，访问时可以直接通过「索引」来访问，所以速度比较快。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[JavaScript 中的 Trie：什么是前缀树？]]></title>
-        <id>https://umeimmense.github.io/post/javascript-zhong-de-trieshi-me-shi-qian-zhui-shu</id>
-        <link href="https://umeimmense.github.io/post/javascript-zhong-de-trieshi-me-shi-qian-zhui-shu">
-        </link>
-        <updated>2021-12-10T08:02:42.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>我们已经在三篇文章中介绍了树数据结构的基础知识。如果你还没有读过这些，我强烈建议先阅读前三篇文章：</p>
-<ul>
-<li><a href="https://umeimmense.github.io/post/javascript-zhong-de-tree/">使用递归和迭代算法遍历二叉树</a></li>
-<li><a href="https://umeimmense.github.io/post/javascript-zhong-de-tree-shi-yong-fu-zhi-zhen-gao-xiao-bian-li/">使用父指针遍历二叉树</a></li>
-<li><a href="https://umeimmense.github.io/post/javascript-jiang-shu-bian-li-suan-fa-ying-yong-yu-dom/">将树遍历算法应用于 DOM</a></li>
-</ul>
-<h2 id="介绍">介绍</h2>
-<p>Trie 是树数据结构的一种变体。它也被称为前缀树或搜索树的变体。就像 n 叉树数据结构一样，trie 可以有 n 个来自单亲的孩子。通常，trie 中的所有节点都会存储一些字符。假设我们只处理英语单词，下面是一个简单的 trie 可能看起来像：<br>
-<img src="https://umeimmense.github.io/post-images/1639386955366.jpeg" alt="" loading="lazy"><br>
-需要注意的事项：</p>
-<ol>
-<li>
-<p>我们正在尝试使用树来尽可能高效地表示英语单词。</p>
-</li>
-<li>
-<p>在上图中，从根节点到任何绿色节点的路径表示一个英文单词。例如：</p>
-<ul>
-<li>NULL-&gt;C-&gt;A-&gt;T: CAT</li>
-<li>NULL-&gt;D-&gt;O: DO</li>
-<li>NULL-&gt;D-&gt;O-&gt;G: DOG</li>
-<li>NULL-&gt;D-&gt;A-&gt;R-&gt;K: DARK</li>
-<li>NULL-&gt;A: A</li>
-<li>NULL-&gt;A-&gt;N: AN</li>
-</ul>
-</li>
-<li>
-<p>每个节点最多可以有 26 个子节点（如果我们只处理英文字母）。我们有一个 NULL 节点作为根节点，因为一个单词可以以 26 个字母中的任何一个开头，因此我们需要一个虚拟节点，它可以将任何潜在的第一个字母作为子节点。</p>
-</li>
-<li>
-<p>绿色节点，本质上代表“词尾”，同时从根遍历到该节点。</p>
-</li>
-</ol>
-<h2 id="实现节点">实现节点</h2>
-<p>现在，让我们尝试提出 Trie 节点的表示。回到树节点，这就是我们呈现它的方式：</p>
-<pre><code class="language-javascript">function Node(value){
-  this.value = value
-  this.left = null
-  this.right = null
-}
-</code></pre>
-<p>因此，我们可以对 Trie 遵循类似的想法，同时确保它满足我们在介绍部分讨论的要求。要了解 Trie 节点的要求，让我们放大任何节点：<br>
-<img src="https://umeimmense.github.io/post-images/1639387276741.jpeg" alt="" loading="lazy"><br>
-所以现在更有意义了。这是最终的代码：</p>
-<pre><code class="language-javascript">function Node(value){
-  this.value = value
-  this.isEndOfWord = false // false by default, a green node means this flag is true
-  this.children = {} // children are stored as Map, where key is the letter and value is a TrieNode for that letter 
-}
-</code></pre>
-<h2 id="实现-trie-数据结构">实现 Trie 数据结构</h2>
-<p>我们可以使用一个简单的 ES6 类来表示：</p>
-<pre><code class="language-javascript">class Trie{
-  constructor(){
-    this.root = new Node(null)
-  }
-
-  insert(word){
-   // TODO
-  }
-
-  search(word){
-   // TODO
-  }
-
-}
-</code></pre>
-<p>所以我们已经准备好了大概。作为初始化的一部分，每个trie 都会创建它自己的根节点（NULL）。那么我们可以实现这两个方法如下：</p>
-<ul>
-<li>insert(word)：我们可以将单词拆分为字母，并为每个字母创建一个 Node()。然后我们可以开始将这些 Trie 节点中的每一个链接到根节点，以插入单词。最后，我们将最后插入的节点的 isEndOfWord 属性标记为 true。</li>
-<li>search(word)：我们可以将单词拆分为字母。然后我们可以从根开始一个一个地寻找这些字母中的每一个。如果我们能够按顺序找到所有字母，那么我们可以返回 true 否则 false。</li>
-</ul>
-<p>让我们直观地理解这两个操作以获得更好的上下文：</p>
-<ul>
-<li>首先insert(CAR)然后insert(CAN):<br>
-<img src="https://umeimmense.github.io/post-images/1639387651437.jpeg" alt="" loading="lazy"></li>
-<li>首先search(CAR)然后search(CAN):<br>
-<img src="https://umeimmense.github.io/post-images/1639387657794.jpeg" alt="" loading="lazy"></li>
-</ul>
-<p>实现如下：</p>
-<pre><code class="language-javascript">class Trie{
-  constructor(){
-    this.root = new Node(null)
-  }
-
-  insert(word){
-    let current = this.root
-    // iterate through all the characters of word
-    for(let character of word){
-         // if node doesn't have the current character as child, insert it
-         if(current.children[character] === undefined){
-             current.children[character] = new Node(character)
-         }
-        // move down, to insert next character
-        current = current.children[character]  
-    }
-    // mark the last inserted character as end of the word
-    current.isEndOfWord = true
-  }
-
-  search(word){
-     let current = this.root
-    // iterate through all the characters of word
-    for(let character of word){
-         if(current.children[character] === undefined){
-             // could not find this character in sequence, return false
-             return false
-         }
-        // move down, to match next character
-        current = current.children[character]  
-    }
-     // found all characters, return true if last character is end of a word
-    return current.isEndOfWord
-  }
-}
-</code></pre>
-<h2 id="使用-trie">使用 Trie</h2>
-<pre><code class="language-javascript">const trie = new Trie();
-
-// insert few words
-trie.insert(&quot;CAT&quot;);
-trie.insert(&quot;DOG&quot;);
-
-// search something
-trie.search(&quot;MAT&quot;) // false
-trie.search(&quot;DOG&quot;) // true
-</code></pre>
-<h3 id="空间复杂度">空间复杂度</h3>
-<p>在最坏的情况下，所有插入单词的每个字符都可以占用 Trie 中的单个节点。所以这意味着最坏的空间复杂度可以是 (W*n)，其中 W 是每个单词的平均字符数，n 是 Trie 中的单词总数。</p>
-<h3 id="时间复杂度">时间复杂度</h3>
-<ul>
-<li>插入：插入一个有n个字符的单词，只需要遍历n个字符，所以时间复杂度为O(n)</li>
-<li>搜索：与插入类似，我们只需要遍历单词的所有字符即可进行搜索。所以时间复杂度是 O(n)，其中 n 是单词中的字符数。</li>
-</ul>
-<p>现在，想一想，你还能如何在庞大的单词列表中搜索某个单词？<br>
--可能使用数组？时间复杂度为 O(m)，其中 m 是单词总数，这很糟糕。</p>
-<ul>
-<li>如何使用Map（或 JavaScript 中的对象）？这会将时间复杂度降低到 O(1)，但是找到具有特定前缀的单词列表有多快？它将是 O(m)。</li>
-</ul>
-<p>Trie 不仅将时间复杂度降低到 O(n)（n = 单词中的字符数），而且您还可以有效地搜索具有前缀的单词列表，这对于任何以上两种方法。</p>
-<h2 id="应用">应用</h2>
-<ul>
-<li>自动完成和预先输入：如果您在文本框中键入内容，并且看到具有相同前缀的潜在搜索列表，即自动完成小部件，那么这可能是由后台的 Trie 处理的。同样，<a href="https://en.wikipedia.org/wiki/Typeahead">Typeahead</a> 也可以使用 Trie 来实现。</li>
-<li>拼写检查器：我们可以使用 trie 创建拼写检查器，即给定一个单词列表，我们可以检查给定单词的拼写是否正确。</li>
-<li>IP 路由（最长前缀匹配）：Internet 由多个路由器节点组成，它们决定应该发送的目标数据包。 Internet 上的每个路由器都需要将数据包发送到由给定 IP 目的地决定的适当目标节点。但是每个路由器如何使用给定的 IP 地址决定下一个目标路由器呢？这个问题可以使用IP路由来解决。<a href="https://www.lewuathe.com/longest-prefix-match-with-trie-tree.html">这是一篇深入探讨这个主题的好文章</a>。</li>
-</ul>
 ]]></content>
     </entry>
 </feed>
