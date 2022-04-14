@@ -1,0 +1,428 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>React中的事件处理 | Cool Coding</title>
+
+<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1649902980070">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Cool Coding
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://umeimmense.github.io/resume/" class="menu gt-a-link" target="_blank">
+                            简历
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1649902980070" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    React中的事件处理
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-04-12 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="前言">前言</h2>
+<p>在本节中，我们将了解 React 中用于 HTML 元素（例如按钮和输入元素）的事件处理程序。你将学习如何使用带有 onClick 事件的按钮，以及如何定义和使用不同类型的事件处理程序。本质上，我们将介绍三种事件处理程序：事件处理程序、内联事件处理程序和回调事件处理程序。</p>
+<h2 id="react中的事件处理程序">React中的事件处理程序</h2>
+<p>首先，我们将从 React 中针对特定 onClick 事件处理程序的按钮示例开始。这是关于如何在 React 中使用事件处理程序（也称为事件处理程序函数或处理程序）处理事件的最基本示例。按钮具有接收函数的 onClick 属性。每次触发事件时都会调用此函数（此处：单击按钮时）：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  function handleClick() {
+    console.log('Button click ...');
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={handleClick}&gt;
+        Event Handler
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>对于其他属性，如 onChange（onChange 事件处理程序）和 onSubmit（onSubmit 事件处理程序），它的工作方式类似。对于初学者来说，onClick 经常不起作用，因为他们没有传递函数，而是直接在 JSX 中调用函数。例如，在下一个版本中，事件处理程序仅在第一次渲染组件时被调用一次。其他每一次单击都不会调用事件处理函数，因为函数的返回值用于 onClick 属性而不是函数本身。所以没有什么可调用的；除非函数返回另一个函数：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  function handleClick() {
+    console.log('Button click ...');
+  }
+
+  // don't do this
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={handleClick()}&gt;
+        Event Handler
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>通过使用 JavaScript 箭头函数，可以使事件处理函数更加简洁。不过，这是一个可选步骤。就个人而言，我喜欢将事件处理程序作为箭头函数：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const handleClick = () =&gt; {
+    console.log('Button click ...');
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={handleClick}&gt;
+        Event Handler
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>但是一旦更多的事件处理程序在 React 组件中添加，通过再次给它们函数语句来使它们与其他变量更容易区分是很好的：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const user = {
+    id: '123abc',
+    username: 'Robin Wieruch',
+  };
+
+  function handleUserSignIn() {
+    // do something
+  }
+
+  function handleUserSignUp() {
+    // do something
+  }
+
+  function handleUserSignOut() {
+    // do something
+  }
+
+  ...
+}
+</code></pre>
+<p>毕竟，onClick 事件的事件处理程序应该实现一些业务逻辑。在本例中，React 的 useState Hook 用于通过 onClick 按钮事件更新某些状态：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const [count, setCount] = React.useState(0);
+
+  function handleClick() {
+    setCount(count + 1);
+  }
+
+  return (
+    &lt;div&gt;
+      Count: {count}
+
+      &lt;button type=&quot;button&quot; onClick={handleClick}&gt;
+        Increase Count
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>下一个示例向你展示了一个输入字段而不是一个按钮。在那里，我们使用的是始终作为第一个参数传递给事件处理函数的实际事件。该事件是来自 React 的合成事件，它本质上封装了原生 HTML 事件并在其之上添加了一些功能。每次有人使用事件的目标属性输入输入字段时，此事件都会为你提供输入字段的值：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const [text, setText] = React.useState('');
+
+  function handleChange(event) {
+    setText(event.target.value);
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;input type=&quot;text&quot; onChange={handleChange} /&gt;
+
+      {text}
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>以前我们没有使用过该事件，因为在我们的按钮示例中我们不需要它。在输入字段示例中，我们需要它。最后但同样重要的是，不要忘记将值传递给输入元素以使其成为受控组件：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const [text, setText] = React.useState('');
+
+  function handleChange(event) {
+    setText(event.target.value);
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;input type=&quot;text&quot; value={text} onChange={handleChange} /&gt;
+
+      {text}
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>简而言之，这就是事件处理程序。让我们了解 React 中更高级的处理程序。</p>
+<h2 id="react-中的内联事件处理程序">React 中的内联事件处理程序</h2>
+<p>内联事件处理程序，也称为内联处理程序，通过直接在 JSX 中使用事件处理程序为我们提供了许多新选项：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const [count, setCount] = React.useState(0);
+
+  return (
+    &lt;div&gt;
+      Count: {count}
+
+      &lt;button
+        type=&quot;button&quot;
+        onClick={function() {
+          setCount(count + 1);
+        }}
+      &gt;
+        Increase Count
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>在 JSX 中使用通用函数语句虽然很冗长。因此，JavaScript 箭头函数可以方便地定义更简洁的内联处理程序：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const [count, setCount] = React.useState(0);
+
+  return (
+    &lt;div&gt;
+      Count: {count}
+
+      &lt;button
+        type=&quot;button&quot;
+        onClick={() =&gt; setCount(count + 1)}
+      &gt;
+        Increase Count
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>一般来说，开发者都是懒惰的人，所以经常使用内联事件处理程序来避免在 JSX 之外进行额外的函数声明。然而，这会将大量业务逻辑转移到 JSX 中，这使得它的可读性、可维护性和易错性降低。就个人而言，我喜欢在没有内联事件处理程序的情况下保持 JSX 干净，并在 JSX 之外声明事件处理程序。<br>
+内联处理程序也用于将参数传递给在 JSX 之外定义的更通用的处理程序：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const [count, setCount] = React.useState(0);
+
+  function handleCount(delta) {
+    setCount(count + delta);
+  }
+
+  return (
+    &lt;div&gt;
+      Count: {count}
+
+      &lt;button type=&quot;button&quot; onClick={() =&gt; handleCount(1)}&gt;
+        Increase Count
+      &lt;/button&gt;
+      &lt;button type=&quot;button&quot; onClick={() =&gt; handleCount(-1)}&gt;
+        Decrease Count
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>这样，也可以并行传递事件和参数。即使在此示例中不需要它，但你肯定会在将来遇到需要该事件的一种或另一种情况（例如 React Forms 的 preventDefault ）：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const [count, setCount] = React.useState(0);
+
+  function handleCount(event, delta) {
+    setCount(count + delta);
+  }
+
+  return (
+    &lt;div&gt;
+      Count: {count}
+
+      &lt;button type=&quot;button&quot; onClick={event =&gt; handleCount(event, 1)}&gt;
+        Increase Count
+      &lt;/button&gt;
+      &lt;button type=&quot;button&quot; onClick={event =&gt; handleCount(event, -1)}&gt;
+        Decrease Count
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>因此，当你需要传递事件和参数时，例如当你需要为 onClick 事件提供额外参数时，内联事件处理程序可能会为你提供帮助。然后 JSX 之外的更通用的事件处理程序可以使用这个额外的参数。</p>
+<h2 id="react-中的回调事件处理程序">React 中的回调事件处理程序</h2>
+<p>简而言之，有回调事件处理程序或回调处理程序。当子组件需要与父组件通信时使用它们。由于 React props 只在组件树中向下传递，因此使用回调处理程序（其核心是一个函数）进行向上通信：</p>
+<pre><code class="language-jsx">import React from 'react';
+
+function App() {
+  const [text, setText] = React.useState('');
+
+  // 1
+  function handleTextChange(event) {
+    setText(event.target.value); // 3
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;MyInput inputValue={text} onInputChange={handleTextChange} /&gt;
+
+      {text}
+    &lt;/div&gt;
+  );
+}
+
+// 2
+function MyInput({ inputValue, onInputChange }) {
+  return (
+    &lt;input type=&quot;text&quot; value={inputValue} onChange={onInputChange} /&gt;
+  );
+}
+</code></pre>
+<p>回调处理程序在某处定义 (1)，在其他地方使用 (2)，但回调到其定义的位置 (3)。这样，就可以从子组件到父组件进行通信。回调处理程序通过 React props 向下传递，并在调用函数时向上通信。</p>
+<p>你已经了解了 React 的事件处理程序、内联事件处理程序和回调事件处理程序，以及如何在按钮中为它们的 onClick 事件和在输入字段中为它们的 onChange 事件使用它们。还有其他事件处理程序，例如表单元素的 onSubmit，实际上需要该事件来阻止本机浏览器行为。无论如何，所有这些事件处理程序都有其特定目的。你的目标应该是让你的代码保持可读性和可维护性，</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/react-suspense-ji-ben-zhi-nan" class="post-title gt-a-link">
+                    React Suspense 基本指南
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"></div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/umeimmense" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        
+    </div>
+    <!-- <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://umeimmense.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div> -->
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
