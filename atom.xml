@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-14T02:23:24.956Z</updated>
+    <updated>2022-04-14T09:34:01.997Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -424,6 +424,145 @@ function MyInput({ inputValue, onInputChange }) {
 </code></pre>
 <p>回调处理程序在某处定义 (1)，在其他地方使用 (2)，但回调到其定义的位置 (3)。这样，就可以从子组件到父组件进行通信。回调处理程序通过 React props 向下传递，并在调用函数时向上通信。</p>
 <p>你已经了解了 React 的事件处理程序、内联事件处理程序和回调事件处理程序，以及如何在按钮中为它们的 onClick 事件和在输入字段中为它们的 onChange 事件使用它们。还有其他事件处理程序，例如表单元素的 onSubmit，实际上需要该事件来阻止本机浏览器行为。无论如何，所有这些事件处理程序都有其特定目的。你的目标应该是让你的代码保持可读性和可维护性，</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[React 中的浅比较是如何工作的？]]></title>
+        <id>https://umeimmense.github.io/post/react-zhong-de-qian-bi-jiao-shi-ru-he-gong-zuo-de</id>
+        <link href="https://umeimmense.github.io/post/react-zhong-de-qian-bi-jiao-shi-ru-he-gong-zuo-de">
+        </link>
+        <updated>2022-04-11T07:34:48.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>浅比较在 React 开发中无处不在。它在不同的流程中起着关键作用，也可以在 React 组件生命周期的多个地方找到。类组件是否应该更新的机制，React hooks 的依赖数组，通过 React.memo 进行记忆等等。</p>
+<p>如果你曾经阅读过 React 的官方文档，你很可能已经经常看到浅比较这个术语。因此，本文将研究浅比较的概念，它到底是什么，它是如何工作的。</p>
+<h2 id="什么是浅比较">什么是浅比较？</h2>
+<p>理解浅层比较最直接的方法是深入研究它的实现。相应的代码可以在共享子包的 <a href="https://github.com/facebook/react/blob/main/packages/shared/shallowEqual.js">React Github</a> 项目中找到。例如下面的实现：</p>
+<pre><code class="language-jsx">import is from './objectIs';
+import hasOwnProperty from './hasOwnProperty';
+
+/**
+ * Performs equality by iterating through keys on an object and returning false
+ * when any key has values which are not strictly equal between the arguments.
+ * Returns true when the values of all keys are strictly equal.
+ */
+function shallowEqual(objA: mixed, objB: mixed): boolean {
+  if (is(objA, objB)) {
+    return true;
+  }
+
+  if (
+    typeof objA !== 'object' ||
+    objA === null ||
+    typeof objB !== 'object' ||
+    objB === null
+  ) {
+    return false;
+  }
+
+  const keysA = Object.keys(objA);
+  const keysB = Object.keys(objB);
+
+  if (keysA.length !== keysB.length) {
+    return false;
+  }
+
+  // Test for A's keys different from B.
+  for (let i = 0; i &lt; keysA.length; i++) {
+    const currentKey = keysA[i];
+    if (
+      !hasOwnProperty.call(objB, currentKey) ||
+      !is(objA[currentKey], objB[currentKey])
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+</code></pre>
+<p>这过程中发生了很多事情，所以让我们将其拆分并逐步执行该功能。</p>
+<pre><code class="language-jsx">function shallowEqual(objA: mixed, objB: mixed): boolean {
+	// ...
+}
+</code></pre>
+<p>从函数定义开始，函数接受两个将相互比较的实体。与 TypeScript 不同，此代码使用 Flow 作为类型检查系统。两个函数参数都是使用特殊的混合 Flow 类型键入的，类似于 TypeScript 的未知数。它表明参数可以是任何类型的值，该函数将找出其余的并使其工作。</p>
+<pre><code class="language-jsx">import is from './objectIs';
+
+function shallowEqual(objA: mixed, objB: mixed): boolean {
+  if (is(objA, objB)) {
+    return true;
+  }
+	// ...
+}
+</code></pre>
+<p>其次，首先使用来自 React 内部对象的 is 函数将函数参数相互比较。导入的函数只不过是 JavaScript 的 Object.is 函数的 polyfill 版本。这个比较函数基本上等同于常见的 === 运算符，但有两个例外：</p>
+<ul>
+<li>Object.is 认为相反的有符号零（+0 和 -0）不相等，而 === 认为它们相等。</li>
+<li>Object.is 认为 Number.NaN 和 NaN 相等，而 === 认为它们不相等。</li>
+</ul>
+<p>基本上，第一个条件语句处理所有简单的情况：如果两个函数参数具有相同的值，对于原始类型，或引用相同的对象，对于数组和对象，那么它们被认为是浅比较相等的。</p>
+<pre><code class="language-jsx">function shallowEqual(objA: mixed, objB: mixed): boolean {
+	// ...
+
+  if (
+    typeof objA !== 'object' ||
+    objA === null ||
+    typeof objB !== 'object' ||
+    objB === null
+  ) {
+    return false;
+  }
+
+	// ...
+}
+</code></pre>
+<p>在处理了两个函数参数值相等或引用同一个对象的所有简单情况之后，我们想要进入更复杂的结构（对象和数组）。但是，如果任何一个参数是原始值，前面的条件语句仍然可以给我们留下原始值。</p>
+<p>因此，为了确保我们从现在开始处理两个复杂的结构，代码会检查任一参数是否不是对象类型或等于 null。前一个检查确保我们正在处理对象或数组，而后一个检查是过滤掉空值，因为它们的类型也是对象。如果任一条件成立，我们肯定是在处理不相等的参数（否则前面的条件语句会将它们过滤掉），因此浅比较返回 false。</p>
+<pre><code class="language-jsx">function shallowEqual(objA: mixed, objB: mixed): boolean {
+	// ...
+
+  const keysA = Object.keys(objA);
+  const keysB = Object.keys(objB);
+
+  if (keysA.length !== keysB.length) {
+    return false;
+  }
+
+	// ...
+}
+</code></pre>
+<p>现在可以确定我们只处理数组和对象，我们可以专注于浅比较这些数据结构。为此，我们必须深入研究复杂数据结构的值，并在两个函数参数之间进行比较。</p>
+<p>但在我们这样做之前，我们可以通过一个简单的检查来确保两个参数具有相同数量的值。如果不是，则通过浅层比较可以保证它们不相等，这可以节省我们一些精力。为此，我们使用参数的键。对于对象，键数组将由实际键组成，而对于数组，键数组将由字符串中原始数组中占用的索引组成。</p>
+<pre><code class="language-jsx">import hasOwnProperty from './hasOwnProperty';
+
+function shallowEqual(objA: mixed, objB: mixed): boolean {
+	// ...
+
+  // Test for A's keys different from B.
+  for (let i = 0; i &lt; keysA.length; i++) {
+    const currentKey = keysA[i];
+    if (
+      !hasOwnProperty.call(objB, currentKey) ||
+      !is(objA[currentKey], objB[currentKey])
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+</code></pre>
+<p>作为最后一步，我们按键迭代两个函数参数的值，并逐个验证它们以确定它们是否等效。为此，代码使用在上一步中生成的键数组，使用 hasOwnProperty 检查键是否实际上是参数的属性，并使用与比较值之前相同的 Object.is 函数。</p>
+<p>如果事实证明任何键在两个参数之间没有等效值，那么通过浅比较可以肯定它们不相等。因此，我们缩短了 for 循环，并从 shallowEqual 函数中返回 false。如果所有值都相等，那么我们可以通过浅比较调用函数参数相等并从函数返回 true。</p>
+<h2 id="一些有趣的点">一些有趣的点</h2>
+<p>现在我们了解了浅层比较及其背后的实现，我们可以从这些知识中学到一些有趣的东西：</p>
+<ul>
+<li>浅比较不使用严格相等、=== 运算符，而是使用 Object.is 函数。</li>
+<li>通过浅比较，空对象和数组是等价的。</li>
+<li>通过浅比较，以索引为键的对象等效于在各个索引处具有相同值的数组。例如。 { 0: 2, 1: 3 } 等价于 [2, 3]。</li>
+<li>由于 Object.is 优于 === 的使用，通过浅比较，+0 和 -0 不等价，NaN 和 Number.NaN 也不等价。- 如果它们在复杂结构内进行比较，这也适用。<br>
+虽然两个内联创建的对象（或数组）通过浅比较相等（{} 和 [] 浅相等），但具有嵌套内联对象的内联对象不相等（{ someKey: {} } 和 { someKey: [] } 不浅平等的）。</li>
+</ul>
 ]]></content>
     </entry>
     <entry>
@@ -2090,208 +2229,6 @@ const Users = ({ users }) =&gt; {
 <h2 id="参考">参考</h2>
 <p><a href="https://github.com/remix-run/react-router/releases">react-router</a><br>
 <a href="https://create-react-app.dev/docs/getting-started/">CRA</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ JavaScript 中的 Heap]]></title>
-        <id>https://umeimmense.github.io/post/javascript-zhong-de-dui</id>
-        <link href="https://umeimmense.github.io/post/javascript-zhong-de-dui">
-        </link>
-        <updated>2021-12-13T03:18:28.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>之前我们已经研究了树数据结构的实现以及它的一些变体，例如 trie。在这篇文章中，我们将深入研究堆。它也称为优先级队列。</p>
-<h2 id="什么是堆">什么是堆？</h2>
-<p>堆是树数据结构的一种变体，具有两个附加属性：<br>
-1.它是一棵完全二叉树：一棵完全二叉树的每一层都包含最大数量的节点，可能最后一层除外，它必须从左到右填充。完整的二叉树总是通过它的定义来平衡的。作为参考下图显示了什么时候可以将树称为完全二叉树：<br>
-<img src="https://umeimmense.github.io/post-images/1639723723975.jpeg" alt="" loading="lazy"><br>
-2.每个节点都满足“堆属性”：堆属性本质上意味着对于任何给定的节点 C，如果 P 是 C 的父节点，则：</p>
-<ul>
-<li>对于最大堆：P 的键应该大于或等于 C 的键。</li>
-<li>对于最小堆：P 的键应该小于或等于 C 的键。<br>
-<img src="https://umeimmense.github.io/post-images/1639723881691.jpeg" alt="" loading="lazy"></li>
-</ul>
-<h2 id="如何表示堆">如何表示堆？</h2>
-<p>我们通常从节点的类表示开始实现，然后将其与实际数据结构本身的类表示联系起来。我们也可以对堆做同样的事情。但是，有一种更简单的方法可以解决此问题，这是因为所有堆都必须遵守以下两个属性之一：</p>
-<blockquote>
-<p>所有堆必须是完全二叉树<br>
-由于所有堆都必须是完全二叉树，并且我们知道完全二叉树中除最后一层外的所有级别都必须完全填充。此外，对于最后一层，所有子项必须从左到右方向填充，没有任何间隙。这个定义确保了一个由 n 个节点组成的完全二叉树只能有 1 种可能的形状。反过来，它允许我们使用数组来表示完整的二叉树。这意味着，堆也可以使用数组来表示。例如，我们可以将一个简单的堆表示为一个数组，如下图所示：<br>
-<img src="https://umeimmense.github.io/post-images/1639724054342.jpeg" alt="" loading="lazy"><br>
-这里要注意的关键是父节点和子节点之间的关系。如果仔细观察上图，我们可以推断出以下内容：</p>
-</blockquote>
-<ol>
-<li>如果节点位于数组中的索引 i 处，则假设结果索引位于数组的长度内：</li>
-</ol>
-<ul>
-<li>它的左孩子将在第 (2i+1) 个位置</li>
-<li>左孩子将在 (2i+2) 位置</li>
-</ul>
-<ol start="2">
-<li>如果一个节点被放置在数组中的索引 i 处，它的父节点将位于第 ((i-1)/2) 个索引处。<br>
-下图可以更轻松地使用上述信息：<br>
-<img src="https://umeimmense.github.io/post-images/1639724181146.jpeg" alt="" loading="lazy"></li>
-</ol>
-<h2 id="具体实现">具体实现</h2>
-<blockquote>
-<p>注意：在整个实现过程中，我们只会讨论最小堆。稍后我们将看到如何将相同的想法轻松扩展到最大堆。</p>
-</blockquote>
-<p>在我们已经涵盖了表示的细节，让我们想出一个使用数据结构的接口。在堆数据结构的帮助下，我们希望能够实现三个关键点：</p>
-<ul>
-<li>向堆中添加一个新键</li>
-<li>从堆中删除最大或最小键（取决于它是最小堆还是最大堆）</li>
-<li>从堆中获取最小键的最大值（取决于是最小堆还是最大堆）</li>
-</ul>
-<p>第三个操作很简单。我们知道对于最小堆，数组中的第一项将是最小键，同样对于最大堆，数组中的第一项将是最大键。所以我们剩下两个操作的实现：</p>
-<pre><code class="language-javascript">// adds the provided newKey into the min-heap named &quot;heap&quot;
-function heappush(heap, newKey){}
-
-// removes the smallest key from the min-heap named &quot;heap&quot;
-function heappop(heap){}
-</code></pre>
-<h3 id="实现heappush">实现heappush()</h3>
-<p>我们如何向堆中添加一个新键？假设我们首先将新键推送到数组中。推送新键仍然让我们遵守堆的第一个要求，即它必须是一个完整的二叉树。但是，我们需要确保它也遵守“堆属性”。<br>
-我们可以通过将push的项与其父项进行比较来做到这一点。如果父项大于的push的项，那么我们知道堆属性被违反，因此我们可以交换。我们可以继续进行这种交换，直到找到一个合法的父节点或者我们已经到达堆的顶部。<br>
-<img src="https://umeimmense.github.io/post-images/1639724511455.jpeg" alt="" loading="lazy"><br>
-代码如下</p>
-<pre><code class="language-javascript">function heappush(heap, newKey){
-  // push the new key 
-  heap.push(newKey);
-
-  // get the current index of pushed key
-  let curr = heap.length-1;
-
- // keep comparing till root is reached or we terminate in middle
-  while(curr &gt; 0){
-    let parent = Math.floor((curr-1)/2)
-    if( heap[curr] &lt; heap[parent] ){
-      // quick swap
-      [ heap[curr], heap[parent] ] = [ heap[parent], heap[curr] ]
-      // update the index of newKey
-      curr = parent
-    } else{
-      // if no swap, break, since we heap is stable now
-      break
-    }
-  } 
-}
-</code></pre>
-<h3 id="实现-heappop">实现 heappop()</h3>
-<p>使用 <code>heappop()</code> 我们需要删除堆的最顶层元素。意思是，对于最小堆，最小键将被删除，而对于最大堆，最大键将被删除。从数组的角度来看，它只是意味着我们应该删除数组的第一项。但是哪个节点应该成为根？如果我们随机选择被移除节点的左孩子或右孩子作为新的根节点，则不能保证遵循堆属性。我们可以按照以下步骤（对于最小堆）：</p>
-<ol>
-<li>将根节点与最后一个节点交换（数组中的第一个元素与最后一个元素）</li>
-<li>通过从数组中弹出最后一项来删除根节点</li>
-<li>将新根节点的键与其子节点进行比较：</li>
-</ol>
-<ul>
-<li>如果键小于它的两个子键，则堆是稳定的</li>
-<li>否则，将Key与较小的子Key交换</li>
-</ul>
-<ol start="4">
-<li>重复步骤 3，直到到达最后一个子节点或建立堆属性。</li>
-</ol>
-<p>本质上，我们遵循与 heappush() 类似的过程，除了我们试图以从上到下的方式建立堆属性，即从根开始并一直持续到最后一个孩子。在 heappush() 中，我们遵循相反的顺序，即从最后一个孩子开始，一直到根。<br>
-代码实现：</p>
-<pre><code class="language-javascript">function heappop(heap){
-  // swap root with last node
-  const n = heap.length;
-  [heap[0], heap[n-1]] = [ heap[n-1], heap[0]]
-
-  // remove the root i.e. the last item (because of swap)
-  const removedKey = heap.pop();
-
-  let curr = 0;
-
-  // keep going till atleast left child is possible for current node
-  while(2*curr + 1 &lt; heap.length){
-    const leftIndex = 2*curr+1; 
-    const rightIndex = 2*curr+2;
-    const minChildIndex = (rightIndex &lt; heap.length &amp;&amp; heap[rightIndex] &lt; heap[leftIndex] ) ? rightIndex :leftIndex;
-    if(heap[minChildIndex] &lt; heap[curr]){
-     // quick swap, if smaller of two children is smaller than the parent (min-heap)
-      [heap[minChildIndex], heap[curr]] = [heap[curr], heap[minChildIndex]]
-      curr = minChildIndex
-    } else {
-      break
-    }
-  }
-
-  // finally return the removed key
-  return removedKey;
-}
-</code></pre>
-<h2 id="使用现有数组创建堆">使用现有数组创建堆</h2>
-<p>从现有数组创建堆看起来非常简单。只需创建一个空堆，然后遍历数组的所有项并执行 heappush():</p>
-<pre><code class="language-javascript">function heapify(arr){
-  const heap = []
-  for(let item of arr){
-     heappush(heap, item)
-  }
-  return heap;
-}
-</code></pre>
-<p>但是我们可以在这里做得更好吗？是的。首先，我们可以完全避免为新堆使用额外的空间。为什么不重新排列数组本身的元素，使其满足堆属性？为此，我们可以遵循与堆弹出类似的逻辑。我们可以查看第一个节点并与它的子节点进行比较，看看它是否是最小的节点，如果不是与较小的子节点交换。下面我们来实现一下：</p>
-<pre><code class="language-javascript">// follows pretty much the same logic as heappush, except minor modifications
-function percolateDown(heap, index){
-  let curr = index;
-  // keep going down till heap property is established
-  while(2*curr + 1 &lt; heap.length){
-    const leftIndex = 2*curr+1; 
-    const rightIndex = 2*curr+2;
-    const minChildIndex = (rightIndex &lt; heap.length &amp;&amp; heap[rightIndex] &lt; heap[leftIndex] ) ? rightIndex :leftIndex;
-    if(heap[minChildIndex] &lt; heap[curr]){
-     // quick swap, if smaller of two children is smaller than the parent (min-heap)
-      [heap[minChildIndex], heap[curr]] = [heap[curr], heap[minChildIndex]]
-      curr = minChildIndex
-    } else {
-      break
-    }
-}
-</code></pre>
-<p>我们可以对数组中的所有元素使用 percolateDown() 函数，按照堆属性将所有元素按正确顺序排列：</p>
-<pre><code class="language-javascript">function heapify(heap){
-  for(let i in heap){
-     percolateDown(heap, i)
-   }
-  return heap
-}
-</code></pre>
-<p>这样就为我们节省了一个额外的数组。但是我们能做些什么来改善所花费的时间吗？是的。如果你仔细观察，我们实际上是在做一些重复的工作。假设堆中有 n 个节点，其中 x 是叶节点，那么这意味着我们只需要对 n-x 个节点执行 percolateDown()，因为到那时最后 x 个节点将在正确的位置。</p>
-<blockquote>
-<p>那么在堆的数组表示中，我们应该执行 percolateDown() 操作到哪个索引？<br>
-直到最后一个节点的父节点所在的索引。因为一旦最后一个节点的父节点被过滤掉，它也会处理最后一个节点。所以：</p>
-</blockquote>
-<ul>
-<li>如果数组长度为 n</li>
-<li>最后一个节点的索引是：n-1</li>
-<li>它的父节点的索引是：<code>Math.floor((n-1) - 1 / 2) = Math.floor(n/2 - 1)</code></li>
-</ul>
-<pre><code class="language-javascript">function heapify(heap){
-  const last = Math.floor(heap.length/2 - 1);
-  for(let i = 0; i &lt;= last; i++){
-     percolateDown(heap, i)
-   }
-  return heap
-}
-</code></pre>
-<h2 id="时间和空间复杂度">时间和空间复杂度</h2>
-<p>查看 heappush() 和 heapop() 操作，很明显我们在尝试添加或删除键时正在遍历树的高度。由于堆是一棵平衡树，因此高度是 log(n)，其中 n 是节点总数。因此，对于堆的推送和弹出操作，时间复杂度为 O(log(n))。 heapify() 操作的时间复杂度可能看起来像 Onlog(n)，因为每次调用都需要 O(log(n))。这个观察结果对于推导 heapify() 的时间复杂度的上限是正确的，但是，渐近（平均）时间复杂度为 O(n)。更多细节在这里。就空间复杂度而言，它是恒定的，因为额外的空间仅被诸如 curr、leftIndex 等大小恒定的变量占用。</p>
-<h2 id="最大堆">最大堆</h2>
-<p>如果我们有 minHeap 的实现，我们也可以轻松地将它用作最大堆。我们只需要确保在向堆添加值时我们插入键的负数。它将确保堆充当所有键的负数的最小堆，这相当于所有实际键的最大堆。例如：</p>
-<ul>
-<li>假设我们有一个数组 <code>const x = [23, 454, 54, 29]</code>;</li>
-<li>可以使用以下方法创建最小堆：</li>
-</ul>
-<pre><code class="language-javascript">const heap = [];
-for(let el of x) heappush(heap, el);
-  // min value
-const min = heappop(heap)
-</code></pre>
-<p>最大堆可以使用</p>
-<pre><code class="language-javascript">const heap = [];
-for(let el of x) heappush(heap, -el);
-
-// max value
-const max = -heappop(heap)
-</code></pre>
 ]]></content>
     </entry>
 </feed>
