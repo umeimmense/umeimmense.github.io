@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>React Conf 2021 | Cool Coding</title>
+<title>自定义React Hook：使用LocalStorage | Cool Coding</title>
 
 <link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1649944216994">
 
@@ -25,11 +25,11 @@
 
 
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
-    <div class="main-content">
-        <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -93,78 +93,72 @@
     </div>
 </nav>
 
-        <div class="current-tag-container">
-            <h2 class="title gt-c-content-color-first">
-                #React Conf 2021
-            </h2>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    自定义React Hook：使用LocalStorage
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-04-13 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="实现-uselocalstorage">实现 useLocalStorage</h2>
+<p>一个简洁的自定义 React Hook，展示了如何在 React 中使用本地存储来存储状态。你可以在任何 React 组件中使用它，它允许你在本地存储中写入和读取状态：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+const useLocalStorage = (storageKey, fallbackState) =&gt; {
+  const [value, setValue] = React.useState(
+    JSON.parse(localStorage.getItem(storageKey)) ?? fallbackState
+  );
+
+  React.useEffect(() =&gt; {
+    localStorage.setItem(storageKey, JSON.stringify(value));
+  }, [value, storageKey]);
+
+  return [value, setValue];
+};
+
+const App = () =&gt; {
+  const [isOpen, setOpen] = useLocalStorage('is-open', false);
+
+  const handleToggle = () =&gt; {
+    setOpen(!isOpen);
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={handleToggle}&gt;Toggle&lt;/button&gt;
+      {isOpen &amp;&amp; &lt;div&gt;Content&lt;/div&gt;}
+    &lt;/div&gt;
+  );
+};
+
+export default App;
+</code></pre>
+<p>本地存储Hook只是作为一种学习体验。如果你在生产环境中依赖 React 应用程序的本地存储，你应该检查更广泛使用的Hook（因此是健壮的）。</p>
+
+                </div>
+            </article>
         </div>
-        <div class="post-list-container">
-    <div class="post-inner">
+
         
-            <div class="post gt-bg-theme-color-second">
-                <div class="post-left">
-                    <div>
-                        
-                        <a href="https://umeimmense.github.io/post/tan-suo-react-18-de-san-ge-xin-api">
-                            <span class="post-title gt-c-content-color-first">探索 React 18 的三个新 API</span>
-                        </a>
-                    </div>
-                    <div class="gt-post-content post-abstract gt-c-content-color-second">
-                        
-                    </div>
-                    <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            发布于 · 2022-03-03 ·
-                        </time>
-                        
-                            <a href="https://umeimmense.github.io/tag/react-conf-2021" class="post-tag">
-                                # React Conf 2021
-                            </a>
-                        
-                            <a href="https://umeimmense.github.io/tag/react" class="post-tag">
-                                # React
-                            </a>
-                        
-                    </div>
-                </div>
-                
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/zi-ding-yi-react-hookjian-ce-zu-jian-wai-bu-de-dian-ji" class="post-title gt-a-link">
+                    自定义React Hook：检测组件外部的点击
+                </a>
             </div>
         
-            <div class="post gt-bg-theme-color-second">
-                <div class="post-left">
-                    <div>
-                        
-                        <a href="https://umeimmense.github.io/post/concurrent-rendering">
-                            <span class="post-title gt-c-content-color-first">React 18 并发（Concurrent）渲染的入门指南</span>
-                        </a>
-                    </div>
-                    <div class="gt-post-content post-abstract gt-c-content-color-second">
-                        
-                    </div>
-                    <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            发布于 · 2022-03-02 ·
-                        </time>
-                        
-                            <a href="https://umeimmense.github.io/tag/react-conf-2021" class="post-tag">
-                                # React Conf 2021
-                            </a>
-                        
-                            <a href="https://umeimmense.github.io/tag/react" class="post-tag">
-                                # React
-                            </a>
-                        
-                    </div>
-                </div>
-                
-            </div>
+
         
-    </div>
-</div>
-        <div class="pagination-container">
-    
-    
-</div>
+
+        
+
+        
 
         <div class="site-footer gt-c-content-color-first">
     <div class="slogan gt-c-content-color-first"></div>
