@@ -2,13 +2,186 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-14T13:50:38.810Z</updated>
+    <updated>2022-04-14T13:59:19.569Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[自定义React Hook：获取滚动方向]]></title>
+        <id>https://umeimmense.github.io/post/zi-ding-yi-react-hookhuo-qu-gun-dong-fang-xiang</id>
+        <link href="https://umeimmense.github.io/post/zi-ding-yi-react-hookhuo-qu-gun-dong-fang-xiang">
+        </link>
+        <updated>2022-04-13T08:01:53.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>本节我们实现一个简洁的自定义 React Hook，它可以检测用户的滚动方向：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+const THRESHOLD = 0;
+
+const useScrollDirection = () =&gt; {
+  const [scrollDirection, setScrollDirection] = React.useState('up');
+
+  const blocking = React.useRef(false);
+  const prevScrollY = React.useRef(0);
+
+  React.useEffect(() =&gt; {
+    prevScrollY.current = window.pageYOffset;
+
+    const updateScrollDirection = () =&gt; {
+      const scrollY = window.pageYOffset;
+
+      if (Math.abs(scrollY - prevScrollY.current) &gt;= THRESHOLD) {
+        const newScrollDirection =
+          scrollY &gt; prevScrollY.current ? 'down' : 'up';
+
+        setScrollDirection(newScrollDirection);
+
+        prevScrollY.current = scrollY &gt; 0 ? scrollY : 0;
+      }
+
+      blocking.current = false;
+    };
+
+    const onScroll = () =&gt; {
+      if (!blocking.current) {
+        blocking.current = true;
+        window.requestAnimationFrame(updateScrollDirection);
+      }
+    };
+
+    window.addEventListener('scroll', onScroll);
+
+    return () =&gt; window.removeEventListener('scroll', onScroll);
+  }, [scrollDirection]);
+
+  return scrollDirection;
+};
+
+export { useScrollDirection };
+</code></pre>
+<p>在一个函数组件中，自定义的 React Hook可以这样使用：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+import { useScrollDirection } from './useScrollDirection';
+
+const App = () =&gt; {
+  const scrollDirection = useScrollDirection(ref);
+  console.log('up');
+
+  return (...);
+};
+</code></pre>
+<p>最后，可能有很多方法可以改进这个自定义Hook（例如，检查水平而不是垂直滚动方向）。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[自定义React Hook：检查是否溢出]]></title>
+        <id>https://umeimmense.github.io/post/zi-ding-yi-react-hookjian-cha-shi-fou-yi-chu</id>
+        <link href="https://umeimmense.github.io/post/zi-ding-yi-react-hookjian-cha-shi-fou-yi-chu">
+        </link>
+        <updated>2022-04-13T08:01:26.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>本节我们实现一个简洁的自定义 React Hook，它检查元素的内容是否溢出（这里：垂直溢出）：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+export const useIsOverflow = (ref, callback) =&gt; {
+  const [isOverflow, setIsOverflow] = React.useState(undefined);
+
+  React.useLayoutEffect(() =&gt; {
+    const { current } = ref;
+
+    const trigger = () =&gt; {
+      const hasOverflow = current.scrollHeight &gt; current.clientHeight;
+
+      setIsOverflow(hasOverflow);
+
+      if (callback) callback(hasOverflow);
+    };
+
+    if (current) {
+      trigger();
+    }
+  }, [callback, ref]);
+
+  return isOverflow;
+};
+</code></pre>
+<p>如果你想检测水平溢出，可以将 hasOverflow 分配交换为以下内容：</p>
+<pre><code class="language-jsx">const hasOverflow = current.scrollWidth &gt; current.clientWidth;
+</code></pre>
+<p>在一个函数组件中，自定义的 React Hook可以这样使用：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+import { useIsOverflow } from './useIsOverflow';
+
+const App = () =&gt; {
+  const ref = React.useRef();
+  const isOverflow = useIsOverflow(ref);
+
+  console.log(isOverflow);
+  // true
+
+  return (
+    &lt;div style={{ overflow: 'auto', height: '100px' }} ref={ref}&gt;
+      &lt;div style={{ height: '200px' }}&gt;Hello React&lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+</code></pre>
+<p>Hook第一次返回未定义，因为状态尚未设置。</p>
+<p>自定义Hook还接受一个可选的回调函数，该函数在检查溢出后触发：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const ref = React.useRef();
+  const isOverflow = useIsOverflow(ref, (isOverflowFromCallback) =&gt; {
+    console.log(isOverflowFromCallback);
+    // true
+  });
+
+  console.log(isOverflow);
+  // true
+
+  return (
+    &lt;div style={{ overflow: 'auto', height: '100px' }} ref={ref}&gt;
+      &lt;div style={{ height: '200px' }}&gt;Hello React&lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+</code></pre>
+<p>如果元素的大小发生变化，你可以调整自定义Hook以再次检查验证溢出，但前提是浏览器支持 ResizeObserver：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+export const useIsOverflow = (ref, callback) =&gt; {
+  const [isOverflow, setIsOverflow] = React.useState(undefined);
+
+  React.useLayoutEffect(() =&gt; {
+    const { current } = ref;
+
+    const trigger = () =&gt; {
+      const hasOverflow = current.scrollHeight &gt; current.clientHeight;
+
+      setIsOverflow(hasOverflow);
+
+      if (callback) callback(hasOverflow);
+    };
+
+    if (current) {
+      if ('ResizeObserver' in window) {
+        new ResizeObserver(trigger).observe(current);
+      }
+
+      trigger();
+    }
+  }, [callback, ref]);
+
+  return isOverflow;
+};
+</code></pre>
+<p>最后，可能有很多方法可以改进这个自定义Hook（例如，在自定义Hook中初始化 ref 并从自定义Hook返回它以将其附加到元素，只触发一次自定义Hook）。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[自定义React Hook：使用LocalStorage]]></title>
         <id>https://umeimmense.github.io/post/zi-ding-yi-react-hookshi-yong-localstorage</id>
@@ -1460,204 +1633,6 @@ https://unpkg.com/react-dom@18.0.0-beta-24dd07bd2-20211208/umd/react-dom.develop
 }
 </code></pre>
 <p>注意：我们需要将渲染升级为<code>createRoot</code>。 对于上面给出的示例，我们渲染了 <code>Counter</code> 组件，如下所示。 我们使用 <code>ReactDOM.createRoot</code> 创建了根，然后在其上渲染了 <code>Counter</code> 组件。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[探索 React 18 的三个新 API]]></title>
-        <id>https://umeimmense.github.io/post/tan-suo-react-18-de-san-ge-xin-api</id>
-        <link href="https://umeimmense.github.io/post/tan-suo-react-18-de-san-ge-xin-api">
-        </link>
-        <updated>2022-03-02T16:16:50.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>目前 React 生态系统中最大的话题是 React 18 及其备受期待的并发渲染功能的完整发布。 2021 年 6 月，React 团队宣布了 React 18 的计划以及即将发生的事情。 2021年 12 月，React Conf 2021 的主题是所有新发布的并发渲染功能。</p>
-<p>与 React 18 一起发布的几个新 API 允许用户充分利用 React 的并发渲染功能。 这些hook是：</p>
-<ul>
-<li><a href="#the-usesyncexternalstore-hook">useSyncExternalStore</a></li>
-<li><a href="#the-useid-hook">useId</a></li>
-<li><a href="#the-useinsertioneffect-hook">useInsertionEffect</a></li>
-</ul>
-<p>本文将介绍这三个新 API、它们的用例、它们解决的问题、添加它们的原因以及它们如何集成到并发渲染领域。</p>
-<h1 id="the-usesyncexternalstore-hook">the-usesyncexternalstore-hook</h1>
-<p>在 React v16.14.0 中引入的用于适应并发渲染的 API 之一是 useMutableSource，它旨在允许 React 组件在并发渲染期间安全有效地与外部可变源集成。</p>
-<p>Hook 将附加到数据源，等待更改，并相应地安排更新。 所有这一切都会以一种防止撕裂的方式发生，即当出现视觉不一致时，因为同一状态有多个值。</p>
-<p>这对于新的并发渲染特性来说是一个特别突出的问题，因为状态流可以很快地交织在一起。 然而，采用 useMutableSource 被证明是困难的，原因如下：</p>
-<ol>
-<li>Hook 是异步的<br>
-Hook 不知道如果选择器函数的结果值发生变化，它是否可以重用它。 唯一的解决方案是重新订阅提供的数据源并再次检索快照，这可能会导致性能问题，因为它发生在每次渲染上。</li>
-</ol>
-<p>对于用户和库（如 Redux），这意味着他们必须记住项目中的每个选择器，并且无法内联定义选择器函数，因为它们的引用不稳定。</p>
-<ol start="2">
-<li>它必须处理外部状态<br>
-最初的实现也有缺陷，因为它必须处理 React 之外的状态。 这意味着由于其可变性，状态可能随时更改。</li>
-</ol>
-<p>因为 React 试图以异步方式解决这个问题，这有时会导致 UI 的可见部分被替换为备用，从而导致次优的用户体验。</p>
-<p>所有这一切都使得库维护者的迁移变得痛苦，并且对开发人员和用户来说都是次优的体验。</p>
-<h3 id="使用-usesyncexternalstore-解决这些问题">使用 useSyncExternalStore 解决这些问题</h3>
-<p>为了解决这些问题，React 团队更改了底层实现并将 Hook 重命名为 useSyncExternalStore 以正确反映其行为。 这些变化包括：</p>
-<ul>
-<li>每次选择器（用于快照）更改时都不会重新订阅外部源——相反，React 将比较选择器的结果值，而不是选择器函数，以决定是否再次检索快照，以便用户可以定义 选择器内联而不会对性能产生负面影响</li>
-<li>每当外部存储发生更改时，生成的更新现在始终是同步的，这可以防止 UI 被替换为回退</li>
-</ul>
-<p>唯一的要求是 getSnapshot Hook 参数的结果值需要是引用稳定的。 React 在内部使用它来确定是否需要检索新快照，因此它需要是不可变值或记忆/缓存对象。</p>
-<p>为了方便起见，React 将提供一个附加版本的 Hook，它自动支持对 getSnapshot 的结果值的记忆。</p>
-<h2 id="如何使用-usesyncexternalstore">如何使用 useSyncExternalStore</h2>
-<pre><code class="language-jsx">// Code illustrating the usage of `useSyncExternalStore`.
-// Source: &lt;https://github.com/reactwg/react-18/discussions/86&gt;
-
-import {useSyncExternalStore} from 'react';
-
-// React will also publish a backwards-compatible shim
-// It will prefer the native API, when available
-import {useSyncExternalStore} from 'use-sync-external-store/shim';
-
-// Basic usage. getSnapshot must return a cached/memoized result
-const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
-
-// Selecting a specific field using an inline getSnapshot
-const selectedField = useSyncExternalStore(store.subscribe, () =&gt; store.getSnapshot().selectedField);
-
-// Code illustrating the usage of the memoized version.
-// Source: &lt;https://github.com/reactwg/react-18/discussions/86&gt;
-
-// Name of API is not final
-import {useSyncExternalStoreWithSelector} from 'use-sync-external-store/with-selector';
-
-const selection = useSyncExternalStoreWithSelector(
-	store.subscribe,
-	store.getSnapshot,
-	getServerSnapshot,
-	selector,
-	isEqual
-);
-</code></pre>
-<h1 id="the-useid-hook">The useId Hook</h1>
-<h2 id="在服务器端运行-react">在服务器端运行 React</h2>
-<p>长期以来，一个 React 项目只在客户端运行。简而言之，这意味着所有代码都被发送到用户的浏览器（客户端），然后浏览器负责向用户呈现和显示应用程序。</p>
-<p>React 作为一个整体一直在向服务器端渲染（SSR）领域扩展。在 SSR 中，服务器负责根据 React 代码生成 HTML 结构。而不是所有的 React 代码，只有 HTML 被发送到浏览器。</p>
-<p>然后，浏览器只负责采用该结构并通过渲染组件、在其上添加 CSS 并将 JavaScript 附加到它来使其具有交互性。这个过程称为水合作用。</p>
-<p>hydration 最重要的要求是服务器和客户端生成的 HTML 结构必须匹配。如果他们不这样做，浏览器就无法确定它应该对结构的特定部分做什么，这会导致不正确地呈现或非交互式 UI。</p>
-<p>这在依赖于标识符的特性中尤为突出，因为它们必须在两边都匹配，例如在生成唯一样式类名称和可访问性标识符时。</p>
-<h2 id="useid-hook-的演进">useID Hook 的演进</h2>
-<p>为了解决这个问题，React 最初引入了 useOpaqueIdentifier Hook，但不幸的是，它也存在一些问题：</p>
-<p>在不同的环境中，Hooks 会产生不同的输出（不透明）：</p>
-<p>服务器端：它会产生一个字符串<br>
-客户端：它会产生一个特殊的对象，必须直接传递给 DOM 属性<br>
-这意味着 Hook 只能生成一个标识符，并且不可能动态生成新的 ID，因为它必须遵守 Hook 的规则。 因此，如果您的组件需要 X 个不同的标识符，它必须在不同的时间调用 Hook X，这在实践中显然不能很好地扩展。</p>
-<pre><code class="language-jsx">// Code illustrating the way `useOpaqueIdentifier` handles the need for N identifiers in a single component, namely calling the hook N times.
-// Source: &lt;https://github.com/facebook/react/pull/17322#issuecomment-613104823&gt;
-
-function App() {
-	const tabIdOne = React.unstable_useOpaqueIdentifier();
-	const panelIdOne = React.unstable_useOpaqueIdentifier();
-	const tabIdTwo = React.unstable_useOpaqueIdentifier();
-	const panelIdTwo = React.unstable_useOpaqueIdentifier();
-
-return (
-	&lt;React.Fragment&gt;
-		&lt;Tabs defaultValue=&quot;one&quot;&gt;
-			&lt;div role=&quot;tablist&quot;&gt;
-				&lt;Tab id={tabIdOne} panelId={panelIdOne} value=&quot;one&quot;&gt;
-					One
-				&lt;/Tab&gt;
-				&lt;Tab id={tabIdTwo} panelId={panelIdTwo} value=&quot;one&quot;&gt;
-					One
-				&lt;/Tab&gt;
-			&lt;/div&gt;
-			&lt;TabPanel id={panelIdOne} tabId={tabIdOne} value=&quot;one&quot;&gt;
-				Content One
-			&lt;/TabPanel&gt;
-			&lt;TabPanel id={panelIdTwo} tabId={tabIdTwo} value=&quot;two&quot;&gt;
-				Content Two
-			&lt;/TabPanel&gt;
-		&lt;/Tabs&gt;
-	&lt;/React.Fragment&gt;
-	);
-}
-</code></pre>
-<p>某些可访问性 API（如 aria-labelledby）可以通过空格分隔的列表接受多个标识符，但由于 Hook 的输出被格式化为不透明的数据类型，它总是必须直接附加到 DOM 属性。这意味着无法正确使用上述可访问性 API。</p>
-<p>为了解决这个问题，实现已更改并重命名为 useId。这个新的 Hook API 在 SSR 和 hydration 期间生成稳定的标识符以避免不匹配。在服务器渲染的内容之外，它回退到一个全局计数器。</p>
-<p>与使用 useOpaqueIdentifier 创建不透明数据类型（服务器中的特殊对象和客户端中的字符串）不同，useId Hook 会在两侧生成非透明字符串。</p>
-<p>这意味着如果我们需要 X 个不同的 ID，就没有必要再调用 Hook X 次了。相反，组件可以调用 useId 一次并将其用作整个组件所需的标识符的基础（例如，使用后缀），因为它只是一个字符串。这解决了 useOpaqueIdentifier 中存在的两个问题。</p>
-<h2 id="如何使用-useid">如何使用 useID</h2>
-<p>下面的代码示例说明了如何根据我们上面讨论的内容使用 useId。 因为 React 生成的 ID 是全局唯一的，并且后缀是本地唯一的，所以动态创建的 ID 也是全局唯一的——因此不会导致任何水合不匹配。</p>
-<pre><code class="language-jsx">// Code illustrating the improved way in which `useId` handles the need for N identifiers in a single component, namely calling the hook once and creating them dynamically.
-// Source: &lt;https://github.com/reactwg/react-18/discussions/111&gt;
-
-function NameFields() {
-	const id = useId();
-	return (
-		&lt;div&gt;
-			&lt;label htmlFor={id + '-firstName'}&gt;First Name&lt;/label&gt;
-			&lt;div&gt;		
-				&lt;input id={id + '-firstName'} type=&quot;text&quot; /&gt;
-			&lt;/div&gt;
-			&lt;label htmlFor={id + '-lastName'}&gt;Last Name&lt;/label&gt;
-			&lt;div&gt;		
-				&lt;input id={id + '-lastName'} type=&quot;text&quot; /&gt;
-			&lt;/div&gt;
-		&lt;/div&gt;
-	);
-}
-</code></pre>
-<h1 id="the-useinsertioneffect-hook-css-in-js-库的问题">The useInsertionEffect Hook . CSS-in-JS 库的问题</h1>
-<p>最后一个将在 React 18 中添加的 Hook——我们将在这里讨论——是 useInsertionEffect。这个与其他的略有不同，因为它的唯一目的对于动态生成新规则并在文档中插入带有 <code>&lt;style&gt;</code> 标记的 CSS-in-JS 库很重要。</p>
-<p>在某些场景下，<code>&lt;style&gt;</code>标签需要在客户端生成或编辑，如果不仔细处理，可能会导致并发渲染的性能问题。这是因为在添加或删除 CSS 规则时，浏览器必须检查这些规则是否适用于现有树。它必须重新计算所有样式规则并重新应用它们——而不仅仅是改变的规则。如果 React 发现另一个组件也生成了新规则，那么同样的过程将再次发生。</p>
-<p>这实际上意味着在 React 渲染时，必须针对每一帧的所有 DOM 节点重新计算 CSS 规则。虽然你很有可能不会遇到这个问题，但它的规模并不大。</p>
-<p>从理论上讲，有一些方法主要与时间有关。这个时间问题的最佳解决方案是在对 DOM 进行所有其他更改的同时生成这些标签，就像 React 库那样。最重要的是，它应该发生在任何尝试访问布局之前以及所有内容呈现给浏览器进行绘制之前。</p>
-<p>这听起来像是 useLayoutEffect 可以解决的问题，但问题是同一个 Hook 将用于读取布局和插入样式规则。这可能会导致不希望的行为，例如在一次通过中多次计算布局或读取不正确的布局。</p>
-<h2 id="useinsertioneffect-如何解决并发渲染问题">useInsertionEffect 如何解决并发渲染问题</h2>
-<p>为了解决这个问题，React 团队引入了 useInsertionEffect Hook。 它与 useLayoutEffect Hook 非常相似，但它无法访问 DOM 节点的 refs。</p>
-<p>这意味着只能插入样式规则。 它的主要用例是插入全局 DOM 节点，如 <code>&lt;style&gt;</code> 或 SVGs <code>&lt;defs&gt;</code>。 由于这仅与在客户端生成标签有关，因此 Hook 不会在服务器上运行。</p>
-<pre><code class="language-jsx">// Code illustrating the way `useInsertionEffect` is used.
-// Source: &lt;https://github.com/reactwg/react-18/discussions/110&gt;
-
-function useCSS(rule) {
-	useInsertionEffect(() =&gt; {
-		if (!isInserted.has(rule)) {
-			isInserted.add(rule);
-			document.head.appendChild(getStyleForRule(rule));
-		}
-	});
-	return rule;
-}
-
-function Component() {
-	let className = useCSS(rule);
-	return &lt;div className={className} /&gt;;
-}
-</code></pre>
-<p>React 18 最令人期待的特性是它的并发渲染特性。 随着团队的宣布，我们收到了新的 API，允许用户根据他们的用例采用并发渲染功能。 虽然有些是全新的，但有些是基于社区反馈的先前 API 的改进版本。</p>
-<p>在本文中，我们介绍了三个最新的 API，即 useSyncExternalStore、useId 和 useInsertionEffect Hooks。 我们查看了它们的用例、它们解决的问题、与以前的版本相比为什么需要进行某些更改，以及它们用于并发渲染的目的。</p>
-<p>React 18 充满了新功能，绝对值得期待！</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[React 18 并发（Concurrent）渲染的入门指南]]></title>
-        <id>https://umeimmense.github.io/post/concurrent-rendering</id>
-        <link href="https://umeimmense.github.io/post/concurrent-rendering">
-        </link>
-        <updated>2022-03-02T07:21:22.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>目前 React 领域最热门的话题是 React 18 版本。 特别是，该版本将引入一组所谓的并发渲染功能。 这些特性允许开发者选择 React 的并发渲染机制。 这种机制为 React 开发人员提供了一个全新的机会来控制和优化最终用户的体验。 这绝对是自 hooks 以来，我们在 React 世界中将收到的最令人兴奋的事情之一。</p>
-<p>因此，你很可能以前听说过并发渲染。 可能是关于它的文章、围绕它的 API，或者 React 18 将为它带来什么。 但是，你可能会对并发渲染的基础知识感到疑惑。 究竟什么是并发渲染，为什么我们真的需要它？</p>
-<p>为了帮助你理解，本文将讨论这些问题。 通过研究它的目的、它试图解决什么问题以及它是如何解决它的，你将获得有关并发渲染主题的基础知识。</p>
-<h2 id="为什么我们需要并发渲染">为什么我们需要并发渲染？</h2>
-<p>React 当前形式的问题之一是所有状态更新都是同步的。 这意味着 React 只能一一处理它们。 在许多用例和现实生活场景中，这非常好，不会对用户体验施加任何限制。</p>
-<p>但是在 React 想要获取与其当前正在处理的状态更新不同的状态更新的情况下，现在这显然是不可能的。 React 在启动后无法中断、暂停或放弃渲染更新——这是一个阻塞的进程。</p>
-<p>从本质上讲，这对优化用户体验的过程设置了上限。 虽然很高，但还是有上限的。 每个状态更新都被视为同等重要，即使这不适用于用户体验。 某些更新可能比其他更新具有更高的优先级或紧迫性。 与可能的情况相比，不能这样做实际上会对用户体验产生巨大的负面影响，这是次优的。</p>
-<h2 id="什么是并发渲染">什么是并发渲染？</h2>
-<p>并发渲染是一组功能，允许你的 React 项目选择所谓的可中断渲染。 与之前 React 被阻塞的渲染过程相反，这使得渲染过程可以从 React 端中断，这正是并发渲染的用武之地。这为 React 开发人员进一步提升 React 应用程序的用户体验开辟了许多新的可能性。</p>
-<p>它允许 React 一次处理多个状态更新。 然而，这并不意味着 React 会突然同时执行所有排队状态更新。 相反，选择并发渲染允许 React 考虑其最佳行动方案。 幸运的是，这也是我们作为开发人员可以控制的事情。</p>
-<p>假设 React 当前正在处理状态更新并且有一个不同的更新进来，那么 React 可以根据变量的因素做出不同的决定。 如果新的传入状态更新被标记为同等或不那么紧急，那么与之前的渲染过程相比没有任何变化。 React 将像往常一样继续当前状态更新。 完成后，它将获取新的状态更新。</p>
-<p>但是如果新传入的状态更新被标记为更紧急，那么 React 可以决定暂停当前状态更新并首先处理传入的更新。 在完成新的更紧急的状态更新后，React 会回到原来的状态更新。 如果它确定有必要恢复它，它会这样做。 如果事实证明状态更新现在无关紧要，它可以决定完全放弃它。</p>
-<h2 id="下一步是什么">下一步是什么？</h2>
-<p>本文简要介绍了 React 18 将为 React 开发领域带来的最激动人心的功能之一，即并发渲染，并让你快速了解整个主题。 使用本文中的知识，你应该知道什么是并发渲染，了解它试图解决的问题，并大致了解它的工作原理。</p>
-<p>幸运的是，并发渲染并不止于此。 虽然并发渲染还有很多方面需要理解或深入研究，但本文作为介绍以进入整个主题，并允许你从这里开始进一步探索 React 18。</p>
-<p>下面准备了一些资料<br>
-<a href="https://umeimmense.github.io/post/tan-suo-react-18-de-san-ge-xin-api/">这里</a>介绍了 React 18 中引入的三个新 API。所有这些 API 都是允许某些开发人员在某些场景中选择并发渲染的hook。<br>
-<a href="https://reactjs.org/blog/2021/06/08/the-plan-for-react-18.html">官方的 React 18 公告</a>是了解更多关于 React 18、不同特性、如何采用它以及关于即将发布的 React 版本的所有信息的好地方。<br>
-<a href="https://github.com/reactwg/react-18/discussions">React 工作组</a>是了解更多技术方面、获得更多指导、了解不同 API 和特性背后的思维过程以及总体上更深入地了解 React 18 中所有内容的好地方。<br>
-这就是全部！ 现在你已经牢牢掌握了并发渲染的主题，在 React 18 中为你打开了一个全新的世界供你探索。走出去，探索并享受这个新的冒险！</p>
 ]]></content>
     </entry>
 </feed>

@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Browser | Cool Coding</title>
+<title>自定义React Hook：获取滚动方向 | Cool Coding</title>
 
 <link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1649944757667">
 
@@ -25,11 +25,11 @@
 
 
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
-    <div class="main-content">
-        <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -93,49 +93,98 @@
     </div>
 </nav>
 
-        <div class="current-tag-container">
-            <h2 class="title gt-c-content-color-first">
-                #Browser
-            </h2>
-        </div>
-        <div class="post-list-container">
-    <div class="post-inner">
-        
-            <div class="post gt-bg-theme-color-second">
-                <div class="post-left">
-                    <div>
-                        
-                        <a href="https://umeimmense.github.io/post/javascript-yin-qing-ru-he-ti-sheng-qi-yun-xing-shi-de-xing-neng">
-                            <span class="post-title gt-c-content-color-first">JavaScript 引擎如何提升其运行时的性能？</span>
-                        </a>
-                    </div>
-                    <div class="gt-post-content post-abstract gt-c-content-color-second">
-                        
-                    </div>
-                    <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            发布于 · 2021-12-02 ·
-                        </time>
-                        
-                            <a href="https://umeimmense.github.io/tag/browser" class="post-tag">
-                                # Browser
-                            </a>
-                        
-                            <a href="https://umeimmense.github.io/tag/javascript" class="post-tag">
-                                # JavaScript
-                            </a>
-                        
-                    </div>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    自定义React Hook：获取滚动方向
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-04-13 ·
+                    </time>
+                    
                 </div>
-                
+                <div class="post-content">
+                    <h2 id="前言">前言</h2>
+<p>本节我们实现一个简洁的自定义 React Hook，它可以检测用户的滚动方向：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+const THRESHOLD = 0;
+
+const useScrollDirection = () =&gt; {
+  const [scrollDirection, setScrollDirection] = React.useState('up');
+
+  const blocking = React.useRef(false);
+  const prevScrollY = React.useRef(0);
+
+  React.useEffect(() =&gt; {
+    prevScrollY.current = window.pageYOffset;
+
+    const updateScrollDirection = () =&gt; {
+      const scrollY = window.pageYOffset;
+
+      if (Math.abs(scrollY - prevScrollY.current) &gt;= THRESHOLD) {
+        const newScrollDirection =
+          scrollY &gt; prevScrollY.current ? 'down' : 'up';
+
+        setScrollDirection(newScrollDirection);
+
+        prevScrollY.current = scrollY &gt; 0 ? scrollY : 0;
+      }
+
+      blocking.current = false;
+    };
+
+    const onScroll = () =&gt; {
+      if (!blocking.current) {
+        blocking.current = true;
+        window.requestAnimationFrame(updateScrollDirection);
+      }
+    };
+
+    window.addEventListener('scroll', onScroll);
+
+    return () =&gt; window.removeEventListener('scroll', onScroll);
+  }, [scrollDirection]);
+
+  return scrollDirection;
+};
+
+export { useScrollDirection };
+</code></pre>
+<p>在一个函数组件中，自定义的 React Hook可以这样使用：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+import { useScrollDirection } from './useScrollDirection';
+
+const App = () =&gt; {
+  const scrollDirection = useScrollDirection(ref);
+  console.log('up');
+
+  return (...);
+};
+</code></pre>
+<p>最后，可能有很多方法可以改进这个自定义Hook（例如，检查水平而不是垂直滚动方向）。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/zi-ding-yi-react-hookjian-cha-shi-fou-yi-chu" class="post-title gt-a-link">
+                    自定义React Hook：检查是否溢出
+                </a>
             </div>
         
-    </div>
-</div>
-        <div class="pagination-container">
-    
-    
-</div>
+
+        
+
+        
+
+        
 
         <div class="site-footer gt-c-content-color-first">
     <div class="slogan gt-c-content-color-first"></div>
