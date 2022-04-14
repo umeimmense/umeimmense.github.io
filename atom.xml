@@ -2,13 +2,57 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-14T13:59:19.569Z</updated>
+    <updated>2022-04-14T14:01:17.179Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[自定义React Hook：获取滚动条宽度]]></title>
+        <id>https://umeimmense.github.io/post/zi-ding-yi-react-hookhuo-qu-gun-dong-tiao-kuan-du</id>
+        <link href="https://umeimmense.github.io/post/zi-ding-yi-react-hookhuo-qu-gun-dong-tiao-kuan-du">
+        </link>
+        <updated>2022-04-13T08:02:17.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>本节实现一个简洁的自定义 React Hook，它可以让你获得滚动条的宽度。你可以在任何 React 组件中使用它，它会返回这个特定浏览器（和操作系统）的滚动条的宽度：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+export const useScrollbarWidth = () =&gt; {
+  const didCompute = React.useRef(false);
+  const widthRef = React.useRef(0);
+
+  if (didCompute.current) return widthRef.current;
+
+  // Creating invisible container
+  const outer = document.createElement('div');
+  outer.style.visibility = 'hidden';
+  outer.style.overflow = 'scroll'; // forcing scrollbar to appear
+  outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+  document.body.appendChild(outer);
+
+  // Creating inner element and placing it in the container
+  const inner = document.createElement('div');
+  outer.appendChild(inner);
+
+  // Calculating difference between container's full width and the child width
+  const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
+
+  // Removing temporary elements from the DOM
+  outer.parentNode.removeChild(outer);
+
+  didCompute.current = true;
+  widthRef.current = scrollbarWidth;
+
+  return scrollbarWidth;
+};
+</code></pre>
+<p>本质上，自定义Hook只是将隐藏的滚动条呈现到项目中，对其进行测量，然后再次将其删除。之后它返回结果。</p>
+<p>作为替代方案，如果你希望在水平滚动容器的情况下使用高度而不是滚动条的宽度，则只需将宽度属性替换为高度属性。</p>
+<p>就我个人而言，我自己从未遇到过这个问题，但是，当我们在客户端机器上测试应用程序时，在某些情况下滚动条没有覆盖并占用空间。通常这没关系，但是，我们遇到了一些用例，我们必须拥有滚动条的大小才能解决有关应用程序布局的问题。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[自定义React Hook：获取滚动方向]]></title>
         <id>https://umeimmense.github.io/post/zi-ding-yi-react-hookhuo-qu-gun-dong-fang-xiang</id>
@@ -1533,106 +1577,6 @@ function ComponentB() {
 <h2 id="总结">总结</h2>
 <p>React Suspense 已经被关注了 3 年多。但是随着 React 18 的发布，官方发布的时间越来越近了。除了并发渲染，它将是作为 React 版本的一部分发布的最大功能之一。就其本身而言，它可以将数据获取和加载状态实现提升到一个新的直观和优雅水平。</p>
 <p>为了帮助你了解 Suspense 的基础知识，本文介绍了几个对其很重要的问题和方面。这涉及到 Suspense 是什么，为什么我们首先需要像 Suspense 这样的东西，它如何解决某些数据获取问题以及 Suspense 带来的所有好处。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[React 18 中的自动批处理]]></title>
-        <id>https://umeimmense.github.io/post/react-18-zhong-de-zi-dong-pi-chu-li</id>
-        <link href="https://umeimmense.github.io/post/react-18-zhong-de-zi-dong-pi-chu-li">
-        </link>
-        <updated>2022-03-14T13:37:21.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p><code>React 18</code> 支持对状态更新的自动批处理支持。 这有助于避免在 <code>Promise</code>、<code>setTimeout</code>、<code>setInterval</code>、原生事件处理程序以及<code>react</code>事件处理程序中多次渲染状态更新。 因此，由于自动批处理，我们在<code>React</code> 应用程序中获得了开箱即用的性能改进。</p>
-<h2 id="什么是自动批处理">什么是（自动）批处理？</h2>
-<p>批处理是将多个状态更新分组为单个更新的过程。 如果我们有多个调用来设置组件的状态，<code>React</code> 会将这些更新组合在一个更新调用（称为批处理）中，从而导致组件的一次重新渲染。 当 <code>React</code> 自动计算出这一点并批量更新状态时，它被称为自动批处理，下面让我们通过探究更新状态的各种方式来看看它是如何工作的？</p>
-<h2 id="react-17-及之前的事件处理程序的状态更新">React 17 及之前的事件处理程序的状态更新</h2>
-<p>让我们举个例子来了解在 <code>React 17</code> 中事件处理程序上的状态更新时渲染是如何发生的？</p>
-<pre><code class="language-jsx">const Counter = () =&gt; {
-  const [count, setCount] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-
-  const handleClick = () =&gt; {
-    setCount(count + 1);
-    setShowModal((prev) =&gt; !prev);
-    // React renders once at the end (that's batching)
-  };
-
-  console.log('rendered component');
-
-  return (
-    &lt;div&gt;
-      &lt;p&gt;You clicked {count} times&lt;/p&gt;
-      &lt;p&gt;{`Show modal? ${showModal}`}&lt;/p&gt;
-      &lt;button onClick={handleClick}&gt;Click me&lt;/button&gt;
-      &lt;/div&gt;
-  );
-}
-</code></pre>
-<p>现在，我们可以看到有两个状态更新调用。 一个用于 <code>setCount</code>，另一个用于 <code>setShowModal</code>。 但是，<code>react</code> 确保最后只调用一个渲染。<br>
-如果更新不是批处理的，它会以不成熟方式渲染组件，导致 UI 闪烁。 即我们希望我们的组件仅在更新计数和更新 <code>showModal</code> 标志后才呈现。</p>
-<h2 id="react-17-及之前的-promise-和原生事件处理程序的状态更新">React 17 及之前的 Promise 和原生事件处理程序的状态更新</h2>
-<p>自动批处理不适用于<code>promise</code>/非<code>react</code>处理程序（如 <code>setTimeout</code>、<code>setInterval</code> 等）中的状态更新。</p>
-<pre><code class="language-jsx">const Counter = () =&gt; {
-  const [count, setCount] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-
-  const handleClick = () =&gt; {
-    console.log('fetch called');
-
-    fetch('https://jsonplaceholder.typicode.com/todos/1')
-      .then(() =&gt; {
-        setCount(count + 1); // Re-render is called
-        setShowModal((prev) =&gt; !prev); // Re-render is called
-      })
-  };
-
-  console.log('rendered component');
-
-  return (
-    &lt;div&gt;
-      &lt;p&gt;You clicked {count} times&lt;/p&gt;
-      &lt;p&gt;{`Show modal? ${showModal}`}&lt;/p&gt;
-      &lt;button onClick={handleClick}&gt;Click me now&lt;/button&gt;
-    &lt;/div&gt;
-  );
-}
-</code></pre>
-<p>通常，我们调用 API 请求来获取某些内容并根据 API 请求的响应在回调中执行状态更新。 正如我们在上面的示例中看到的，有 2 次调用来设置回调中的状态，导致 2 次重新渲染。<br>
-这是一个性能瓶颈。 这可能会导致 UI 闪烁，从而呈现部分状态更新的结果。</p>
-<h2 id="react-18-中-promise-和原生事件处理程序的状态更新">React 18+ 中 Promise 和原生事件处理程序的状态更新</h2>
-<p><code>React</code> 通过为 <code>Promise</code>、<code>setTimeou</code>t 和 <code>setInterval</code>、原生事件处理程序以及默认的 <code>react</code> 事件处理程序中的状态更新提供自动批处理支持来解决此问题。<br>
-注意：对于这个例子，我们已经更新了如下所示的 <code>react</code> 和 <code>react-dom</code> 库版本。</p>
-<pre><code class="language-shell">https://unpkg.com/react@18.0.0-beta-24dd07bd2-20211208/umd/react.development.js
-https://unpkg.com/react-dom@18.0.0-beta-24dd07bd2-20211208/umd/react-dom.development.js
-</code></pre>
-<p>如果我们采用与上面给出的相同示例，我们可以在下面看到渲染的数量。</p>
-<pre><code class="language-jsx">const Counter = () =&gt; {
-  const [count, setCount] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-
-  const handleClick = () =&gt; {
-    console.log('fetch called');
-
-    fetch('https://jsonplaceholder.typicode.com/todos/1')
-      .then(() =&gt; {
-        setCount(count + 1);
-        setShowModal((prev) =&gt; !prev);
-        // React 18 renders once at the end (that's automatic batching)
-      })
-  };
-
-  console.log('rendered component');
-
-  return (
-    &lt;div&gt;
-      &lt;p&gt;You clicked {count} times&lt;/p&gt;
-      &lt;p&gt;{`Show modal? ${showModal}`}&lt;/p&gt;
-      &lt;button onClick={handleClick}&gt;Click me&lt;/button&gt;
-      &lt;/div&gt;
-  );
-}
-</code></pre>
-<p>注意：我们需要将渲染升级为<code>createRoot</code>。 对于上面给出的示例，我们渲染了 <code>Counter</code> 组件，如下所示。 我们使用 <code>ReactDOM.createRoot</code> 创建了根，然后在其上渲染了 <code>Counter</code> 组件。</p>
 ]]></content>
     </entry>
 </feed>
