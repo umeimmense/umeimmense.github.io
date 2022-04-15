@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Browser | Cool Coding</title>
+<title>如何在React Table 使用主题 | Cool Coding</title>
 
 <link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1650049123471">
 
@@ -25,11 +25,11 @@
 
 
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
-    <div class="main-content">
-        <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -93,49 +93,99 @@
     </div>
 </nav>
 
-        <div class="current-tag-container">
-            <h2 class="title gt-c-content-color-first">
-                #Browser
-            </h2>
-        </div>
-        <div class="post-list-container">
-    <div class="post-inner">
-        
-            <div class="post gt-bg-theme-color-second">
-                <div class="post-left">
-                    <div>
-                        
-                        <a href="https://umeimmense.github.io/post/javascript-yin-qing-ru-he-ti-sheng-qi-yun-xing-shi-de-xing-neng">
-                            <span class="post-title gt-c-content-color-first">JavaScript 引擎如何提升其运行时的性能？</span>
-                        </a>
-                    </div>
-                    <div class="gt-post-content post-abstract gt-c-content-color-second">
-                        
-                    </div>
-                    <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            发布于 · 2021-12-02 ·
-                        </time>
-                        
-                            <a href="https://umeimmense.github.io/tag/browser" class="post-tag">
-                                # Browser
-                            </a>
-                        
-                            <a href="https://umeimmense.github.io/tag/javascript" class="post-tag">
-                                # JavaScript
-                            </a>
-                        
-                    </div>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    如何在React Table 使用主题
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-04-15 ·
+                    </time>
+                    
                 </div>
-                
+                <div class="post-content">
+                    <h2 id="前言">前言</h2>
+<p>在本节中，我想向你展示如何使用 React Table Library 及其 useTheme 插件来使用自定义样式对你的表格进行主题化。在前面的例子中，你已经安装了 React Table Library 来创建一个Table 组件。</p>
+<h2 id="实现">实现</h2>
+<p>首先，导入 useTheme Hook：</p>
+<pre><code class="language-jsx">import { useTheme } from '@table-library/react-table-library/theme';
+</code></pre>
+<p>其次，用它创建一个主题并将其作为Props传递给 Table 组件：</p>
+<pre><code class="language-jsx">const THEME = {};
+
+const App = () =&gt; {
+  const data = { nodes };
+
+  const theme = useTheme(THEME);
+
+  return (
+    &lt;Table data={data} theme={theme}&gt;
+      ...
+    &lt;/Table&gt;
+  );
+};
+</code></pre>
+<p>只需几行，你就为表格创建了一个自定义主题。但是，主题是空的，接下来让我们看看如何使用它来调整表格的样式：</p>
+<pre><code class="language-jsx">const THEME = {
+  HeaderRow: `
+    font-size: 14px;
+
+    background-color: #eaf5fd;
+  `,
+  Row: `
+    font-size: 14px;
+
+    &amp;:nth-child(odd) {
+      background-color: #d2e9fb;
+    }
+
+    &amp;:nth-child(even) {
+      background-color: #eaf5fd;
+    }
+  `,
+};
+</code></pre>
+<p>本质上，主题是一本字典，你可以在其中设置表格的不同组件的样式。在最后一个示例中，我们设置了标题行和行组件的样式。由于两个组件共享一些相同的样式，你也可以将此样式提取为一个共同点：</p>
+<pre><code class="language-jsx">const THEME = {
+  BaseRow: `
+    font-size: 14px;
+  `,
+  HeaderRow: `
+    background-color: #eaf5fd;
+  `,
+  Row: `
+    &amp;:nth-child(odd) {
+      background-color: #d2e9fb;
+    }
+
+    &amp;:nth-child(even) {
+      background-color: #eaf5fd;
+    }
+  `,
+};
+</code></pre>
+<p>以下组件可用作样式键：Table、HeaderRow、Row、HeaderCell、Cell、BaseRow、BaseCell。最后，这应该为你提供所有入口点，以便为表格设置所有不同组件的样式。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/ru-he-chuang-jian-react-table-zu-jian" class="post-title gt-a-link">
+                    如何创建 React Table 组件
+                </a>
             </div>
         
-    </div>
-</div>
-        <div class="pagination-container">
-    
-    
-</div>
+
+        
+
+        
+
+        
 
         <div class="site-footer gt-c-content-color-first">
     <div class="slogan gt-c-content-color-first"></div>
