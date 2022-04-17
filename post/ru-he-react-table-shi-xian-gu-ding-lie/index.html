@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>React Router | Cool Coding</title>
+<title>如何 React Table 实现 Fixed Column | Cool Coding</title>
 
 <link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1650174032517">
 
@@ -25,11 +25,11 @@
 
 
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
-    <div class="main-content">
-        <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -93,107 +93,113 @@
     </div>
 </nav>
 
-        <div class="current-tag-container">
-            <h2 class="title gt-c-content-color-first">
-                #React Router
-            </h2>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    如何 React Table 实现 Fixed Column
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-04-17 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="前言">前言</h2>
+<p>在本节中中，我想向你展示如何使用带有固定标题的 React Table库。在前面的例子中，你已经安装了 React Table Library 来创建一个Table组件并给它一个主题。现在，我们将允许用户将他们的列粘在一边：</p>
+<h2 id="实现">实现</h2>
+<pre><code class="language-jsx">import { useTheme } from '@table-library/react-table-library/theme';
+
+const App = () =&gt; {
+  const data = { nodes };
+
+  const theme = useTheme({
+    BaseCell: `
+      &amp;:nth-of-type(1) {
+        left: 0px;
+
+        min-width: 250px;
+        width: 250px;
+      }
+
+      &amp;:nth-of-type(2) {
+        left: 250px;
+
+        min-width: 150px;
+        width: 150px;
+      }
+
+      &amp;:nth-of-type(3),
+      &amp;:nth-of-type(4) {
+        min-width: 50%;
+        width: 50%;
+      }
+    `,
+  });
+
+  return (...);
+};
+</code></pre>
+<p>我们将列固定在左侧。你也可以以相同的方式将列固定到右侧。缺少的是给 Cell 组件一个 <code>pinLeft</code>（或 <code>pinRight</code>）Props来指示它们固定到一边：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  ...
+
+  return (
+    &lt;Table data={data} theme={theme} layout={{ custom: true, horizontalScroll: true }}&gt;
+      {(tableList) =&gt; (
+        &lt;&gt;
+          &lt;Header&gt;
+            &lt;HeaderRow&gt;
+              &lt;HeaderCell pinLeft&gt;Task&lt;/HeaderCell&gt;
+              &lt;HeaderCell pinLeft&gt;Deadline&lt;/HeaderCell&gt;
+              &lt;HeaderCell&gt;Type&lt;/HeaderCell&gt;
+              &lt;HeaderCell&gt;Complete&lt;/HeaderCell&gt;
+            &lt;/HeaderRow&gt;
+          &lt;/Header&gt;
+
+          &lt;Body&gt;
+            {tableList.map((item) =&gt; (
+              &lt;Row key={item.id} item={item}&gt;
+                &lt;Cell pinLeft&gt;{item.name}&lt;/Cell&gt;
+                &lt;Cell pinLeft&gt;
+                  {item.deadline.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                  })}
+                &lt;/Cell&gt;
+                &lt;Cell&gt;{item.type}&lt;/Cell&gt;
+                &lt;Cell&gt;{item.isComplete.toString()}&lt;/Cell&gt;
+              &lt;/Row&gt;
+            ))}
+          &lt;/Body&gt;
+        &lt;/&gt;
+      )}
+    &lt;/Table&gt;
+  );
+};
+</code></pre>
+<p>一切就绪后，表格的非固定列将沿垂直方向滚动，而该列在表格的一侧保持固定。</p>
+
+                </div>
+            </article>
         </div>
-        <div class="post-list-container">
-    <div class="post-inner">
+
         
-            <div class="post gt-bg-theme-color-second">
-                <div class="post-left">
-                    <div>
-                        
-                        <a href="https://umeimmense.github.io/post/react-router-6sou-suo-can-shu">
-                            <span class="post-title gt-c-content-color-first">React Router 6：搜索参数</span>
-                        </a>
-                    </div>
-                    <div class="gt-post-content post-abstract gt-c-content-color-second">
-                        
-                    </div>
-                    <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            发布于 · 2021-12-17 ·
-                        </time>
-                        
-                            <a href="https://umeimmense.github.io/tag/react-router" class="post-tag">
-                                # React Router
-                            </a>
-                        
-                            <a href="https://umeimmense.github.io/tag/react" class="post-tag">
-                                # React
-                            </a>
-                        
-                    </div>
-                </div>
-                
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/ru-he-reacttable-shi-xian-gu-ding-biao-ti" class="post-title gt-a-link">
+                    如何 React Table 实现 Fixed Header
+                </a>
             </div>
         
-            <div class="post gt-bg-theme-color-second">
-                <div class="post-left">
-                    <div>
-                        
-                        <a href="https://umeimmense.github.io/post/react-router-6qian-tao-lu-you">
-                            <span class="post-title gt-c-content-color-first">React Router 6：嵌套路由</span>
-                        </a>
-                    </div>
-                    <div class="gt-post-content post-abstract gt-c-content-color-second">
-                        
-                    </div>
-                    <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            发布于 · 2021-12-14 ·
-                        </time>
-                        
-                            <a href="https://umeimmense.github.io/tag/react-router" class="post-tag">
-                                # React Router
-                            </a>
-                        
-                            <a href="https://umeimmense.github.io/tag/react" class="post-tag">
-                                # React
-                            </a>
-                        
-                    </div>
-                </div>
-                
-            </div>
+
         
-            <div class="post gt-bg-theme-color-second">
-                <div class="post-left">
-                    <div>
-                        
-                        <a href="https://umeimmense.github.io/post/chu-tan-react-router-6">
-                            <span class="post-title gt-c-content-color-first">初探 React Router 6 </span>
-                        </a>
-                    </div>
-                    <div class="gt-post-content post-abstract gt-c-content-color-second">
-                        
-                    </div>
-                    <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            发布于 · 2021-12-13 ·
-                        </time>
-                        
-                            <a href="https://umeimmense.github.io/tag/react-router" class="post-tag">
-                                # React Router
-                            </a>
-                        
-                            <a href="https://umeimmense.github.io/tag/react" class="post-tag">
-                                # React
-                            </a>
-                        
-                    </div>
-                </div>
-                
-            </div>
+
         
-    </div>
-</div>
-        <div class="pagination-container">
-    
-    
-</div>
+
+        
 
         <div class="site-footer gt-c-content-color-first">
     <div class="slogan gt-c-content-color-first"></div>
