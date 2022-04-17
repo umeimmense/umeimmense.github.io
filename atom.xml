@@ -2,13 +2,235 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-17T05:59:49.547Z</updated>
+    <updated>2022-04-17T06:27:25.968Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[如何在 React Table 中实现 Sort]]></title>
+        <id>https://umeimmense.github.io/post/ru-he-zai-react-table-zhong-shi-xian-sort</id>
+        <link href="https://umeimmense.github.io/post/ru-he-zai-react-table-zhong-shi-xian-sort">
+        </link>
+        <updated>2022-04-17T06:01:19.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>在本节中，我想向你展示如何使用 React Table Library 及其 useSort 插件来实现排序功能。在前面的例子中，你已经安装了 React Table Library 来创建一个 Table 组件。现在，我们将允许用户通过单击列标题对Table中的列进行排序。</p>
+<h2 id="实现">实现</h2>
+<p>首先，导入 useSort Hook：</p>
+<pre><code class="language-jsx">import { useSort } from '@table-library/react-table-library/sort';
+</code></pre>
+<p>其次，使用Table的数据对其进行初始化，并将其作为 prop 传递给 Table 组件：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const data = { nodes };
+
+  const sort = useSort(data);
+
+  return (
+    &lt;Table data={data} sort={sort}&gt;
+      ...
+    &lt;/Table&gt;
+  );
+};
+</code></pre>
+<p>之后，将你的标题列转换为可排序的：</p>
+<pre><code class="language-jsx">import {
+  useSort,
+  HeaderCellSort ,
+} from '@table-library/react-table-library/sort';
+
+const App = () =&gt; {
+  ...
+
+  return (
+    &lt;Table data={data} sort={sort}&gt;
+      {(tableList) =&gt; (
+        &lt;&gt;
+          &lt;Header&gt;
+            &lt;HeaderRow&gt;
+              &lt;HeaderCellSort sortKey=&quot;TASK&quot;&gt;
+                Task
+              &lt;/HeaderCellSort&gt;
+              &lt;HeaderCellSort sortKey=&quot;DEADLINE&quot;&gt;
+                Deadline
+              &lt;/HeaderCellSort&gt;
+              &lt;HeaderCellSort sortKey=&quot;TYPE&quot;&gt;
+                Type
+              &lt;/HeaderCellSort&gt;
+              &lt;HeaderCellSort sortKey=&quot;COMPLETE&quot;&gt;
+                Complete
+              &lt;/HeaderCellSort&gt;
+            &lt;/HeaderRow&gt;
+          &lt;/Header&gt;
+
+          &lt;Body&gt;
+            ...
+          &lt;/Body&gt;
+        &lt;/&gt;
+      )}
+    &lt;/Table&gt;
+  );
+};
+</code></pre>
+<p>然后为每个排序键创建各自的排序函数：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const data = { nodes };
+
+  const sort = useSort(data, null, {
+    sortFns: {
+      TASK: (array) =&gt;
+        array.sort((a, b) =&gt; a.name.localeCompare(b.name)),
+      DEADLINE: (array) =&gt;
+        array.sort((a, b) =&gt; a.deadline - b.deadline),
+      TYPE: (array) =&gt;
+        array.sort((a, b) =&gt; a.type.localeCompare(b.type)),
+      COMPLETE: (array) =&gt;
+        array.sort((a, b) =&gt; a.isComplete - b.isComplete),
+    },
+  });
+
+  return (
+    &lt;Table data={data} sort={sort}&gt;
+      ...
+    &lt;/Table&gt;
+  );
+};
+</code></pre>
+<p>只需几行，你就有一个可排序的Table。我们可以按字符串排序（按字母顺序）、按日期排序、按布尔值排序和按枚举排序。由于自己传递了 sortBy 函数，因此如何对列进行排序取决于sortBy 函数。</p>
+<p>可能缺少的获取当前排序的onChange事件。让我们看看它是如何与 useSort 结合使用的：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const data = { nodes };
+
+  const sort = useSort(data,
+    {
+      onChange: onSortChange,
+    }, {
+      sortFns: ...,
+    }
+  );
+
+  function onSortChange(action, state) {
+    console.log(action, state);
+  }
+
+  ...
+};
+</code></pre>
+<p>onChange 回调函数使你可以访问触发排序更改的操作以及Table的实际排序状态。通过访问此信息，你可以基于它触发更多的Table或非Table事件（例如，服务器端排序等副作用）。</p>
+<p>最后，值得注意的是，你传递给Table的排序对象包含排序状态——这使你能够随时访问它——以及以编程方式对列进行排序的所有函数。当在这个 React Table中使用自定义排序组件时，我们稍后会详细看到这一点。<br>
+无论如何，表中的列排序通常会带来更多要求。让我们来看看其中的两个：</p>
+<p>例如，有时用户想要具有初始排序状态。这也可以通过 useSort 来实现，方法是传入一个默认的排序状态：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  ...
+
+  const sort = useSort(data,
+    {
+      state: {
+        sortKey: 'TASK',
+        reverse: false,
+      },
+      onChange: onSortChange,
+    }, {
+      sortFns: ...,
+    }
+  );
+
+  ...
+};
+</code></pre>
+<p>另一个案例是将排序图标与来自第三方库（例如 Material UI）的自定义排序图标交换：</p>
+<pre><code class="language-jsx">import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
+import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+
+const App = () =&gt; {
+  ...
+
+  const sort = useSort(
+    data,
+    {
+      onChange: onSortChange,
+    },
+    {
+      sortIcon: {
+        margin: '0px',
+        iconDefault: &lt;UnfoldMoreOutlinedIcon /&gt;,
+        iconUp: &lt;KeyboardArrowUpOutlinedIcon /&gt;,
+        iconDown: (
+          &lt;KeyboardArrowDownOutlinedIcon /&gt;
+        ),
+      },
+      sortFns: ...
+    }
+  );
+
+  ...
+};
+</code></pre>
+<p>排序功能还有更多选项。只需前往 <a href="https://react-table-library.com/?path=/docs/features-sort--base">React Table 文档</a>以了解有关它们的更多信息。</p>
+<p>最后，使用 React Table Library 可以完全用自定义组件交换排序组件。对于我们的表格排序插件，我们可能希望将排序标题组件与我们自己的来自第三方库的 HTML 按钮进行交换。下面，你将看到一个如何在 React 表库中使用 Material UI 组件的示例。</p>
+<p>首先，从你的第三方库中导入自定义组件（和自定义图标）：</p>
+<pre><code class="language-jsx">import MaterialButton from '@mui/material/Button';
+import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
+import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+</code></pre>
+<p>其次Table Header 使用第三方按钮：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  ...
+
+  const getIcon = (sortKey) =&gt; {
+    if (sort.state.sortKey === sortKey &amp;&amp; sort.state.reverse) {
+      return &lt;KeyboardArrowDownOutlinedIcon /&gt;;
+    }
+
+    if (sort.state.sortKey === sortKey &amp;&amp; !sort.state.reverse) {
+      return &lt;KeyboardArrowUpOutlinedIcon /&gt;;
+    }
+
+    return &lt;UnfoldMoreOutlinedIcon /&gt;;
+  };
+
+  return (
+    &lt;Table data={data} sort={sort}&gt;
+      {(tableList) =&gt; (
+        &lt;&gt;
+          &lt;Header&gt;
+            &lt;HeaderRow&gt;
+              &lt;HeaderCell&gt;
+                &lt;MaterialButton
+                  fullWidth
+                  style={{ justifyContent: 'flex-start' }}
+                  endIcon={getIcon('TASK')}
+                  onClick={() =&gt;
+                    sort.fns.onToggleSort({
+                      sortKey: 'TASK',
+                    })
+                  }
+                &gt;
+                  Task
+                &lt;/MaterialButton&gt;
+              &lt;/HeaderCell&gt;
+
+              ...
+
+            &lt;/HeaderRow&gt;
+          &lt;/Header&gt;
+
+          &lt;Body&gt;
+            ...
+          &lt;/Body&gt;
+        &lt;/&gt;
+      )}
+    &lt;/Table&gt;
+  );
+};
+
+</code></pre>
+<p>请注意 useSort 中的排序对象如何为你提供创建自定义组件所需的一切。这样，你可以为每个表格列自定义排序组件。通过使用排序状态和所有排序功能，你可以从任何地方读取和写入排序状态。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[如何在 React Table 中实现 Resize]]></title>
         <id>https://umeimmense.github.io/post/ru-he-zai-react-table-zhong-shi-xian-resize</id>
@@ -625,195 +847,6 @@ const App = () =&gt; {
 export default App;
 </code></pre>
 <p>本地存储Hook只是作为一种学习体验。如果你在生产环境中依赖 React 应用程序的本地存储，你应该检查更广泛使用的Hook（因此是健壮的）。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[自定义 React Hook：检测组件外部的点击]]></title>
-        <id>https://umeimmense.github.io/post/zi-ding-yi-react-hookjian-ce-zu-jian-wai-bu-de-dian-ji</id>
-        <link href="https://umeimmense.github.io/post/zi-ding-yi-react-hookjian-ce-zu-jian-wai-bu-de-dian-ji">
-        </link>
-        <updated>2022-04-14T08:00:20.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>本章我们一起来聊聊如何创建自定义 React Hook来检测 React 组件外部的点击。例如，你可能希望为各种组件（如对话框或下拉菜单）提供此类自定义 React Hook，因为当用户单击它们外部时它们应该关闭。所以我们需要一种方法来找出这个外部点击。<br>
-在这里学到的大部分内容都可以追溯到 JavaScript 中事件冒泡和捕获的概念。因此，如果你需要对冒泡、目标和捕获阶段进行复习，我建议你阅读以下文章，之前该文章涉及 React 的这个主题。</p>
-<h2 id="实现">实现</h2>
-<p>让我们从 React 中的一个函数组件开始，我们使用 React 的 useState Hook 和一个事件处理程序来增加一个计数器：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-const style = {
-  padding: '10px',
-  border: '1px solid black',
-  display: 'flex',
-  justifyContent: 'flex-end',
-};
-
-function App() {
-  const [count, setCount] = React.useState(0);
-
-  const handleClick = () =&gt; {
-    setCount((state) =&gt; state + 1);
-  };
-
-  return (
-    &lt;div style={style}&gt;
-      &lt;button type=&quot;button&quot; onClick={handleClick}&gt;
-        Count: {count}
-      &lt;/button&gt;
-    &lt;/div&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>一切都按预期工作。接下来，我们要在用户单击按钮外部时重置状态（此处为：计数）。我们可以编写用于重置状态的事件处理程序，但是尚不清楚在哪里使用它：</p>
-<pre><code class="language-jsx">function App() {
-  const [count, setCount] = React.useState(0);
-
-  const handleClickOutside = () =&gt; {
-    setCount(0);
-  };
-
-  const handleClick = () =&gt; {
-    setCount((state) =&gt; state + 1);
-  };
-
-  return (
-    &lt;div style={style}&gt;
-      &lt;button type=&quot;button&quot; onClick={handleClick}&gt;
-        Count: {count}
-      &lt;/button&gt;
-    &lt;/div&gt;
-  );
-}
-</code></pre>
-<p>一种原始的方法是在顶级组件的最外层 HTML 元素（这里：<div>）上使用这个新的处理程序。但是，更好的方法是在文档级别使用此事件处理程序作为最佳实践，因为最外层的 HTML 元素可能会在开发过程中发生变化。<br>
-我们将直接在自定义Hook中实现这一点，以避免冗余重构：</p>
-<pre><code class="language-jsx">const useOutsideClick = (callback) =&gt; {
-  const ref = React.useRef();
-
-  React.useEffect(() =&gt; {
-    const handleClick = (event) =&gt; {
-      callback();
-    };
-
-    document.addEventListener('click', handleClick);
-
-    return () =&gt; {
-      document.removeEventListener('click', handleClick);
-    };
-  }, []);
-
-  return ref;
-};
-</code></pre>
-<p>自定义Hook会启动一个最终返回的 React ref。它还没有真正用在Hook的实现细节中。此外，自定义Hook使用 React 的 useEffect Hook在文档级别分配（和删除）一个事件监听器（这里：单击事件）。毕竟，每当单击文档时，处理程序以及传递的回调函数都会运行。</p>
-<p>现在自定义Hook可以在我们的 React 组件中以下列方式使用：将事件处理程序作为回调函数传递给Hook——只要单击文档就会执行。此外，使用返回的引用（此处为：ref）并将其分配给按钮 HTML 元素：</p>
-<pre><code class="language-jsx">function App() {
-  const [count, setCount] = React.useState(0);
-
-  const handleClickOutside = () =&gt; {
-    setCount(0);
-  };
-
-  const ref = useOutsideClick(handleClickOutside);
-
-  const handleClick = () =&gt; {
-    setCount((state) =&gt; state + 1);
-  };
-
-  return (
-    &lt;div style={style}&gt;
-      &lt;button ref={ref} type=&quot;button&quot; onClick={handleClick}&gt;
-        Count: {count}
-      &lt;/button&gt;
-    &lt;/div&gt;
-  );
-}
-</code></pre>
-<p>但是，你会注意到，处理程序将始终触发，即使在单击按钮本身时也是如此。如果你再次检查自定义Hook，你将看到该引用（ref）并没有真正在其中使用。我们想要完成的事情：仅在单击传递的 ref（此处表示按钮）之外的任何内容时执行回调函数，而不是在单击 ref 本身（或其内容）时执行回调函数：</p>
-<pre><code class="language-jsx">const useOutsideClick = (callback) =&gt; {
-  const ref = React.useRef();
-
-  React.useEffect(() =&gt; {
-    const handleClick = (event) =&gt; {
-      if (ref.current &amp;&amp; !ref.current.contains(event.target)) {
-        callback();
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-
-    return () =&gt; {
-      document.removeEventListener('click', handleClick);
-    };
-  }, [ref]);
-
-  return ref;
-};
-</code></pre>
-<p>就是这样。分配给按钮的引用是触发按钮的事件处理程序和文档的事件处理程序之间的边界。在参考之外点击的所有内容都将被视为外部点击。</p>
-<p>但是缺少一个小的改进：如果我们需要通过在事件处理程序上使用 stopPropagation() 方法来停止某些边缘情况下的事件冒泡怎么办。例如，在下面我们通过单击容器元素来扩展组件并在那里停止事件的传播：</p>
-<pre><code class="language-jsx">const style = {
-  padding: '10px',
-  border: '1px solid black',
-  display: 'flex',
-  justifyContent: 'space-between',
-};
-
-...
-
-function App() {
-  const [count, setCount] = React.useState(0);
-
-  const handleClickOutside = () =&gt; {
-    setCount(0);
-  };
-
-  const ref = useOutsideClick(handleClickOutside);
-
-  const handleClick = () =&gt; {
-    setCount((state) =&gt; state + 1);
-  };
-
-  const handleHeaderClick = (event) =&gt; {
-    // do something
-
-    event.stopPropagation();
-  };
-
-  return (
-    &lt;div style={style} onClick={handleHeaderClick}&gt;
-      &lt;div&gt;Header&lt;/div&gt;
-      &lt;button ref={ref} type=&quot;button&quot; onClick={handleClick}&gt;
-        Count: {count}
-      &lt;/button&gt;
-    &lt;/div&gt;
-  );
-}
-</code></pre>
-<p>当我们尝试这个例子时，我们会看到容器上的点击不会作为“外部点击”，因为即使它是外部点击，由于事件停止冒泡，它永远不会到达文档的事件侦听器。</p>
-<p>通过使用冒泡和捕获阶段，我们可以调整自定义Hook以在捕获阶段触发。因为捕获阶段发生在冒泡阶段之前，所以即使事件在冒泡阶段停止传播，对文档的点击也将始终运行：</p>
-<pre><code class="language-jsx">const useOutsideClick = (callback) =&gt; {
-  const ref = React.useRef();
-
-  React.useEffect(() =&gt; {
-    const handleClick = (event) =&gt; {
-      if (ref.current &amp;&amp; !ref.current.contains(event.target)) {
-        callback();
-      }
-    };
-
-    document.addEventListener('click', handleClick, true);
-
-    return () =&gt; {
-      document.removeEventListener('click', handleClick, true);
-    };
-  }, [ref]);
-
-  return ref;
-};
-</code></pre>
-<p>就是这样。你创建了一个自定义挂钩来检测引用的组件/元素之外的点击。建议你再次阅读事件冒泡和捕获文章，以更深入地解释这些阶段发生的事情。</p>
 ]]></content>
     </entry>
 </feed>

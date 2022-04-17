@@ -1,0 +1,380 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>如何在 React Table 中实现 Sort | Cool Coding</title>
+
+<link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1650176841728">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://umeimmense.github.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Cool Coding
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://umeimmense.github.io/resume/" class="menu gt-a-link" target="_blank">
+                            简历
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1650176841728" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    如何在 React Table 中实现 Sort
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-04-17 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="前言">前言</h2>
+<p>在本节中，我想向你展示如何使用 React Table Library 及其 useSort 插件来实现排序功能。在前面的例子中，你已经安装了 React Table Library 来创建一个 Table 组件。现在，我们将允许用户通过单击列标题对Table中的列进行排序。</p>
+<h2 id="实现">实现</h2>
+<p>首先，导入 useSort Hook：</p>
+<pre><code class="language-jsx">import { useSort } from '@table-library/react-table-library/sort';
+</code></pre>
+<p>其次，使用Table的数据对其进行初始化，并将其作为 prop 传递给 Table 组件：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const data = { nodes };
+
+  const sort = useSort(data);
+
+  return (
+    &lt;Table data={data} sort={sort}&gt;
+      ...
+    &lt;/Table&gt;
+  );
+};
+</code></pre>
+<p>之后，将你的标题列转换为可排序的：</p>
+<pre><code class="language-jsx">import {
+  useSort,
+  HeaderCellSort ,
+} from '@table-library/react-table-library/sort';
+
+const App = () =&gt; {
+  ...
+
+  return (
+    &lt;Table data={data} sort={sort}&gt;
+      {(tableList) =&gt; (
+        &lt;&gt;
+          &lt;Header&gt;
+            &lt;HeaderRow&gt;
+              &lt;HeaderCellSort sortKey=&quot;TASK&quot;&gt;
+                Task
+              &lt;/HeaderCellSort&gt;
+              &lt;HeaderCellSort sortKey=&quot;DEADLINE&quot;&gt;
+                Deadline
+              &lt;/HeaderCellSort&gt;
+              &lt;HeaderCellSort sortKey=&quot;TYPE&quot;&gt;
+                Type
+              &lt;/HeaderCellSort&gt;
+              &lt;HeaderCellSort sortKey=&quot;COMPLETE&quot;&gt;
+                Complete
+              &lt;/HeaderCellSort&gt;
+            &lt;/HeaderRow&gt;
+          &lt;/Header&gt;
+
+          &lt;Body&gt;
+            ...
+          &lt;/Body&gt;
+        &lt;/&gt;
+      )}
+    &lt;/Table&gt;
+  );
+};
+</code></pre>
+<p>然后为每个排序键创建各自的排序函数：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const data = { nodes };
+
+  const sort = useSort(data, null, {
+    sortFns: {
+      TASK: (array) =&gt;
+        array.sort((a, b) =&gt; a.name.localeCompare(b.name)),
+      DEADLINE: (array) =&gt;
+        array.sort((a, b) =&gt; a.deadline - b.deadline),
+      TYPE: (array) =&gt;
+        array.sort((a, b) =&gt; a.type.localeCompare(b.type)),
+      COMPLETE: (array) =&gt;
+        array.sort((a, b) =&gt; a.isComplete - b.isComplete),
+    },
+  });
+
+  return (
+    &lt;Table data={data} sort={sort}&gt;
+      ...
+    &lt;/Table&gt;
+  );
+};
+</code></pre>
+<p>只需几行，你就有一个可排序的Table。我们可以按字符串排序（按字母顺序）、按日期排序、按布尔值排序和按枚举排序。由于自己传递了 sortBy 函数，因此如何对列进行排序取决于sortBy 函数。</p>
+<p>可能缺少的获取当前排序的onChange事件。让我们看看它是如何与 useSort 结合使用的：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const data = { nodes };
+
+  const sort = useSort(data,
+    {
+      onChange: onSortChange,
+    }, {
+      sortFns: ...,
+    }
+  );
+
+  function onSortChange(action, state) {
+    console.log(action, state);
+  }
+
+  ...
+};
+</code></pre>
+<p>onChange 回调函数使你可以访问触发排序更改的操作以及Table的实际排序状态。通过访问此信息，你可以基于它触发更多的Table或非Table事件（例如，服务器端排序等副作用）。</p>
+<p>最后，值得注意的是，你传递给Table的排序对象包含排序状态——这使你能够随时访问它——以及以编程方式对列进行排序的所有函数。当在这个 React Table中使用自定义排序组件时，我们稍后会详细看到这一点。<br>
+无论如何，表中的列排序通常会带来更多要求。让我们来看看其中的两个：</p>
+<p>例如，有时用户想要具有初始排序状态。这也可以通过 useSort 来实现，方法是传入一个默认的排序状态：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  ...
+
+  const sort = useSort(data,
+    {
+      state: {
+        sortKey: 'TASK',
+        reverse: false,
+      },
+      onChange: onSortChange,
+    }, {
+      sortFns: ...,
+    }
+  );
+
+  ...
+};
+</code></pre>
+<p>另一个案例是将排序图标与来自第三方库（例如 Material UI）的自定义排序图标交换：</p>
+<pre><code class="language-jsx">import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
+import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+
+const App = () =&gt; {
+  ...
+
+  const sort = useSort(
+    data,
+    {
+      onChange: onSortChange,
+    },
+    {
+      sortIcon: {
+        margin: '0px',
+        iconDefault: &lt;UnfoldMoreOutlinedIcon /&gt;,
+        iconUp: &lt;KeyboardArrowUpOutlinedIcon /&gt;,
+        iconDown: (
+          &lt;KeyboardArrowDownOutlinedIcon /&gt;
+        ),
+      },
+      sortFns: ...
+    }
+  );
+
+  ...
+};
+</code></pre>
+<p>排序功能还有更多选项。只需前往 <a href="https://react-table-library.com/?path=/docs/features-sort--base">React Table 文档</a>以了解有关它们的更多信息。</p>
+<p>最后，使用 React Table Library 可以完全用自定义组件交换排序组件。对于我们的表格排序插件，我们可能希望将排序标题组件与我们自己的来自第三方库的 HTML 按钮进行交换。下面，你将看到一个如何在 React 表库中使用 Material UI 组件的示例。</p>
+<p>首先，从你的第三方库中导入自定义组件（和自定义图标）：</p>
+<pre><code class="language-jsx">import MaterialButton from '@mui/material/Button';
+import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
+import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+</code></pre>
+<p>其次Table Header 使用第三方按钮：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  ...
+
+  const getIcon = (sortKey) =&gt; {
+    if (sort.state.sortKey === sortKey &amp;&amp; sort.state.reverse) {
+      return &lt;KeyboardArrowDownOutlinedIcon /&gt;;
+    }
+
+    if (sort.state.sortKey === sortKey &amp;&amp; !sort.state.reverse) {
+      return &lt;KeyboardArrowUpOutlinedIcon /&gt;;
+    }
+
+    return &lt;UnfoldMoreOutlinedIcon /&gt;;
+  };
+
+  return (
+    &lt;Table data={data} sort={sort}&gt;
+      {(tableList) =&gt; (
+        &lt;&gt;
+          &lt;Header&gt;
+            &lt;HeaderRow&gt;
+              &lt;HeaderCell&gt;
+                &lt;MaterialButton
+                  fullWidth
+                  style={{ justifyContent: 'flex-start' }}
+                  endIcon={getIcon('TASK')}
+                  onClick={() =&gt;
+                    sort.fns.onToggleSort({
+                      sortKey: 'TASK',
+                    })
+                  }
+                &gt;
+                  Task
+                &lt;/MaterialButton&gt;
+              &lt;/HeaderCell&gt;
+
+              ...
+
+            &lt;/HeaderRow&gt;
+          &lt;/Header&gt;
+
+          &lt;Body&gt;
+            ...
+          &lt;/Body&gt;
+        &lt;/&gt;
+      )}
+    &lt;/Table&gt;
+  );
+};
+
+</code></pre>
+<p>请注意 useSort 中的排序对象如何为你提供创建自定义组件所需的一切。这样，你可以为每个表格列自定义排序组件。通过使用排序状态和所有排序功能，你可以从任何地方读取和写入排序状态。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/ru-he-zai-react-table-zhong-shi-xian-resize" class="post-title gt-a-link">
+                    如何在 React Table 中实现 Resize
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first"></div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/umeimmense" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        
+    </div>
+    <!-- <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://umeimmense.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div> -->
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
