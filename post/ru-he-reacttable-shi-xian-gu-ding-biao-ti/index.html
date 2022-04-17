@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>自定义React Hook：获取滚动条宽度 | Cool Coding</title>
+<title>如何 React Table 实现固定标题 | Cool Coding</title>
 
 <link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1650172967537">
 
@@ -97,55 +97,43 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    自定义React Hook：获取滚动条宽度
+                    如何 React Table 实现固定标题
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
-                        · 2022-04-14 ·
+                        · 2022-04-16 ·
                     </time>
-                    
-                        <a href="https://umeimmense.github.io/tag/react" class="post-tags">
-                            # React
-                        </a>
                     
                 </div>
                 <div class="post-content">
                     <h2 id="前言">前言</h2>
-<p>本节实现一个简洁的自定义 React Hook，它可以让你获得滚动条的宽度。你可以在任何 React 组件中使用它，它会返回这个特定浏览器（和操作系统）的滚动条的宽度：</p>
-<pre><code class="language-jsx">import * as React from 'react';
+<p>在本节中中，我想向您展示如何使用带有固定标题的 React 表库。在前面的例子中，你已经安装了 React Table Library 来创建一个Table组件并给它一个主题。现在，我们将允许用户将他们的标题粘贴到顶部：</p>
+<h2 id="实现">实现</h2>
+<pre><code class="language-jsx">import { useTheme } from '@table-library/react-table-library/theme';
 
-export const useScrollbarWidth = () =&gt; {
-  const didCompute = React.useRef(false);
-  const widthRef = React.useRef(0);
+const App = () =&gt; {
+  const data = { nodes };
 
-  if (didCompute.current) return widthRef.current;
+  const theme = useTheme({
+    Table: `
+      height: 100%;
+    `,
+  });
 
-  // Creating invisible container
-  const outer = document.createElement('div');
-  outer.style.visibility = 'hidden';
-  outer.style.overflow = 'scroll'; // forcing scrollbar to appear
-  outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
-  document.body.appendChild(outer);
-
-  // Creating inner element and placing it in the container
-  const inner = document.createElement('div');
-  outer.appendChild(inner);
-
-  // Calculating difference between container's full width and the child width
-  const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
-
-  // Removing temporary elements from the DOM
-  outer.parentNode.removeChild(outer);
-
-  didCompute.current = true;
-  widthRef.current = scrollbarWidth;
-
-  return scrollbarWidth;
+  return (
+    &lt;div
+      style={{
+        height: '150px',
+      }}
+    &gt;
+      &lt;Table data={data} theme={theme}&gt;
+        ...
+      &lt;/Table&gt;
+    &lt;/div&gt;
+  );
 };
 </code></pre>
-<p>本质上，自定义Hook只是将隐藏的滚动条呈现到项目中，对其进行测量，然后再次将其删除。之后它返回结果。</p>
-<p>作为替代方案，如果你希望在水平滚动容器的情况下使用高度而不是滚动条的宽度，则只需将宽度属性替换为高度属性。</p>
-<p>就我个人而言，我自己从未遇到过这个问题，但是，当我们在客户端机器上测试应用程序时，在某些情况下滚动条没有覆盖并占用空间。通常这没关系，但是，我们遇到了一些用例，我们必须拥有滚动条的大小才能解决有关应用程序布局的问题。</p>
+<p>固定Table标题所需的一切都是Table组件周围的容器组件。这样，Table的行将在垂直方向滚动，而标题保持在Table的顶部。</p>
 
                 </div>
             </article>
@@ -154,8 +142,8 @@ export const useScrollbarWidth = () =&gt; {
         
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://umeimmense.github.io/post/zi-ding-yi-react-hookhuo-qu-gun-dong-fang-xiang" class="post-title gt-a-link">
-                    自定义React Hook：获取滚动方向
+                <a href="https://umeimmense.github.io/post/ru-he-zai-react-table-shi-yong-zhu-ti" class="post-title gt-a-link">
+                    如何在React Table 使用主题
                 </a>
             </div>
         

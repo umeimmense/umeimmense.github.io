@@ -2,13 +2,49 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-15T18:58:47.099Z</updated>
+    <updated>2022-04-17T05:22:49.347Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[如何 React Table 实现固定标题]]></title>
+        <id>https://umeimmense.github.io/post/ru-he-reacttable-shi-xian-gu-ding-biao-ti</id>
+        <link href="https://umeimmense.github.io/post/ru-he-reacttable-shi-xian-gu-ding-biao-ti">
+        </link>
+        <updated>2022-04-15T19:05:09.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>在本节中中，我想向您展示如何使用带有固定标题的 React 表库。在前面的例子中，你已经安装了 React Table Library 来创建一个Table组件并给它一个主题。现在，我们将允许用户将他们的标题粘贴到顶部：</p>
+<h2 id="实现">实现</h2>
+<pre><code class="language-jsx">import { useTheme } from '@table-library/react-table-library/theme';
+
+const App = () =&gt; {
+  const data = { nodes };
+
+  const theme = useTheme({
+    Table: `
+      height: 100%;
+    `,
+  });
+
+  return (
+    &lt;div
+      style={{
+        height: '150px',
+      }}
+    &gt;
+      &lt;Table data={data} theme={theme}&gt;
+        ...
+      &lt;/Table&gt;
+    &lt;/div&gt;
+  );
+};
+</code></pre>
+<p>固定Table标题所需的一切都是Table组件周围的容器组件。这样，Table的行将在垂直方向滚动，而标题保持在Table的顶部。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[如何在React Table 使用主题]]></title>
         <id>https://umeimmense.github.io/post/ru-he-zai-react-table-shi-yong-zhu-ti</id>
@@ -1076,440 +1112,6 @@ function MyInput({ inputValue, onInputChange }) {
 </code></pre>
 <p>回调处理程序在某处定义 (1)，在其他地方使用 (2)，但回调到其定义的位置 (3)。这样，就可以从子组件到父组件进行通信。回调处理程序通过 React props 向下传递，并在调用函数时向上通信。</p>
 <p>你已经了解了 React 的事件处理程序、内联事件处理程序和回调事件处理程序，以及如何在按钮中为它们的 onClick 事件和在输入字段中为它们的 onChange 事件使用它们。还有其他事件处理程序，例如表单元素的 onSubmit，实际上需要该事件来阻止本机浏览器行为。无论如何，所有这些事件处理程序都有其特定目的。你的目标应该是让你的代码保持可读性和可维护性，</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[React中的事件冒泡和捕获]]></title>
-        <id>https://umeimmense.github.io/post/react-shi-jian-mou-pao-he-bu-huo</id>
-        <link href="https://umeimmense.github.io/post/react-shi-jian-mou-pao-he-bu-huo">
-        </link>
-        <updated>2022-04-12T08:17:20.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>本文主题是React事件冒泡和捕获的 。大多数 JavaScript 开发人员可能已经熟悉这个主题，因为它起源于 JavaScript 及其 DOM API。但是，在本文中，我想为 React 中的事件冒泡和捕获整理一些信息。</p>
-<p>React 中的事件处理程序可用于侦听特定事件（例如单击事件）。我们将从 React 中的一个函数组件开始，我们使用 React 的 useState Hook 来增加一个计数器：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-function App() {
-  const [count, setCount] = React.useState(0);
-
-  const handleClick = () =&gt; {
-    setCount(count + 1);
-  };
-
-  return (
-    &lt;button type=&quot;button&quot; onClick={handleClick}&gt;
-      Count: {count}
-    &lt;/button&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>在原生 JavaScript 中，这相当于 element.addEventListener('click', handleClick);。 React 中有很多事件。下面显示了鼠标和触摸事件的事件列表：</p>
-<ul>
-<li>touchstart</li>
-<li>touchmove</li>
-<li>touchend</li>
-<li>mousemove</li>
-<li>mousedown</li>
-<li>mouseup</li>
-<li>click<br>
-此特定事件列表按其执行顺序显示。因此，如果在 HTML 元素中添加了 mouseup 和 click 事件侦听器，则 mouseup 事件将在 click 事件之前触发：</li>
-</ul>
-<pre><code class="language-jsx">import * as React from 'react';
-
-function App() {
-  const handleClick = () =&gt; {
-    alert('click');
-  };
-
-  const handleMouseUp = () =&gt; {
-    alert('mouseup');
-  };
-
-  return (
-    &lt;button
-      type=&quot;button&quot;
-      onClick={handleClick}
-      onMouseUp={handleMouseUp}
-    &gt;
-      Which one fires first?
-    &lt;/button&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>在某些情况下，你可能希望在另一个事件触发时阻止其中一个事件。例如，当触摸事件发生并被处理时，你可能希望阻止所有点击事件。</p>
-<p>无论如何，在前面的示例中，所有事件都发生在同一个 HTML 元素上。关于事件冒泡或捕获还没有什么可看的。接下来，让我们探索使用多个 HTML 元素的事件冒泡：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-function App() {
-  const [count, setCount] = React.useState(0);
-
-  const handleCount = () =&gt; {
-    setCount((state) =&gt; state + 1);
-  };
-
-  return (
-    &lt;div onClick={handleCount}&gt;
-      &lt;button type=&quot;button&quot; onClick={handleCount}&gt;
-        Count: {count}
-      &lt;/button&gt;
-    &lt;/div&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>在这个例子中，按钮似乎被点击了两次，因为计数器增加了 2 而不是 1。然而，发生的事情是包装容器元素也调用了它的事件处理程序。进入在 React 中事件冒泡。</p>
-<h2 id="react-中的事件冒泡">React 中的事件冒泡</h2>
-<p>下面的示例显示了两个具有相同样式的 HTML 元素。为了简单起见，我们在这里使用内联样式，但是，你可以随意使用更复杂的方式来设置你的 React 应用程序的样式。</p>
-<p>无论如何，让我们进入事件冒泡的话题。如你所见，在下一个示例中，只有外部容器元素侦听单击事件，而不是内部容器元素。但无论你是单击外部元素还是内部元素，都会触发事件处理程序：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-const style = {
-  padding: '10px 30px',
-  border: '1px solid black',
-};
-
-function App() {
-  const handleClick = () =&gt; {
-    alert('click');
-  };
-
-  return (
-    &lt;div style={style} onClick={handleClick}&gt;
-      &lt;div style={style}&gt;Click Me&lt;/div&gt;
-    &lt;/div&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>在 JavaScript 中，这个原理称为事件冒泡。每当在 HTML 元素（例如内部 HTML 元素）上发生事件时，它就会开始运行通过该特定元素的处理程序，然后是其父 HTML 元素（例如外部 HTML 元素，它实际上在其中找到侦听处理程序）的处理程序，然后一直向上遍历每个祖先 HTML 元素，直到它到达文档的根。<br>
-<img src="https://umeimmense.github.io/post-images/1649934566165.png" alt="" loading="lazy"><br>
-在下一个示例中尝试一下，当单击内部 HTML 元素时，两个事件处理程序都会被触发。如果单击外部 HTML 元素，则仅触发外部元素的事件处理程序：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-const style = {
-  padding: '10px 30px',
-  border: '1px solid black',
-};
-
-function App() {
-  const handleOuterClick = () =&gt; {
-    alert('outer click');
-  };
-
-  const handleInnerClick = () =&gt; {
-    alert('inner click');
-  };
-
-  return (
-    &lt;div style={style} onClick={handleOuterClick}&gt;
-      &lt;div style={style} onClick={handleInnerClick}&gt;
-        Click Me
-      &lt;/div&gt;
-    &lt;/div&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>换句话说，事件从它们的起源开始冒泡整个文档。通过 React 的 useEffect Hook 在文档上添加一个事件监听器，自己验证这种行为：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-const style = {
-  padding: '10px 30px',
-  border: '1px solid black',
-};
-
-function App() {
-  const handleOuterClick = () =&gt; {
-    alert('outer click');
-  };
-
-  const handleInnerClick = () =&gt; {
-    alert('inner click');
-  };
-
-  React.useEffect(() =&gt; {
-    const handleDocumentClick = () =&gt; {
-      alert('document click');
-    };
-
-    document.addEventListener('click', handleDocumentClick);
-
-    return () =&gt; {
-      document.removeEventListener('click', handleDocumentClick);
-    };
-  }, []);
-
-  return (
-    &lt;div style={style} onClick={handleOuterClick}&gt;
-      &lt;div style={style} onClick={handleInnerClick}&gt;
-        Click Me
-      &lt;/div&gt;
-    &lt;/div&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>因此，如果一个事件从其交互元素中冒出整个文档，那么在某些情况下如何停止冒泡呢？在 React 中输入 stopPropagation</p>
-<h2 id="react-stoppropagation">React  stopPropagation</h2>
-<p>stopPropagation() 方法是 DOM API 的原生方法。由于 React 将事件包装到称为合成事件的 React 版本中，因此该 API 仍然可用于 React 事件，它还可以用于停止事件的传播：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-function App() {
-  const [count, setCount] = React.useState(0);
-
-  const handleCount = (event) =&gt; {
-    setCount((state) =&gt; state + 1);
-
-    event.stopPropagation();
-  };
-
-  return (
-    &lt;div onClick={handleCount}&gt;
-      &lt;button type=&quot;button&quot; onClick={handleCount}&gt;
-        Count: {count}
-      &lt;/button&gt;
-    &lt;/div&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>我们通过对事件使用 stopPropagation() 方法扩展了前面的示例之一。这样，当按钮被点击时，事件不会冒泡，也不会触发周围容器元素的事件处理程序。<br>
-<img src="https://umeimmense.github.io/post-images/1649934812136.png" alt="" loading="lazy"><br>
-反之，当容器元素被显式点击时（在这种情况下不太可能没有任何进一步的样式），只有容器的事件处理程序会触发。这里容器元素上的 stopPropagation() 有点多余，因为它上面没有事件处理程序。</p>
-<p>最佳时机：默认情况下不要停止事件传播。例如，如果你将在项目中的每个按钮上使用 stopPropagation()，但稍后你想在文档级别跟踪用户点击，你将不会再收到这些事件。默认情况下使用 stopPropagation() 往往会导致错误，因此仅在必要时使用它。</p>
-<p>当停止事件传播有意义时，让我们看看更复杂的场景。例如，可能有一个可点击的标题，可以将用户从任何页面导航到主页，但是，在标题内有一个按钮可以让用户从应用程序中注销。两个元素都应该是可点击的，不会相互干扰：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-const styleHeader = {
-  padding: '10px',
-  border: '1px solid black',
-  boxSizing: 'border-box',
-  width: '100%',
-  display: 'flex',
-  justifyContent: 'space-between',
-};
-
-function App() {
-  const [isActive, setActive] = React.useState(false);
-
-  const handleHeaderClick = () =&gt; {
-    alert('header click (e.g. navigate to home page)');
-  };
-
-  const handleButtonClick = (event) =&gt; {
-    alert('button click (e.g. log out user)');
-
-    if (isActive) {
-      event.stopPropagation();
-    }
-  };
-
-  return (
-    &lt;&gt;
-      &lt;div style={styleHeader} onClick={handleHeaderClick}&gt;
-        &lt;div&gt;Header&lt;/div&gt;
-        &lt;button type=&quot;button&quot; onClick={handleButtonClick}&gt;
-          Log Out
-        &lt;/button&gt;
-      &lt;/div&gt;
-
-      &lt;button type=&quot;button&quot; onClick={() =&gt; setActive(!isActive)}&gt;
-        Stop Propagation: {isActive.toString()}
-      &lt;/button&gt;
-    &lt;/&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>在不停止传播的情况下，注销按钮将触发它自己的事件处理程序，但也会触发标题上的事件处理程序，因为事件会冒泡到它上面。当 stopPropagation() 被激活时，单击注销按钮不会导致标题上的冒泡事件，因为该事件被阻止冒泡。</p>
-<p>总之，只要有一个带有处理程序的元素嵌套在另一个带有处理程序的元素中，两者都在侦听相同的事件（这里：单击事件），使用 stopPropagation() 将有助于将事件委托给正确的处理程序（通过防止他们从冒泡）。</p>
-<h2 id="target-currenttarget">target &amp;&amp; currentTarget</h2>
-<p>当单击带有监听器（事件处理程序）的 HTML 元素时，你可以访问它的事件（在 React 中它是合成事件）。在其他属性中，事件可以访问表示导致事件的元素的目标属性。因此，如果按钮具有事件处理程序并且用户单击此按钮，则该事件将以按钮元素作为目标。</p>
-<p>即使这个事件冒泡到另一个事件处理程序，如果一个嵌套元素导致了这个事件，那么目标仍然由这个嵌套元素表示。因此，在所有处理程序中，事件的目标都不会改变。</p>
-<p>从事件处理程序到事件处理程序的变化是事件的 currentTarget，因为它表示实际事件处理程序正在运行的元素：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-const style = {
-  display: 'block',
-  padding: '10px 30px',
-  border: '1px solid black',
-};
-
-function App() {
-  const handleDivClick = (event) =&gt; {
-    alert(`
-      &lt;div /&gt; \n
-      event.target: ${event.target} \n
-      event.currentTarget: ${event.currentTarget}
-    `);
-  };
-
-  const handleSpanClick = (event) =&gt; {
-    alert(`
-      &lt;span /&gt; \n
-      event.target: ${event.target} \n
-      event.currentTarget: ${event.currentTarget}
-    `);
-  };
-
-  return (
-    &lt;div style={style} onClick={handleDivClick}&gt;
-      &lt;span style={style} onClick={handleSpanClick}&gt;
-        Click Me
-      &lt;/span&gt;
-    &lt;/div&gt;
-  );
-}
-
-export default App;
-</code></pre>
-<p>通常你将与事件的目标进行交互，例如停止事件的传播或阻止默认行为。但是，有时你希望从正在运行的事件处理程序访问元素，因此你可以改用 currentTarget。</p>
-<h2 id="react-中的事件捕获">React 中的事件捕获</h2>
-<p>当谈到 JavaScript 中的事件冒泡时，不得不提的是存在事件捕获的概念。实际上两者都是依次发生的：当用户与元素交互时，DOM API 会向下遍历文档（捕获阶段）到目标元素（目标阶段），然后 DOM API 才会再次向上遍历（冒泡阶段）。<br>
-<img src="https://umeimmense.github.io/post-images/1649935104214.png" alt="" loading="lazy"></p>
-<p>在某些情况下，你可能希望在捕获阶段中的事件到达冒泡阶段之前对其进行拦截。然后，你可以使用 onClickCapture 而不是 onClick 来处理 JSX 中的单击事件，或者使用 addEventListener() 方法的第三个参数来激活在捕获阶段而不是冒泡阶段的监听：</p>
-<pre><code class="language-jsx">function App() {
-  const handleOuterClick = () =&gt; {
-    alert('outer click');
-  };
-
-  const handleInnerClick = () =&gt; {
-    alert('inner click');
-  };
-
-  React.useEffect(() =&gt; {
-    const handleDocumentClick = () =&gt; {
-      alert('document click');
-    };
-
-    document.addEventListener(
-      'click',
-      handleDocumentClick,
-      true
-    );
-
-    return () =&gt; {
-      document.removeEventListener(
-        'click',
-        handleDocumentClick,
-        true
-      );
-    };
-  }, []);
-
-  return (
-    &lt;div style={style} onClickCapture={handleOuterClick}&gt;
-      &lt;div style={style} onClickCapture={handleInnerClick}&gt;
-        Click Me
-      &lt;/div&gt;
-    &lt;/div&gt;
-  );
-}
-</code></pre>
-<p>谈到“某些情况”有点含糊。因此，让我们回到前面的示例，其中我们将注销按钮嵌套在标题元素中。如果单击该按钮以不触发标头的事件处理程序，则该按钮将停止事件的传播。现在，如果你想通过在顶级文档级别引入分析跟踪来扩展此示例，你可以验证自己对于单击按钮，你不会收到分析跟踪，而只会收到标题，因为按钮阻止了从冒泡到文档的事件：</p>
-<pre><code class="language-jsx">function App() {
-  const handleHeaderClick = () =&gt; {
-    alert('header click (e.g. navigate to home page)');
-  };
-
-  const handleButtonClick = (event) =&gt; {
-    alert('button click (e.g. log out user)');
-
-    // important: stops event from appearing
-    // in the document's event handler
-    event.stopPropagation();
-  };
-
-  React.useEffect(() =&gt; {
-    const handleDocumentClick = (event) =&gt; {
-      alert(`
-        document clicked - \n
-        run analytics for clicked element: ${event.target}
-      `);
-    };
-
-    document.addEventListener('click', handleDocumentClick);
-
-    return () =&gt; {
-      document.removeEventListener('click', handleDocumentClick);
-    };
-  }, []);
-
-  return (
-    &lt;&gt;
-      &lt;div style={styleHeader} onClick={handleHeaderClick}&gt;
-        &lt;div&gt;Header&lt;/div&gt;
-        &lt;button type=&quot;button&quot; onClick={handleButtonClick}&gt;
-          Log Out
-        &lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/&gt;
-  );
-}
-</code></pre>
-<p>凭借我们对捕获阶段的了解，我们可以在实际用户交互冒泡之前对事件进行分析跟踪。在这种情况下，我们通过将第三个参数设置为 true（使用捕获阶段而不是冒泡阶段）在文档上添加事件侦听器：</p>
-<pre><code class="language-jsx">function App() {
-  const handleHeaderClick = () =&gt; {
-    alert('header click (e.g. navigate to home page)');
-  };
-
-  const handleButtonClick = (event) =&gt; {
-    alert('button click (e.g. log out user)');
-
-    // important: stops event from appearing
-    // in the document's event handler
-    event.stopPropagation();
-  };
-
-  React.useEffect(() =&gt; {
-    const handleDocumentClick = (event) =&gt; {
-      alert(`
-        document clicked - \n
-        run analytics for clicked element: ${event.target}
-      `);
-    };
-
-    document.addEventListener(
-      'click',
-      handleDocumentClick,
-      true
-    );
-
-    return () =&gt; {
-      document.removeEventListener(
-        'click',
-        handleDocumentClick,
-        true
-      );
-    };
-  }, []);
-
-  return (
-    &lt;&gt;
-      &lt;div style={styleHeader} onClick={handleHeaderClick}&gt;
-        &lt;div&gt;Header&lt;/div&gt;
-        &lt;button type=&quot;button&quot; onClick={handleButtonClick}&gt;
-          Log Out
-        &lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/&gt;
-  );
-}
-</code></pre>
-<p>当点击注销按钮时，捕获阶段从上到下遍历所有处理程序，从而触发文档级别的处理程序进行分析跟踪。然后它向下遍历元素到目标（此处：按钮），因为没有其他事件处理程序正在侦听捕获阶段（例如，通过使用 onClickCapture 代替）。从那里，事件冒泡并触发按钮的事件处理程序，阻止事件传播到标题的事件处理程序。<br>
-<img src="https://umeimmense.github.io/post-images/1649935259980.png" alt="" loading="lazy"></p>
-<p>在日常工作中，大多数开发人员使用冒泡阶段通过使用事件处理程序来拦截事件，并使用 stopPropagation() 方法阻止事件传播。因此，在开发人员的脑海中，总是有事件模型在 HTML 树中冒泡。然而，正如某些边缘情况所示，了解捕获阶段也是有意义的。</p>
-<p>理解 JavaScript 中的事件冒泡对于在 React 中使用它至关重要。每当你有一个复杂的页面，其中带有事件处理程序的伪按钮被包装到其他伪按钮中时，就无法绕过本机 stopPropagation 方法。但是，请谨慎使用它，而不是默认使用它，否则从长远来看，你可能会遇到错误。</p>
 ]]></content>
     </entry>
 </feed>
