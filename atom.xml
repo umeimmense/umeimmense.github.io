@@ -2,13 +2,115 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-17T06:44:26.941Z</updated>
+    <updated>2022-04-18T14:32:08.706Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[如何在 React Table 中实现 Search]]></title>
+        <id>https://umeimmense.github.io/post/ru-he-zai-react-table-zhong-shi-xian-search</id>
+        <link href="https://umeimmense.github.io/post/ru-he-zai-react-table-zhong-shi-xian-search">
+        </link>
+        <updated>2022-04-17T08:13:09.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<p>在本节中，将实现带有搜索功能的 React Table。在前面的例子中，你已经安装了 React Table Library 来创建一个Table组件。现在，我们将允许用户在表中搜索数据。</p>
+<h2 id="实现">实现</h2>
+<p>React Table库没有自带搜索功能，但是，由于你可以从外部访问数据，因此你可以在将其传递给表之前对其进行操作。让我们看看这是如何工作的。</p>
+<p>首先，创建一个 React useState Hook - 保存搜索的状态 - 和一个新的事件处理程序 - 作为稍后用户交互的回调函数：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const [search, setSearch] = React.useState('');
+
+  const handleSearch = (event) =&gt; {
+    setSearch(event.target.value);
+  };
+
+  ...
+};
+</code></pre>
+<p>接下来，在 Table 组件中，添加一个 HTML 输入字段来设置搜索状态：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  ...
+
+  return (
+    &lt;&gt;
+      &lt;label htmlFor=&quot;search&quot;&gt;
+        Search by Task:
+        &lt;input id=&quot;search&quot; type=&quot;text&quot; onChange={handleSearch} /&gt;
+      &lt;/label&gt;
+
+      &lt;Table data={data}&gt;
+        ...
+      &lt;/Table&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>搜索状态生效。最后 展示的就是Table 组件之前搜索项目列表：</p>
+<pre><code class="language-jsx">const App = () =&gt; {
+  const [search, setSearch] = React.useState('');
+
+  const handleSearch = (event) =&gt; {
+    setSearch(event.target.value);
+  };
+
+  const data = {
+    nodes: nodes.filter((item) =&gt;
+      item.name.includes(search)
+    ),
+  };
+
+  return (
+    &lt;&gt;
+      &lt;label htmlFor=&quot;search&quot;&gt;
+        Search by Task:
+        &lt;input id=&quot;search&quot; type=&quot;text&quot; onChange={handleSearch} /&gt;
+      &lt;/label&gt;
+
+      &lt;Table data={data}&gt;
+        ...
+      &lt;/Table&gt;
+    &lt;/&gt;
+  );
+};const App = () =&gt; {
+  const [search, setSearch] = React.useState('');
+
+  const handleSearch = (event) =&gt; {
+    setSearch(event.target.value);
+  };
+
+  const data = {
+    nodes: nodes.filter((item) =&gt;
+      item.name.includes(search)
+    ),
+  };
+
+  return (
+    &lt;&gt;
+      &lt;label htmlFor=&quot;search&quot;&gt;
+        Search by Task:
+        &lt;input id=&quot;search&quot; type=&quot;text&quot; onChange={handleSearch} /&gt;
+      &lt;/label&gt;
+
+      &lt;Table data={data}&gt;
+        ...
+      &lt;/Table&gt;
+    &lt;/&gt;
+  );
+};
+</code></pre>
+<p>如果你希望Table搜索不区分大小写，则需要调整过滤器功能：</p>
+<pre><code class="language-jsx">const data = {
+  nodes: nodes.filter((item) =&gt;
+    item.name.toLowerCase().includes(search.toLowerCase())
+  ),
+};
+</code></pre>
+<p>React Table 没有为搜索功能提供原生插件。但是，你可以将搜索到的列表从外部传递到Table并从外部进行搜索，因此你拥有所有选项。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[如何在 React Table 中实现 Sort]]></title>
         <id>https://umeimmense.github.io/post/ru-he-zai-react-table-zhong-shi-xian-sort</id>
@@ -805,48 +907,6 @@ export const useIsOverflow = (ref, callback) =&gt; {
 };
 </code></pre>
 <p>最后，可能有很多方法可以改进这个自定义Hook（例如，在自定义Hook中初始化 ref 并从自定义Hook返回它以将其附加到元素，只触发一次自定义Hook）。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[自定义 React Hook：使用LocalStorage]]></title>
-        <id>https://umeimmense.github.io/post/zi-ding-yi-react-hookshi-yong-localstorage</id>
-        <link href="https://umeimmense.github.io/post/zi-ding-yi-react-hookshi-yong-localstorage">
-        </link>
-        <updated>2022-04-14T08:00:46.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="实现-uselocalstorage">实现 useLocalStorage</h2>
-<p>一个简洁的自定义 React Hook，展示了如何在 React 中使用本地存储来存储状态。你可以在任何 React 组件中使用它，它允许你在本地存储中写入和读取状态：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-const useLocalStorage = (storageKey, fallbackState) =&gt; {
-  const [value, setValue] = React.useState(
-    JSON.parse(localStorage.getItem(storageKey)) ?? fallbackState
-  );
-
-  React.useEffect(() =&gt; {
-    localStorage.setItem(storageKey, JSON.stringify(value));
-  }, [value, storageKey]);
-
-  return [value, setValue];
-};
-
-const App = () =&gt; {
-  const [isOpen, setOpen] = useLocalStorage('is-open', false);
-
-  const handleToggle = () =&gt; {
-    setOpen(!isOpen);
-  };
-
-  return (
-    &lt;div&gt;
-      &lt;button onClick={handleToggle}&gt;Toggle&lt;/button&gt;
-      {isOpen &amp;&amp; &lt;div&gt;Content&lt;/div&gt;}
-    &lt;/div&gt;
-  );
-};
-
-export default App;
-</code></pre>
-<p>本地存储Hook只是作为一种学习体验。如果你在生产环境中依赖 React 应用程序的本地存储，你应该检查更广泛使用的Hook（因此是健壮的）。</p>
 ]]></content>
     </entry>
 </feed>
