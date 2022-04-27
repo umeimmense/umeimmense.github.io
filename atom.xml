@@ -2,13 +2,94 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-27T13:58:06.307Z</updated>
+    <updated>2022-04-27T14:09:38.274Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[自定义 React Hook: 实现只在更新时执行的useEffect]]></title>
+        <id>https://umeimmense.github.io/post/react-zi-ding-yi-hooks-useupdateeffect</id>
+        <link href="https://umeimmense.github.io/post/react-zi-ding-yi-hooks-useupdateeffect">
+        </link>
+        <updated>2022-04-27T14:03:14.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="实现-useupdateeffect">实现 useUpdateEffect</h2>
+<p>本节我们实现自定义React hook useUpdateEffect ，它会忽略第一次的副作用，只在后续更新时执行。</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+const App = () =&gt; {
+  const [toggle, setToggle] = React.useState(true);
+
+  const handleToggle = () =&gt; {
+    setToggle(!toggle);
+  };
+
+  const didMount = React.useRef(false);
+
+  React.useEffect(() =&gt; {
+    if (didMount.current) {
+      console.log('I run only if toggle changes.');
+    } else {
+      didMount.current = true;
+    }
+  }, [toggle]);
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={handleToggle}&gt;
+        Toggle
+      &lt;/button&gt;
+
+      {toggle &amp;&amp; &lt;div&gt;Hello React&lt;/div&gt;}
+    &lt;/div&gt;
+  );
+};
+
+export default App;
+</code></pre>
+<p>如果你定义一个可复用的自定义Hook，它只在更新时（而不是在挂载时）触发效果函数，你可以使用下面的hook：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+const useEffectOnlyOnUpdate = (callback, dependencies) =&gt; {
+  const didMount = React.useRef(false);
+
+  React.useEffect(() =&gt; {
+    if (didMount.current) {
+      callback(dependencies);
+    } else {
+      didMount.current = true;
+    }
+  }, [callback, dependencies]);
+};
+
+const App = () =&gt; {
+  const [toggle, setToggle] = React.useState(true);
+
+  const handleToggle = () =&gt; {
+    setToggle(!toggle);
+  };
+
+  useEffectOnlyOnUpdate((dependencies) =&gt; {
+    console.log('I run only if toggle changes.');
+  }, [toggle]);
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={handleToggle}&gt;
+        Toggle
+      &lt;/button&gt;
+
+      {toggle &amp;&amp; &lt;div&gt;Hello React&lt;/div&gt;}
+    &lt;/div&gt;
+  );
+};
+
+export default App;
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[如何在 React Table 中实现 Search]]></title>
         <id>https://umeimmense.github.io/post/ru-he-zai-react-table-zhong-shi-xian-search</id>
@@ -802,111 +883,6 @@ const App = () =&gt; {
 };
 </code></pre>
 <p>最后，可能有很多方法可以改进这个自定义Hook（例如，检查水平而不是垂直滚动方向）。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[自定义 React Hook：检查是否溢出]]></title>
-        <id>https://umeimmense.github.io/post/zi-ding-yi-react-hookjian-cha-shi-fou-yi-chu</id>
-        <link href="https://umeimmense.github.io/post/zi-ding-yi-react-hookjian-cha-shi-fou-yi-chu">
-        </link>
-        <updated>2022-04-14T08:01:26.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>本节我们实现一个简洁的自定义 React Hook，它检查元素的内容是否溢出（这里：垂直溢出）：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-export const useIsOverflow = (ref, callback) =&gt; {
-  const [isOverflow, setIsOverflow] = React.useState(undefined);
-
-  React.useLayoutEffect(() =&gt; {
-    const { current } = ref;
-
-    const trigger = () =&gt; {
-      const hasOverflow = current.scrollHeight &gt; current.clientHeight;
-
-      setIsOverflow(hasOverflow);
-
-      if (callback) callback(hasOverflow);
-    };
-
-    if (current) {
-      trigger();
-    }
-  }, [callback, ref]);
-
-  return isOverflow;
-};
-</code></pre>
-<p>如果你想检测水平溢出，可以将 hasOverflow 分配交换为以下内容：</p>
-<pre><code class="language-jsx">const hasOverflow = current.scrollWidth &gt; current.clientWidth;
-</code></pre>
-<p>在一个函数组件中，自定义的 React Hook可以这样使用：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-import { useIsOverflow } from './useIsOverflow';
-
-const App = () =&gt; {
-  const ref = React.useRef();
-  const isOverflow = useIsOverflow(ref);
-
-  console.log(isOverflow);
-  // true
-
-  return (
-    &lt;div style={{ overflow: 'auto', height: '100px' }} ref={ref}&gt;
-      &lt;div style={{ height: '200px' }}&gt;Hello React&lt;/div&gt;
-    &lt;/div&gt;
-  );
-};
-</code></pre>
-<p>Hook第一次返回未定义，因为状态尚未设置。</p>
-<p>自定义Hook还接受一个可选的回调函数，该函数在检查溢出后触发：</p>
-<pre><code class="language-jsx">const App = () =&gt; {
-  const ref = React.useRef();
-  const isOverflow = useIsOverflow(ref, (isOverflowFromCallback) =&gt; {
-    console.log(isOverflowFromCallback);
-    // true
-  });
-
-  console.log(isOverflow);
-  // true
-
-  return (
-    &lt;div style={{ overflow: 'auto', height: '100px' }} ref={ref}&gt;
-      &lt;div style={{ height: '200px' }}&gt;Hello React&lt;/div&gt;
-    &lt;/div&gt;
-  );
-};
-</code></pre>
-<p>如果元素的大小发生变化，你可以调整自定义Hook以再次检查验证溢出，但前提是浏览器支持 ResizeObserver：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-export const useIsOverflow = (ref, callback) =&gt; {
-  const [isOverflow, setIsOverflow] = React.useState(undefined);
-
-  React.useLayoutEffect(() =&gt; {
-    const { current } = ref;
-
-    const trigger = () =&gt; {
-      const hasOverflow = current.scrollHeight &gt; current.clientHeight;
-
-      setIsOverflow(hasOverflow);
-
-      if (callback) callback(hasOverflow);
-    };
-
-    if (current) {
-      if ('ResizeObserver' in window) {
-        new ResizeObserver(trigger).observe(current);
-      }
-
-      trigger();
-    }
-  }, [callback, ref]);
-
-  return isOverflow;
-};
-</code></pre>
-<p>最后，可能有很多方法可以改进这个自定义Hook（例如，在自定义Hook中初始化 ref 并从自定义Hook返回它以将其附加到元素，只触发一次自定义Hook）。</p>
 ]]></content>
     </entry>
 </feed>

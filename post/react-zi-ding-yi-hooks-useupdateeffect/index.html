@@ -1,10 +1,10 @@
-<html lang="zh">
+<html>
 <head>
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>关于 - Cool Coding</title>
+<title>自定义 React Hook: 实现只在更新时执行的useEffect | Cool Coding</title>
 
 <link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1651068576411">
 
@@ -25,7 +25,7 @@
 
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
@@ -94,18 +94,114 @@
 </nav>
 
     <div class="post-container">
-        <div class="post-detail">
+        <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
-                <div class="post-content">
+                <h2 class="post-title">
+                    自定义 React Hook: 实现只在更新时执行的useEffect
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-04-27 ·
+                    </time>
                     
+                        <a href="https://umeimmense.github.io/tag/react" class="post-tags">
+                            # React
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="实现-useupdateeffect">实现 useUpdateEffect</h2>
+<p>本节我们实现自定义React hook useUpdateEffect ，它会忽略第一次的副作用，只在后续更新时执行。</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+const App = () =&gt; {
+  const [toggle, setToggle] = React.useState(true);
+
+  const handleToggle = () =&gt; {
+    setToggle(!toggle);
+  };
+
+  const didMount = React.useRef(false);
+
+  React.useEffect(() =&gt; {
+    if (didMount.current) {
+      console.log('I run only if toggle changes.');
+    } else {
+      didMount.current = true;
+    }
+  }, [toggle]);
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={handleToggle}&gt;
+        Toggle
+      &lt;/button&gt;
+
+      {toggle &amp;&amp; &lt;div&gt;Hello React&lt;/div&gt;}
+    &lt;/div&gt;
+  );
+};
+
+export default App;
+</code></pre>
+<p>如果你定义一个可复用的自定义Hook，它只在更新时（而不是在挂载时）触发效果函数，你可以使用下面的hook：</p>
+<pre><code class="language-jsx">import * as React from 'react';
+
+const useEffectOnlyOnUpdate = (callback, dependencies) =&gt; {
+  const didMount = React.useRef(false);
+
+  React.useEffect(() =&gt; {
+    if (didMount.current) {
+      callback(dependencies);
+    } else {
+      didMount.current = true;
+    }
+  }, [callback, dependencies]);
+};
+
+const App = () =&gt; {
+  const [toggle, setToggle] = React.useState(true);
+
+  const handleToggle = () =&gt; {
+    setToggle(!toggle);
+  };
+
+  useEffectOnlyOnUpdate((dependencies) =&gt; {
+    console.log('I run only if toggle changes.');
+  }, [toggle]);
+
+  return (
+    &lt;div&gt;
+      &lt;button type=&quot;button&quot; onClick={handleToggle}&gt;
+        Toggle
+      &lt;/button&gt;
+
+      {toggle &amp;&amp; &lt;div&gt;Hello React&lt;/div&gt;}
+    &lt;/div&gt;
+  );
+};
+
+export default App;
+</code></pre>
+
                 </div>
             </article>
         </div>
-        <br>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://umeimmense.github.io/post/ru-he-zai-react-table-zhong-shi-xian-search" class="post-title gt-a-link">
+                    如何在 React Table 中实现 Search
+                </a>
+            </div>
         
 
         
 
+        
+
+        
 
         <div class="site-footer gt-c-content-color-first">
     <div class="slogan gt-c-content-color-first"></div>
