@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-28T14:57:05.245Z</updated>
+    <updated>2022-04-28T14:57:40.674Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -176,7 +176,7 @@ ReactDOM.render(&lt;MyApp /&gt;, document.getElementById('root'));
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[自定义 React Hook: 实现只在更新时执行的useEffect]]></title>
+        <title type="html"><![CDATA[自定义 React Hook: 实现只在更新时执行的 useUpdateEffect]]></title>
         <id>https://umeimmense.github.io/post/react-zi-ding-yi-hooks-useupdateeffect</id>
         <link href="https://umeimmense.github.io/post/react-zi-ding-yi-hooks-useupdateeffect">
         </link>
