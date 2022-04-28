@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>如何 React Table 实现 Fixed Header | Cool Coding</title>
+<title>自定义 React Hook: 实现 useHash 获取 url 上的 hash 值 | Cool Coding</title>
 
 <link rel="shortcut icon" href="https://umeimmense.github.io/favicon.ico?v=1651157761547">
 
@@ -97,47 +97,67 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    如何 React Table 实现 Fixed Header
+                    自定义 React Hook: 实现 useHash 获取 url 上的 hash 值
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
-                        · 2022-04-16 ·
+                        · 2022-04-27 ·
                     </time>
-                    
-                        <a href="https://umeimmense.github.io/tag/react" class="post-tags">
-                            # React
-                        </a>
                     
                 </div>
                 <div class="post-content">
-                    <h2 id="前言">前言</h2>
-<p>在本节中中，我想向您展示如何使用带有固定标题的 React Table库。在前面的例子中，你已经安装了 React Table Library 来创建一个Table组件并给它一个主题。现在，我们将允许用户将他们的标题粘贴到顶部：</p>
-<h2 id="实现">实现</h2>
-<pre><code class="language-jsx">import { useTheme } from '@table-library/react-table-library/theme';
+                    <h2 id="实现-usehash">实现 useHash</h2>
+<p>本节我们实现自定义React hook useHash，它能实时获取浏览器的hash值，并允许更改它。</p>
+<ul>
+<li>使用 useState hook 获取 Location 对象的 hash 属性。</li>
+<li>使用 useCallback hook 创建一个更新状态的处理程序。</li>
+<li>在挂载时使用 useEffect hook为“hashchange”事件添加监听器，并在卸载时清理它。</li>
+<li>使用 useCallback hook 创建一个函数，该函数使用给定值更新 Location 对象的哈希属性。</li>
+</ul>
+<h3 id="实现">实现</h3>
+<pre><code class="language-jsx">const useHash = () =&gt; {
+const [hash, setHash] = React.useState(() =&gt; window.location.hash);
 
-const App = () =&gt; {
-  const data = { nodes };
+const hashChangeHandler = React.useCallback(() =&gt; {
+  setHash(window.location.hash);
+}, []);
 
-  const theme = useTheme({
-    Table: `
-      height: 100%;
-    `,
-  });
+React.useEffect(() =&gt; {
+  window.addEventListener('hashchange', hashChangeHandler);
+  return () =&gt; {
+    window.removeEventListener('hashchange', hashChangeHandler);
+  };
+}, []);
 
-  return (
-    &lt;div
-      style={{
-        height: '150px',
-      }}
-    &gt;
-      &lt;Table data={data} theme={theme}&gt;
-        ...
-      &lt;/Table&gt;
-    &lt;/div&gt;
-  );
+const updateHash = React.useCallback(
+  newHash =&gt; {
+    if (newHash !== hash) window.location.hash = newHash;
+  },
+  [hash]
+);
+
+return [hash, updateHash];
 };
 </code></pre>
-<p>固定Table标题所需的一切都是Table组件周围的容器组件。这样，Table的行将在垂直方向滚动，而标题保持在Table的顶部。</p>
+<h3 id="样例">样例</h3>
+<pre><code class="language-jsx">  const MyApp = () =&gt; {
+  const [hash, setHash] = useHash();
+
+  React.useEffect(() =&gt; {
+    setHash('#list');
+  }, []);
+
+  return (
+    &lt;&gt;
+      &lt;p&gt;window.location.href: {window.location.href}&lt;/p&gt;
+      &lt;p&gt;Edit hash: &lt;/p&gt;
+      &lt;input value={hash} onChange={e =&gt; setHash(e.target.value)} /&gt;
+    &lt;/&gt;
+  );
+};
+
+ReactDOM.render(&lt;MyApp /&gt;, document.getElementById('root'));
+</code></pre>
 
                 </div>
             </article>
@@ -146,8 +166,8 @@ const App = () =&gt; {
         
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://umeimmense.github.io/post/ru-he-zai-react-table-shi-yong-zhu-ti" class="post-title gt-a-link">
-                    如何在 React Table 使用 Theme
+                <a href="https://umeimmense.github.io/post/react-zi-ding-yi-hooks-useupdateeffect" class="post-title gt-a-link">
+                    自定义 React Hook: 实现只在更新时执行的useEffect
                 </a>
             </div>
         

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-04-27T14:28:47.036Z</updated>
+    <updated>2022-04-28T14:56:03.895Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
@@ -14,7 +14,7 @@
         <id>https://umeimmense.github.io/post/shi-me-shi-dns-or-dns-de-gong-zuo-fang-shi</id>
         <link href="https://umeimmense.github.io/post/shi-me-shi-dns-or-dns-de-gong-zuo-fang-shi">
         </link>
-        <updated>2022-04-27T14:13:23.000Z</updated>
+        <updated>2022-04-28T14:13:23.000Z</updated>
         <content type="html"><![CDATA[<h2 id="前言">前言</h2>
 <p>阅读本文后，你将能够了解到一下内容：</p>
 <ul>
@@ -113,6 +113,66 @@ DNS 查找的这 8 个步骤返回 example.com 的 IP 地址后，浏览器便�
 <blockquote>
 <p><a href="https://www.cloudflare.com/zh-cn/learning/dns/what-is-dns/">原文地址</a></p>
 </blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[自定义 React Hook: 实现 useHash 获取 url 上的 hash 值]]></title>
+        <id>https://umeimmense.github.io/post/zi-ding-yi-react-hook-shi-xian-usehash-huo-qu-url-shang-de-hash-zhi</id>
+        <link href="https://umeimmense.github.io/post/zi-ding-yi-react-hook-shi-xian-usehash-huo-qu-url-shang-de-hash-zhi">
+        </link>
+        <updated>2022-04-27T14:47:39.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="实现-usehash">实现 useHash</h2>
+<p>本节我们实现自定义React hook useHash，它能实时获取浏览器的hash值，并允许更改它。</p>
+<ul>
+<li>使用 useState hook 获取 Location 对象的 hash 属性。</li>
+<li>使用 useCallback hook 创建一个更新状态的处理程序。</li>
+<li>在挂载时使用 useEffect hook为“hashchange”事件添加监听器，并在卸载时清理它。</li>
+<li>使用 useCallback hook 创建一个函数，该函数使用给定值更新 Location 对象的哈希属性。</li>
+</ul>
+<h3 id="实现">实现</h3>
+<pre><code class="language-jsx">const useHash = () =&gt; {
+const [hash, setHash] = React.useState(() =&gt; window.location.hash);
+
+const hashChangeHandler = React.useCallback(() =&gt; {
+  setHash(window.location.hash);
+}, []);
+
+React.useEffect(() =&gt; {
+  window.addEventListener('hashchange', hashChangeHandler);
+  return () =&gt; {
+    window.removeEventListener('hashchange', hashChangeHandler);
+  };
+}, []);
+
+const updateHash = React.useCallback(
+  newHash =&gt; {
+    if (newHash !== hash) window.location.hash = newHash;
+  },
+  [hash]
+);
+
+return [hash, updateHash];
+};
+</code></pre>
+<h3 id="样例">样例</h3>
+<pre><code class="language-jsx">  const MyApp = () =&gt; {
+  const [hash, setHash] = useHash();
+
+  React.useEffect(() =&gt; {
+    setHash('#list');
+  }, []);
+
+  return (
+    &lt;&gt;
+      &lt;p&gt;window.location.href: {window.location.href}&lt;/p&gt;
+      &lt;p&gt;Edit hash: &lt;/p&gt;
+      &lt;input value={hash} onChange={e =&gt; setHash(e.target.value)} /&gt;
+    &lt;/&gt;
+  );
+};
+
+ReactDOM.render(&lt;MyApp /&gt;, document.getElementById('root'));
+</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -877,50 +937,6 @@ const App = () =&gt; {
 };
 </code></pre>
 <p>由于你可以完全控制在 Cell 组件中呈现的内容，因此你可以根据需要格式化数据。布尔值可以转换为字符串，日期可以格式化为可读版本。 Cell 组件没有特殊的props来完成渲染。使用 React 表格​​库可以直接在 React 中呈现表格组件。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[自定义 React Hook：获取滚动条宽度]]></title>
-        <id>https://umeimmense.github.io/post/zi-ding-yi-react-hookhuo-qu-gun-dong-tiao-kuan-du</id>
-        <link href="https://umeimmense.github.io/post/zi-ding-yi-react-hookhuo-qu-gun-dong-tiao-kuan-du">
-        </link>
-        <updated>2022-04-14T08:02:17.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>本节实现一个简洁的自定义 React Hook，它可以让你获得滚动条的宽度。你可以在任何 React 组件中使用它，它会返回这个特定浏览器（和操作系统）的滚动条的宽度：</p>
-<pre><code class="language-jsx">import * as React from 'react';
-
-export const useScrollbarWidth = () =&gt; {
-  const didCompute = React.useRef(false);
-  const widthRef = React.useRef(0);
-
-  if (didCompute.current) return widthRef.current;
-
-  // Creating invisible container
-  const outer = document.createElement('div');
-  outer.style.visibility = 'hidden';
-  outer.style.overflow = 'scroll'; // forcing scrollbar to appear
-  outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
-  document.body.appendChild(outer);
-
-  // Creating inner element and placing it in the container
-  const inner = document.createElement('div');
-  outer.appendChild(inner);
-
-  // Calculating difference between container's full width and the child width
-  const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
-
-  // Removing temporary elements from the DOM
-  outer.parentNode.removeChild(outer);
-
-  didCompute.current = true;
-  widthRef.current = scrollbarWidth;
-
-  return scrollbarWidth;
-};
-</code></pre>
-<p>本质上，自定义Hook只是将隐藏的滚动条呈现到项目中，对其进行测量，然后再次将其删除。之后它返回结果。</p>
-<p>作为替代方案，如果你希望在水平滚动容器的情况下使用高度而不是滚动条的宽度，则只需将宽度属性替换为高度属性。</p>
-<p>就我个人而言，我自己从未遇到过这个问题，但是，当我们在客户端机器上测试应用程序时，在某些情况下滚动条没有覆盖并占用空间。通常这没关系，但是，我们遇到了一些用例，我们必须拥有滚动条的大小才能解决有关应用程序布局的问题。</p>
 ]]></content>
     </entry>
 </feed>
