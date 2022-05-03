@@ -2,13 +2,756 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://umeimmense.github.io</id>
     <title>Cool Coding</title>
-    <updated>2022-05-01T15:56:27.367Z</updated>
+    <updated>2022-05-03T14:18:39.172Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://umeimmense.github.io"/>
     <link rel="self" href="https://umeimmense.github.io/atom.xml"/>
     <logo>https://umeimmense.github.io/images/avatar.png</logo>
     <icon>https://umeimmense.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, Cool Coding</rights>
+    <entry>
+        <title type="html"><![CDATA[数据整理]]></title>
+        <id>https://umeimmense.github.io/post/shu-ju-zheng-li</id>
+        <link href="https://umeimmense.github.io/post/shu-ju-zheng-li">
+        </link>
+        <updated>2022-05-01T15:57:33.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="数据整理">数据整理</h1>
+<blockquote>
+<p>课程链接：<a href="https://missing-semester-cn.github.io/2020/data-wrangling/">数据整理 · the missing semester of your cs education (missing-semester-cn.github.io)</a></p>
+</blockquote>
+<p>[toc]</p>
+<p>您是否曾经有过这样的需求，将某种格式存储的数据转换成另外一种格式? 肯定有过，对吧！<br>
+这也正是我们这节课所要讲授的主要内容。具体来讲，我们需要不断地对数据进行处理，直到得到我们想要的最终结果。</p>
+<p>在之前的课程中，其实我们已经接触到了一些数据整理的基本技术。可以这么说，每当您使用管道运算符的时候，其实就是在进行某种形式的数据整理。</p>
+<p>例如这样一条命令 <code>journalctl | grep -i intel</code>，它会找到所有包含intel(区分大小写)的系统日志。您可能并不认为是数据整理，但是它确实将某种形式的数据（全部系统日志）转换成了另外一种形式的数据（仅包含intel的日志）。大多数情况下，数据整理需要您能够明确哪些工具可以被用来达成特定数据整理的目的，并且明白如何组合使用这些工具。</p>
+<p>让我们从头讲起。既然是学习数据整理，那有两样东西自然是必不可少的：用来整理的数据以及相关的应用场景。日志处理通常是一个比较典型的使用场景，因为我们经常需要在日志中查找某些信息，这种情况下通读日志是不现实的。现在，让我们研究一下系统日志，看看哪些用户曾经尝试过登录我们的服务器：</p>
+<pre><code class="language-bash">ssh myserver journalctl
+</code></pre>
+<p>内容太多了。现在让我们把涉及 sshd 的信息过滤出来：</p>
+<pre><code class="language-bash">ssh myserver journalctl | grep sshd
+</code></pre>
+<p>注意，这里我们使用管道将一个远程服务器上的文件传递给本机的 <code>grep</code> 程序！<br>
+<code>ssh</code> 太牛了，下一节课我们会讲授命令行环境，届时我们会详细讨论 <code>ssh</code> 的相关内容。此时我们打印出的内容，仍然比我们需要的要多得多，读起来也非常费劲。我们来改进一下：</p>
+<pre><code class="language-bash">ssh myserver 'journalctl | grep sshd | grep &quot;Disconnected from&quot;' | less
+</code></pre>
+<p>多出来的引号是什么作用呢？这么说吧，我们的日志是一个非常大的文件，把这么大的文件流直接传输到我们本地的电脑上再进行过滤是对流量的一种浪费。因此我们采取另外一种方式，我们先在远端机器上过滤文本内容，然后再将结果传输到本机。 <code>less</code> 为我们创建来一个文件分页器，使我们可以通过翻页的方式浏览较长的文本。为了进一步节省流量，我们甚至可以将当前过滤出的日志保存到文件中，这样后续就不需要再次通过网络访问该文件了：</p>
+<pre><code class="language-console">$ ssh myserver 'journalctl | grep sshd | grep &quot;Disconnected from&quot;' &gt; ssh.log
+$ less ssh.log
+</code></pre>
+<p>过滤结果中仍然包含不少没用的数据。我们有很多办法可以删除这些无用的数据，但是让我们先研究一下 <code>sed</code> 这个非常强大的工具。</p>
+<p><code>sed</code> 是一个基于文本编辑器<code>ed</code>构建的&quot;流编辑器&quot; 。在 <code>sed</code> 中，您基本上是利用一些简短的命令来修改文件，而不是直接操作文件的内容（尽管您也可以选择这样做）。相关的命令行非常多，但是最常用的是 <code>s</code>，即<em>替换</em>命令，例如我们可以这样写：</p>
+<pre><code class="language-bash">ssh myserver journalctl
+ | grep sshd
+ | grep &quot;Disconnected from&quot;
+ | sed 's/.*Disconnected from //'
+</code></pre>
+<p>上面这段命令中，我们使用了一段简单的<em>正则表达式</em>。正则表达式是一种非常强大的工具，可以让我们基于某种模式来对字符串进行匹配。<code>s</code> 命令的语法如下：<code>s/REGEX/SUBSTITUTION/</code>, 其中 <code>REGEX</code> 部分是我们需要使用的正则表达式，而 <code>SUBSTITUTION</code> 是用于替换匹配结果的文本。</p>
+<h2 id="正则表达式">正则表达式</h2>
+<p>正则表达式非常常见也非常有用，值得您花些时间去理解它。让我们从这一句正则表达式开始学习： <code>/.*Disconnected from /</code>。正则表达式通常以（尽管并不总是） <code>/</code>开始和结束。大多数的 ASCII 字符都表示它们本来的含义，但是有一些字符确实具有表示匹配行为的“特殊”含义。不同字符所表示的含义，根据正则表达式的实现方式不同，也会有所变化，这一点确实令人沮丧。常见的模式有：</p>
+<ul>
+<li><code>.</code>  除空格之外的&quot;任意单个字符&quot;</li>
+<li><code>*</code> 匹配前面字符零次或多次</li>
+<li><code>+</code> 匹配前面字符一次或多次</li>
+<li><code>[abc]</code> 匹配 <code>a</code>, <code>b</code> 和 <code>c</code> 中的任意一个</li>
+<li><code>(RX1|RX2)</code> 任何能够匹配<code>RX1</code> 或 <code>RX2</code>的结果</li>
+<li><code>^</code> 行首</li>
+<li><code>$</code> 行尾</li>
+</ul>
+<p><code>sed</code> 的正则表达式有些时候是比较奇怪的，它需要你在这些模式前添加<code>\</code>才能使其具有特殊含义。或者，您也可以添加<code>-E</code>选项来支持这些匹配。</p>
+<p>回过头我们再看<code>/.*Disconnected from /</code>，我们会发现这个正则表达式可以匹配任何以若干任意字符开头，并接着包含&quot;Disconnected from &quot;的字符串。这也正式我们所希望的。但是请注意，正则表达式并不容易写对。如果有人将 &quot;Disconnected from&quot; 作为自己的用户名会怎样呢？</p>
+<pre><code>Jan 17 03:13:00 thesquareplanet.com sshd[2631]: Disconnected from invalid user Disconnected from 46.97.239.16 port 55920 [preauth]
+</code></pre>
+<p>正则表达式会如何匹配？<code>*</code> 和 <code>+</code> 在默认情况下是贪婪模式，也就是说，它们会尽可能多的匹配文本。因此对上述字符串的匹配结果如下：</p>
+<pre><code>46.97.239.16 port 55920 [preauth]
+</code></pre>
+<p>这可不是我们想要的结果。对于某些正则表达式的实现来说，您可以给 <code>*</code> 或 <code>+</code> 增加一个<code>?</code> 后缀使其变成非贪婪模式，但是很可惜 <code>sed</code> 并不支持该后缀。不过，我们可以切换到<br>
+perl 的命令行模式，该模式支持编写这样的正则表达式：</p>
+<pre><code class="language-bash">perl -pe 's/.*?Disconnected from //'
+</code></pre>
+<p>让我们回到 <code>sed</code> 命令并使用它完成后续的任务，毕竟对于这一类任务，<code>sed</code>是最常见的工具。<code>sed</code> 还可以非常方便的做一些事情，例如打印匹配后的内容，一次调用中进行多次替换搜索等。但是这些内容我们并不会在此进行介绍。<code>sed</code> 本身是一个非常全能的工具，但是在具体功能上往往能找到更好的工具作为替代品。</p>
+<p>好的，我们还需要去掉用户名后面的后缀，应该如何操作呢？</p>
+<p>想要匹配用户名后面的文本，尤其是当这里的用户名可以包含空格时，这个问题变得非常棘手！这里我们需要做的是匹配<em>一整行</em>：</p>
+<pre><code class="language-bash"> | sed -E 's/.*Disconnected from (invalid |authenticating )?user .* [^ ]+ port [0-9]+( \[preauth\])?$//'
+</code></pre>
+<p>让我们借助正则表达式在线调试工具<a href="https://regex101.com/r/qqbZqh/2">regex debugger</a> 来理解这段表达式。OK，开始的部分和以前是一样的，随后，我们匹配两种类型的“user”（在日志中基于两种前缀区分）。再然后我们匹配属于用户名的所有字符。接着，再匹配任意一个单词（<code>[^ ]+</code> 会匹配任意非空且不包含空格的序列）。紧接着后面匹配单“port”和它后面的一串数字，以及可能存在的后缀<code>[preauth]</code>，最后再匹配行尾。</p>
+<p>注意，这样做的话，即使用户名是“Disconnected from”，对匹配结果也不会有任何影响，您知道这是为什么吗？</p>
+<p>问题还没有完全解决，日志的内容全部被替换成了空字符串，整个日志的内容因此都被删除了。我们实际上希望能够将用户名<em>保留</em>下来。对此，我们可以使用“捕获组（capture groups）”来完成。被圆括号内的正则表达式匹配到的文本，都会被存入一系列以编号区分的捕获组中。捕获组的内容可以在替换字符串时使用（有些正则表达式的引擎甚至支持替换表达式本身），例如<code>\1</code>、 <code>\2</code>、<code>\3</code>等等，因此可以使用如下命令：</p>
+<pre><code class="language-bash"> | sed -E 's/.*Disconnected from (invalid |authenticating )?user (.*) [^ ]+ port [0-9]+( \[preauth\])?$/\2/'
+</code></pre>
+<p>想必您已经意识到了，为了完成某种匹配，我们最终可能会写出非常复杂的正则表达式。例如，这里有一篇关于如何匹配电子邮箱地址的文章<a href="https://www.regular-expressions.info/email.html">e-mail address</a>，匹配电子邮箱可一点<a href="https://emailregex.com/">也不简单</a>。网络上还有很多关于如何匹配电子邮箱地址的<a href="https://stackoverflow.com/questions/201323/how-to-validate-an-email-address-using-a-regular-expression/1917982">讨论</a>。人们还为其编写了<a href="https://fightingforalostcause.net/content/misc/2006/compare-email-regex.php">测试用例</a>及 <a href="https://mathiasbynens.be/demo/url-regex">测试矩阵</a>。您甚至可以编写一个用于判断一个数<a href="https://www.noulakaz.net/2007/03/18/a-regular-expression-to-check-for-prime-numbers/">是否为质数</a>的正则表达式。</p>
+<p>正则表达式是出了名的难以写对，但是它仍然会是您强大的常备工具之一。</p>
+<h2 id="回到数据整理">回到数据整理</h2>
+<p>OK，现在我们有如下表达式：</p>
+<pre><code class="language-bash">ssh myserver journalctl
+ | grep sshd
+ | grep &quot;Disconnected from&quot;
+ | sed -E 's/.*Disconnected from (invalid |authenticating )?user (.*) [^ ]+ port [0-9]+( \[preauth\])?$/\2/'
+</code></pre>
+<p><code>sed</code> 还可以做很多各种各样有趣的事情，例如文本注入：(使用 <code>i</code> 命令)，打印特定的行 (使用 <code>p</code>命令)，基于索引选择特定行等等。详情请见<code>man sed</code>!</p>
+<p>现在，我们已经得到了一个包含用户名的列表，列表中的用户都曾经尝试过登陆我们的系统。但这还不够，让我们过滤出那些最常出现的用户：</p>
+<pre><code class="language-bash">ssh myserver journalctl
+ | grep sshd
+ | grep &quot;Disconnected from&quot;
+ | sed -E 's/.*Disconnected from (invalid |authenticating )?user (.*) [^ ]+ port [0-9]+( \[preauth\])?$/\2/'
+ | sort | uniq -c
+</code></pre>
+<p><code>sort</code> 会对其输入数据进行排序。<code>uniq -c</code> 会把连续出现的行折叠为一行并使用出现次数作为前缀。我们希望按照出现次数排序，过滤出最常登陆的用户：</p>
+<pre><code class="language-bash">ssh myserver journalctl
+ | grep sshd
+ | grep &quot;Disconnected from&quot;
+ | sed -E 's/.*Disconnected from (invalid |authenticating )?user (.*) [^ ]+ port [0-9]+( \[preauth\])?$/\2/'
+ | sort | uniq -c
+ | sort -nk1,1 | tail -n10
+</code></pre>
+<p><code>sort -n</code> 会按照数字顺序对输入进行排序（默认情况下是按照字典序排序<br>
+<code>-k1,1</code> 则表示“仅基于以空格分割的第一列进行排序”。<code>,n</code> 部分表示“仅排序到第n个部分”，默认情况是到行尾。就本例来说，针对整个行进行排序也没有任何问题，我们这里主要是为了学习这一用法！</p>
+<p>如果我们希望得到登陆次数最少的用户，我们可以使用 <code>head</code> 来代替<code>tail</code>。或者使用<code>sort -r</code>来进行倒序排序。</p>
+<p>相当不错。但我们只想获取用户名，而且不要一行一个地显示。</p>
+<pre><code class="language-bash">ssh myserver journalctl
+ | grep sshd
+ | grep &quot;Disconnected from&quot;
+ | sed -E 's/.*Disconnected from (invalid |authenticating )?user (.*) [^ ]+ port [0-9]+( \[preauth\])?$/\2/'
+ | sort | uniq -c
+ | sort -nk1,1 | tail -n10
+ | awk '{print $2}' | paste -sd,
+</code></pre>
+<p>我们可以利用 <code>paste</code>命令来合并行(<code>-s</code>)，并指定一个分隔符进行分割 (<code>-d</code>)，那<code>awk</code>的作用又是什么呢？</p>
+<h2 id="awk-另外一种编辑器">awk -- 另外一种编辑器</h2>
+<p><code>awk</code> 其实是一种编程语言，只不过它碰巧非常善于处理文本。关于 <code>awk</code> 可以介绍的内容太多了，限于篇幅，这里我们仅介绍一些基础知识。</p>
+<p>首先， <code>{print $2}</code> 的作用是什么？ <code>awk</code> 程序接受一个模式串（可选），以及一个代码块，指定当模式匹配时应该做何种操作。默认当模式串即匹配所有行（上面命令中当用法）。<br>
+在代码块中，<code>$0</code> 表示整行的内容，<code>$1</code> 到 <code>$n</code> 为一行中的 n 个区域，区域的分割基于 <code>awk</code> 的域分隔符（默认是空格，可以通过<code>-F</code>来修改）。在这个例子中，我们的代码意思是：对于每一行文本，打印其第二个部分，也就是用户名。</p>
+<p>让我们康康，还有什么炫酷的操作可以做。让我们统计一下所有以<code>c</code> 开头，以 <code>e</code> 结尾，并且仅尝试过一次登陆的用户。</p>
+<pre><code class="language-bash"> | awk '$1 == 1 &amp;&amp; $2 ~ /^c[^ ]*e$/ { print $2 }' | wc -l
+</code></pre>
+<p>让我们好好分析一下。首先，注意这次我们为 <code>awk</code>指定了一个匹配模式串（也就是<code>{...}</code>前面的那部分内容）。该匹配要求文本的第一部分需要等于1（这部分刚好是<code>uniq -c</code>得到的计数值），然后其第二部分必须满足给定的一个正则表达式。代码块中的内容则表示打印用户名。然后我们使用 <code>wc -l</code> 统计输出结果的行数。</p>
+<p>不过，既然 <code>awk</code> 是一种编程语言，那么则可以这样：</p>
+<pre><code class="language-awk">BEGIN { rows = 0 }
+$1 == 1 &amp;&amp; $2 ~ /^c[^ ]*e$/ { rows += $1 }
+END { print rows }
+</code></pre>
+<p><code>BEGIN</code> 也是一种模式，它会匹配输入的开头（ <code>END</code> 则匹配结尾）。然后，对每一行第一个部分进行累加，最后将结果输出。事实上，我们完全可以抛弃 <code>grep</code> 和 <code>sed</code> ，因为 <code>awk</code> 就可以<a href="https://backreference.org/2010/02/10/idiomatic-awk">解决所有问题</a>。至于怎么做，就留给读者们做课后练习吧。</p>
+<h2 id="分析数据">分析数据</h2>
+<p>想做数学计算也是可以的！例如这样，您可以将每行的数字加起来：</p>
+<pre><code class="language-bash"> | paste -sd+ | bc -l
+</code></pre>
+<p>下面这种更加复杂的表达式也可以：</p>
+<pre><code class="language-bash">echo &quot;2*($(data | paste -sd+))&quot; | bc -l
+</code></pre>
+<p>您可以通过多种方式获取统计数据。如果已经安装了R语言，<a href="https://github.com/nferraz/st"><code>st</code></a>是个不错的选择：</p>
+<pre><code class="language-bash">ssh myserver journalctl
+ | grep sshd
+ | grep &quot;Disconnected from&quot;
+ | sed -E 's/.*Disconnected from (invalid |authenticating )?user (.*) [^ ]+ port [0-9]+( \[preauth\])?$/\2/'
+ | sort | uniq -c
+ | awk '{print $1}' | R --slave -e 'x &lt;- scan(file=&quot;stdin&quot;, quiet=TRUE); summary(x)'
+</code></pre>
+<p>R 也是一种编程语言，它非常适合被用来进行数据分析和<a href="https://ggplot2.tidyverse.org/">绘制图表</a>。这里我们不会讲的特别详细， 您只需要知道<code>summary</code> 可以打印统计结果。我们通过输入的信息计算出一个矩阵，然后R语言就可以得到我们想要的统计数据。</p>
+<p>如果您希望绘制一些简单的图表， <code>gnuplot</code> 可以帮助到您：</p>
+<pre><code class="language-bash">ssh myserver journalctl
+ | grep sshd
+ | grep &quot;Disconnected from&quot;
+ | sed -E 's/.*Disconnected from (invalid |authenticating )?user (.*) [^ ]+ port [0-9]+( \[preauth\])?$/\2/'
+ | sort | uniq -c
+ | sort -nk1,1 | tail -n10
+ | gnuplot -p -e 'set boxwidth 0.5; plot &quot;-&quot; using 1:xtic(2) with boxes'
+</code></pre>
+<h2 id="利用数据整理来确定参数">利用数据整理来确定参数</h2>
+<p>有时候您要利用数据整理技术从一长串列表里找出你所需要安装或移除的东西。我们之前讨论的相关技术配合 <code>xargs</code> 即可实现：</p>
+<pre><code class="language-bash">rustup toolchain list | grep nightly | grep -vE &quot;nightly-x86&quot; | sed 's/-x86.*//' | xargs rustup toolchain uninstall
+</code></pre>
+<h2 id="整理二进制数据">整理二进制数据</h2>
+<p>虽然到目前为止我们的讨论都是基于文本数据，但对于二进制文件其实同样有用。例如我们可以用 ffmpeg 从相机中捕获一张图片，将其转换成灰度图后通过SSH将压缩后的文件发送到远端服务器，并在那里解压、存档并显示。</p>
+<pre><code class="language-bash">ffmpeg -loglevel panic -i /dev/video0 -frames 1 -f image2 -
+ | convert - -colorspace gray -
+ | gzip
+ | ssh mymachine 'gzip -d | tee copy.jpg | env DISPLAY=:0 feh -'
+</code></pre>
+<h1 id="课后练习">课后练习</h1>
+<ol>
+<li>
+<p>学习一下这篇简短的 <a href="https://regexone.com/">交互式正则表达式教程</a>.✔️</p>
+</li>
+<li>
+<p>统计words文件 (<code>/usr/share/dict/words</code>) 中包含至少三个<code>a</code> 且不以<code>'s</code> 结尾的单词个数。这些单词中，出现频率前三的末尾两个字母是什么？ <code>sed</code>的 <code>y</code>命令，或者 <code>tr</code> 程序也许可以帮你解决大小写的问题。共存在多少种词尾两字母组合？还有一个很有挑战性的问题：哪个组合从未出现过？✔️</p>
+<pre><code class="language-shell"># 输出组合数
+cat ./words | tr &quot;[:upper:]&quot; &quot;[:lower:]&quot; | grep &quot;.*a.*a.*a[a-z]*$&quot; | sed -E 's/.*(..)/\1/' | sort | uniq -c | sort -nk1,1 | wc -l
+
+
+# 保存至word.txt
+cat ./words | tr &quot;[:upper:]&quot; &quot;[:lower:]&quot; | grep &quot;.*a.*a.*a[a-z]*$&quot; | sed -E 's/.*(..)/\1/' | sort | uniq -c | sort -nk1,1 | awk '{print $2}' &gt; word.txt
+
+# 编写python脚本输出全部组合
+letter = &quot;abcdefghijklmnopqrstuvwxyz&quot;
+for a in letter:
+	for b in letter:
+		print(a+b)
+# 保存至allword.txt
+python word.py &gt; allword.txt
+
+# 删除匹配项
+cat word.txt | xargs -n 1 -i sed -i '/{}/d
+' ./allword.txt
+
+# 打印剩余组合数
+cat allword.txt | wc -l
+</code></pre>
+</li>
+<li>
+<p>进行原地替换听上去很有诱惑力，例如：<br>
+<code>sed s/REGEX/SUBSTITUTION/ input.txt &gt; input.txt</code>。但是这并不是一个明智的做法，为什么呢？还是说只有 <code>sed</code>是这样的? 查看 <code>man sed</code> 来完成这个问题</p>
+<p>sed是一个面向行的文本流处理程序</p>
+</li>
+<li>
+<p>找出您最近十次开机的开机时间平均数、中位数和最长时间。在Linux上需要用到 <code>journalctl</code> ，而在 macOS 上使用 <code>log show</code>。找到每次起到开始和结束时的时间戳。在Linux上类似这样操作：</p>
+<pre><code>Logs begin at ...
+</code></pre>
+<p>和</p>
+<pre><code>systemd[577]: Startup finished in ...
+</code></pre>
+<p>在 macOS 上, <a href="https://eclecticlight.co/2018/03/21/macos-unified-log-3-finding-your-way/">查找</a>:</p>
+<pre><code>=== system boot:
+</code></pre>
+<p>和</p>
+<pre><code>Previous shutdown cause: 5
+</code></pre>
+</li>
+<li>
+<p>查看之前三次重启启动信息中不同的部分 (参见 <code>journalctl</code>的<code>-b</code> 选项)。将这一任务分为几个步骤，首先获取之前三次启动的启动日志，也许获取启动日志的命令就有合适的选项可以帮助您提取前三次启动的日志，亦或者您可以使用<code>sed '0,/STRING/d'</code> 来删除 <code>STRING</code>匹配到的字符串前面的全部内容。然后，过滤掉每次都不相同的部分，例如时间戳。下一步，重复记录输入行并对其计数(可以使用<code>uniq</code> )。最后，删除所有出现过3次的内容（因为这些内容上三次启动日志中的重复部分）。</p>
+</li>
+<li>
+<p>在网上找一个类似 <a href="https://stats.wikimedia.org/EN/TablesWikipediaZZ.htm">这个</a> 或者 <a href="https://ucr.fbi.gov/crime-in-the-u.s/2016/crime-in-the-u.s.-2016/topic-pages/tables/table-1">这个</a>的数据集。或者从 <a href="https://www.springboard.com/blog/free-public-data-sets-data-science-project/">这里</a>找一些。使用 <code>curl</code> 获取数据集并提取其中两列数据，如果您想要获取的是HTML数据，那么<a href="https://github.com/EricChiang/pup"><code>pup</code></a>可能会更有帮助。对于JSON类型的数据，可以试试<a href="https://stedolan.github.io/jq/"><code>jq</code></a>。请使用一条指令来找出其中一列的最大值和最小值，用另外一条指令计算两列之间差的总和。✔️</p>
+<pre><code class="language-shell"># 数据集：https://stats.wikimedia.org/EN/TablesWikipediaZZ.htm
+
+# 以标签为依据提取数据，通过paste和sed格式化，截取需要的部分
+cat ./tree.htm | pup --color 'tbody text{}' | paste -sd, | sed -E 's/([A-Z])/\n\1/g' | tail -n +1754 &gt; list.txt
+
+# 按列提取并排列求最值
+cat list.txt | awk -F , '{print $2}' | sort -n 
+
+# 将分隔符替换为‘-’，使用bc命令即可求出两列之差
+cat list.txt | awk -F , '{print $2,$3}'| sed 's/ /-/' | tail -n +3 | bc -l | paste -sd+ | bc -l
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://gitee.com/kaiwen_xue_2689268634/img/raw/master/img/123.jpg" alt="pic" loading="lazy"></figure>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[编辑器（Vim）]]></title>
+        <id>https://umeimmense.github.io/post/bian-ji-qi-vim</id>
+        <link href="https://umeimmense.github.io/post/bian-ji-qi-vim">
+        </link>
+        <updated>2022-05-01T15:56:29.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>课程链接：<a href="https://missing-semester-cn.github.io/2020/editors/">编辑器 (Vim) · the missing semester of your cs education (missing-semester-cn.github.io)</a></p>
+</blockquote>
+<p>写作和写代码其实是两项非常不同的活动。当我们编程的时候，会经常在文件间进行切换、阅读、浏览和修改代码，而不是连续编写一大段的文字。因此代码编辑器和文本编辑器是很不同的两种工具（例如 微软的 Word 与 Visual Studio Code）</p>
+<p>作为程序员，我们大部分时间都花在代码编辑上，所以花点时间掌握某个适合自己的编辑器是非常值得的。通常学习使用一个新的编辑器包含以下步骤：</p>
+<ul>
+<li>阅读教程（比如这节课以及我们为您提供的资源）</li>
+<li>坚持使用它来完成你所有的编辑工作（即使一开始这会让你的工作效率降低）</li>
+<li>随时查阅：如果某个操作看起来像是有更方便的实现方法，一般情况下真的会有。</li>
+</ul>
+<p>如果您能够遵循上述步骤，并且坚持使用新的编辑器完成您所有的文本编辑任务，那么学习一个复杂的代码编辑器的过程一般是这样的：头两个小时，您会学习到编辑器的基本操作，例如打开和编辑文件、保存与退出、浏览缓冲区。当学习时间累计达到20个小时之后，您使用新编辑器的效率应该已经和使用老编辑器一样快。在此之后，其益处开始显现：有了足够的知识和肌肉记忆后，使用新编辑器将大大节省你的时间。而现代文本编辑器都是些复杂且强大的工具，永远有新东西可学：学的越多，效率越高。</p>
+<h1 id="该学哪个编辑器">该学哪个编辑器？</h1>
+<p>程序员们对自己正在使用的文本编辑器通常有着 <a href="https://en.wikipedia.org/wiki/Editor_war">非常强的执念</a>。</p>
+<p>现在最流行的编辑器是什么？ <a href="https://insights.stackoverflow.com/survey/2019/#development-environments-and-tools">Stack Overflow的调查</a>(这个调查可能并不如我们想象的那样客观，因为Stack Overflow 的用户并不能代表所有程序员 )显示， <a href="https://code.visualstudio.com/">Visual Studio Code</a>是目前最流行的代码编辑器。而<a href="https://www.vim.org/">Vim</a> 则是最流行的基于命令行的编辑器。</p>
+<h2 id="vim">Vim</h2>
+<p>这门课的所有教员都使用Vim作为编辑器。Vim有着悠久历史；它始于1976年的Vi编辑器，到现在还在 不断开发中。Vim有很多聪明的设计思想，所以很多其他工具也支持Vim模式（比如，140万人安装了 <a href="https://github.com/VSCodeVim/Vim">Vim emulation for VS code</a>）。即使你最后使用 其他编辑器，Vim也值得学习。</p>
+<p>由于不可能在50分钟内教授Vim的所有功能， 我们会专注于解释Vim的设计哲学，教你基础知识， 展示一部分高级功能，然后给你掌握这个工具所需要的资源。</p>
+<h1 id="vim的哲学">Vim的哲学</h1>
+<p>在编程的时候，你会把大量时间花在阅读/编辑而不是在写代码上。所以， Vim 是一个 <em>多模态</em> 编辑 器： 它对于插入文字和操纵文字有不同的模式。 Vim 既是可编程的 （可以使用 Vimscript 或者像 Python 一样的其他程序语言）， Vim 的接口本身也是一个程序语言： 键入操作 （以及其助记名） 是命令， 这些命令也是可组合的。 Vim 避免了使用鼠标，因为那样太慢了； Vim 甚至避免用 上下左右键因为那样需要太多的手指移动。</p>
+<p>这样的设计哲学的结果是一个能跟上你思维速度的编辑器。</p>
+<h1 id="编辑模式">编辑模式</h1>
+<p>Vim的设计以大多数时间都花在阅读、浏览和进行少量编辑改动为基础，因此它具有多种操作模式：</p>
+<ul>
+<li><em>正常模式</em>：在文件中四处移动光标进行修改</li>
+<li><em>插入模式</em>：插入文本</li>
+<li><em>替换模式</em>：替换文本</li>
+<li><em>可视化（一般，行，块）模式</em>：选中文本块</li>
+<li><em>命令模式</em>：用于执行命令</li>
+</ul>
+<p>在不同的操作模式下， 键盘敲击的含义也不同。比如，<code>x</code> 在插入模式会插入字母<code>x</code>，但是在正常模式 会删除当前光标所在的字母，在可视模式下则会删除选中文块。</p>
+<p>在默认设置下，Vim会在左下角显示当前的模式。 Vim启动时的默认模式是正常模式。通常你会把大部分 时间花在正常模式和插入模式。</p>
+<p>你可以按下 <code>&lt;ESC&gt;</code> （退出键） 从任何其他模式返回正常模式。 在正常模式，键入 <code>i</code> 进入插入 模式， <code>R</code> 进入替换模式， <code>v</code> 进入可视（一般）模式， <code>V</code> 进入可视（行）模式， <code>&lt;C-v&gt;</code> （Ctrl-V, 有时也写作 <code>^V</code>）进入可视（块）模式， <code>:</code> 进入命令模式。</p>
+<p>因为你会在使用 Vim 时大量使用 <code>&lt;ESC&gt;</code> 键，所以可以考虑把大小写锁定键重定义成 <code>&lt;ESC&gt;</code> 键 （<a href="https://vim.fandom.com/wiki/Map_caps_lock_to_escape_in_macOS">MacOS 教程</a> ）。</p>
+<h1 id="基本操作">基本操作</h1>
+<h2 id="插入文本">插入文本</h2>
+<p>在正常模式， 键入 <code>i</code> 进入插入模式。 现在 Vim 跟很多其他的编辑器一样， 直到你键入<code>&lt;ESC&gt;</code> 返回正常模式。 你只需要掌握这一点和上面介绍的所有基础知识就可以使用 Vim 来编辑文件了 （虽然如果你一直停留在插入模式内不一定高效）。</p>
+<h2 id="缓存-标签页-窗口">缓存， 标签页， 窗口</h2>
+<p>Vim 会维护一系列打开的文件，称为 “缓存”。 一个 Vim 会话包含一系列标签页，每个标签页包含 一系列窗口 （分隔面板）。每个窗口显示一个缓存。 跟网页浏览器等其他你熟悉的程序不一样的是， 缓存和窗口不是一一对应的关系； 窗口只是视角。 一个缓存可以在 <em>多个</em> 窗口打开，甚至在同一 个标签页内的多个窗口打开。这个功能其实很好用， 比如在查看同一个文件的不同部分的时候。</p>
+<p>Vim 默认打开一个标签页，这个标签也包含一个窗口。</p>
+<h2 id="命令行">命令行</h2>
+<p>在正常模式下键入 <code>:</code> 进入命令行模式。 在键入 <code>:</code> 后，你的光标会立即跳到屏幕下方的命令行。 这个模式有很多功能， 包括打开， 保存， 关闭文件， 以及 <a href="https://twitter.com/iamdevloper/status/435555976687923200">退出 Vim</a>。</p>
+<ul>
+<li>
+<p><code>:q</code> 退出 （关闭窗口）</p>
+</li>
+<li>
+<p><code>:w</code> 保存 （写）</p>
+</li>
+<li>
+<p><code>:wq</code> 保存然后退出</p>
+</li>
+<li>
+<p><code>:e {文件名}</code> 打开要编辑的文件</p>
+</li>
+<li>
+<p><code>:ls</code> 显示打开的缓存</p>
+</li>
+<li>
+<pre><code class="language-plaintext">  :help {标题}
+</code></pre>
+<p>打开帮助文档</p>
+<ul>
+<li><code>:help :w</code> 打开 <code>:w</code> 命令的帮助文档</li>
+<li><code>:help w</code> 打开 <code>w</code> 移动的帮助文档</li>
+</ul>
+</li>
+</ul>
+<h1 id="vim-的接口其实是一种编程语言">Vim 的接口其实是一种编程语言</h1>
+<p>Vim 最重要的设计思想是 Vim 的界面本身是一个程序语言。 键入操作 （以及他们的助记名） 本身是命令， 这些命令可以组合使用。 这使得移动和编辑更加高效，特别是一旦形成肌肉记忆。</p>
+<h2 id="移动">移动</h2>
+<p>多数时候你会在正常模式下，使用移动命令在缓存中导航。在 Vim 里面移动也被称为 “名词”， 因为它们指向文字块。</p>
+<ul>
+<li>
+<p>基本移动: <code>hjkl</code> （左， 下， 上， 右）</p>
+</li>
+<li>
+<p>词： <code>w</code> （下一个词）， <code>b</code> （词初）， <code>e</code> （词尾）</p>
+</li>
+<li>
+<p>行： <code>0</code> （行初）， <code>^</code> （第一个非空格字符）， <code>$</code> （行尾）</p>
+</li>
+<li>
+<p>屏幕： <code>H</code> （屏幕首行）， <code>M</code> （屏幕中间）， <code>L</code> （屏幕底部）</p>
+</li>
+<li>
+<p>翻页： <code>Ctrl-u</code> （上翻）， <code>Ctrl-d</code> （下翻）</p>
+</li>
+<li>
+<p>文件： <code>gg</code> （文件头）， <code>G</code> （文件尾）</p>
+</li>
+<li>
+<p>行数： <code>:{行数}&lt;CR&gt;</code> 或者 <code>{行数}G</code> ({行数}为行数)</p>
+</li>
+<li>
+<p>杂项： <code>%</code> （找到配对，比如括号或者 /* */ 之类的注释对）</p>
+</li>
+<li>
+<p>查找：</p>
+<pre><code class="language-plaintext">f{字符}
+</code></pre>
+<p>，</p>
+<pre><code class="language-plaintext">t{字符}
+</code></pre>
+<p>，</p>
+<pre><code class="language-plaintext">F{字符}
+</code></pre>
+<p>，</p>
+<pre><code class="language-plaintext">T{字符}
+</code></pre>
+<ul>
+<li>查找/到 向前/向后 在本行的{字符}</li>
+<li><code>,</code> / <code>;</code> 用于导航匹配</li>
+</ul>
+</li>
+<li>
+<p>搜索: <code>/{正则表达式}</code>, <code>n</code> / <code>N</code> 用于导航匹配</p>
+</li>
+</ul>
+<h2 id="选择">选择</h2>
+<p>可视化模式:</p>
+<ul>
+<li>可视化</li>
+<li>可视化行</li>
+<li>可视化块</li>
+</ul>
+<p>可以用移动命令来选中。</p>
+<h2 id="编辑">编辑</h2>
+<p>所有你需要用鼠标做的事， 你现在都可以用键盘：采用编辑命令和移动命令的组合来完成。 这就是 Vim 的界面开始看起来像一个程序语言的时候。Vim 的编辑命令也被称为 “动词”， 因为动词可以施动于名词。</p>
+<ul>
+<li>
+<pre><code class="language-plaintext">  i
+</code></pre>
+<p>进入插入模式</p>
+<ul>
+<li>但是对于操纵/编辑文本，不单想用退格键完成</li>
+</ul>
+</li>
+<li>
+<p><code>O</code> / <code>o</code> 在之上/之下插入行</p>
+</li>
+<li>
+<pre><code class="language-plaintext">  d{移动命令}
+</code></pre>
+<p>删除 {移动命令}</p>
+<ul>
+<li>例如， <code>dw</code> 删除词, <code>d$</code> 删除到行尾, <code>d0</code> 删除到行头。</li>
+</ul>
+</li>
+<li>
+<pre><code class="language-plaintext">  c{移动命令}
+</code></pre>
+<p>改变 {移动命令}</p>
+<ul>
+<li>例如， <code>cw</code> 改变词</li>
+<li>比如 <code>d{移动命令}</code> 再 <code>i</code></li>
+</ul>
+</li>
+<li>
+<p><code>x</code> 删除字符 （等同于 <code>dl</code>）</p>
+</li>
+<li>
+<p><code>s</code> 替换字符 （等同于 <code>xi</code>）</p>
+</li>
+<li>
+<p>可视化模式 + 操作</p>
+<ul>
+<li>选中文字, <code>d</code> 删除 或者 <code>c</code> 改变</li>
+</ul>
+</li>
+<li>
+<p><code>u</code> 撤销, <code>&lt;C-r&gt;</code> 重做</p>
+</li>
+<li>
+<p><code>y</code> 复制 / “yank” （其他一些命令比如 <code>d</code> 也会复制）</p>
+</li>
+<li>
+<p><code>p</code> 粘贴</p>
+</li>
+<li>
+<p>更多值得学习的: 比如 <code>~</code> 改变字符的大小写</p>
+</li>
+</ul>
+<h2 id="计数">计数</h2>
+<p>你可以用一个计数来结合“名词” 和 “动词”， 这会执行指定操作若干次。</p>
+<ul>
+<li><code>3w</code> 向前移动三个词</li>
+<li><code>5j</code> 向下移动5行</li>
+<li><code>7dw</code> 删除7个词</li>
+</ul>
+<h2 id="修饰语">修饰语</h2>
+<p>你可以用修饰语改变 “名词” 的意义。修饰语有 <code>i</code>， 表示 “内部” 或者 “在内“， 和 <code>a</code>， 表示 ”周围“。</p>
+<ul>
+<li><code>ci(</code> 改变当前括号内的内容</li>
+<li><code>ci[</code> 改变当前方括号内的内容</li>
+<li><code>da'</code> 删除一个单引号字符串， 包括周围的单引号</li>
+</ul>
+<h1 id="演示">演示</h1>
+<p>这里是一个有问题的 <a href="https://en.wikipedia.org/wiki/Fizz_buzz">fizz buzz</a> 实现：</p>
+<pre><code>def fizz_buzz(limit):
+    for i in range(limit):
+        if i % 3 == 0:
+            print('fizz')
+        if i % 5 == 0:
+            print('fizz')
+        if i % 3 and i % 5:
+            print(i)
+
+def main():
+    fizz_buzz(10)
+</code></pre>
+<p>我们会修复以下问题：</p>
+<ul>
+<li>主函数没有被调用</li>
+<li>从 0 而不是 1 开始</li>
+<li>在 15 的整数倍的时候在不用行打印 “fizz” 和 “buzz”</li>
+<li>在 5 的整数倍的时候打印 “fizz”</li>
+<li>采用硬编码的参数 10 而不是从命令控制行读取参数</li>
+</ul>
+<p>展示详情请观看课程视频。 比较上面用 Vim 的操作和你可能使用其他程序的操作。 值得一提的是 Vim 需要很少的键盘操作，允许你编辑的速度跟上你思维的速度。</p>
+<h1 id="自定义-vim">自定义 Vim</h1>
+<p>Vim 由一个位于 <code>~/.vimrc</code> 的文本配置文件 （包含 Vim 脚本命令）。 你可能会启用很多基本 设置。</p>
+<p>我们提供一个文档详细的基本设置， 你可以用它当作你的初始设置。 我们推荐使用这个设置因为 它修复了一些 Vim 默认设置奇怪行为。 <strong>在 <a href="https://missing-semester-cn.github.io/2020/files/vimrc">这儿</a> 下载我们的设置， 然后将它保存成 <code>~/.vimrc</code>.</strong></p>
+<p>Vim 能够被重度自定义， 花时间探索自定义选项是值得的。 你可以参考其他人的在 GitHub 上共享的设置文件， 比如， 你的授课人的 Vim 设置 (<a href="https://github.com/anishathalye/dotfiles/blob/master/vimrc">Anish</a>, <a href="https://github.com/jonhoo/configs/blob/master/editor/.config/nvim/init.vim">Jon</a> (uses <a href="https://neovim.io/">neovim</a>), <a href="https://github.com/JJGO/dotfiles/blob/master/vim/.vimrc">Jose</a>)。 有很多好的博客文章也聊到了这个话题。 尽量不要复制粘贴别人的整个设置文件， 而是阅读和理解它， 然后采用对你有用的部分。</p>
+<h1 id="扩展-vim">扩展 Vim</h1>
+<p>Vim 有很多扩展插件。 跟很多互联网上已经过时的建议相反， 你 <em>不</em> 需要在 Vim 使用一个插件 管理器（从 Vim 8.0 开始）。 你可以使用内置的插件管理系统。 只需要创建一个 <code>~/.vim/pack/vendor/start/</code> 的文件夹， 然后把插件放到这里 （比如通过 <code>git clone</code>）。</p>
+<p>以下是一些我们最爱的插件：</p>
+<ul>
+<li><a href="https://github.com/ctrlpvim/ctrlp.vim">ctrlp.vim</a>: 模糊文件查找</li>
+<li><a href="https://github.com/mileszs/ack.vim">ack.vim</a>: 代码搜索</li>
+<li><a href="https://github.com/scrooloose/nerdtree">nerdtree</a>: 文件浏览器</li>
+<li><a href="https://github.com/easymotion/vim-easymotion">vim-easymotion</a>: 魔术操作</li>
+</ul>
+<p>我们尽量避免在这里提供一份冗长的插件列表。 你可以查看讲师们的开源的配置文件 (<a href="https://github.com/anishathalye/dotfiles">Anish</a>, <a href="https://github.com/jonhoo/configs">Jon</a>, <a href="https://github.com/JJGO/dotfiles">Jose</a>) 来看看我们使用的其他插件。 浏览 <a href="https://vimawesome.com/">Vim Awesome</a> 来了解一些很棒的插件。 这个话题也有很多博客文章： 搜索 “best Vim plugins”。</p>
+<h1 id="其他程序的-vim-模式">其他程序的 Vim 模式</h1>
+<p>很多工具提供了 Vim 模式。 这些 Vim 模式的质量参差不齐； 取决于具体工具， 有的提供了 很多酷炫的 Vim 功能， 但是大多数对基本功能支持的很好。</p>
+<h2 id="shell">Shell</h2>
+<p>如果你是一个 Bash 用户， 用 <code>set -o vi</code>。 如果你用 Zsh： <code>bindkey -v</code>。 Fish 用 <code>fish_vi_key_bindings</code>。 另外， 不管利用什么 shell， 你可以 <code>export EDITOR=vim</code>。 这是一个用来决定当一个程序需要启动编辑时启动哪个的环境变量。 例如， <code>git</code> 会使用这个编辑器来编辑 commit 信息。</p>
+<h2 id="readline">Readline</h2>
+<p>很多程序使用 <a href="https://tiswww.case.edu/php/chet/readline/rltop.html">GNU Readline</a> 库来作为 它们的命令控制行界面。 Readline 也支持基本的 Vim 模式， 可以通过在 <code>~/.inputrc</code> 添加如下行开启：</p>
+<pre><code>set editing-mode vi
+</code></pre>
+<p>比如， 在这个设置下， Python REPL 会支持 Vim 快捷键。</p>
+<h2 id="其他">其他</h2>
+<p>甚至有 Vim 的网页浏览快捷键 <a href="http://vim.wikia.com/wiki/Vim_key_bindings_for_web_browsers">browsers</a>, 受欢迎的有 用于 Google Chrome 的 <a href="https://chrome.google.com/webstore/detail/vimium/dbepggeogbaibhgnhhndojpepiihcmeb?hl=en">Vimium</a> 和用于 Firefox 的 <a href="https://github.com/tridactyl/tridactyl">Tridactyl</a>。 你甚至可以在 <a href="https://github.com/lambdalisue/jupyter-vim-binding">Jupyter notebooks</a> 中用 Vim 快捷键。</p>
+<h1 id="vim-进阶">Vim 进阶</h1>
+<p>这里我们提供了一些展示这个编辑器能力的例子。我们无法把所有的这样的事情都教给你， 但是你 可以在使用中学习。 一个好的对策是: 当你在使用你的编辑器的时候感觉 “一定有更好的方法来做这个”， 那么很可能真的有： 上网搜寻一下。</p>
+<h2 id="搜索和替换">搜索和替换</h2>
+<p><code>:s</code> （替换） 命令 （<a href="http://vim.wikia.com/wiki/Search_and_replace">文档</a>）。</p>
+<ul>
+<li>
+<pre><code class="language-plaintext">  %s/foo/bar/g
+</code></pre>
+<ul>
+<li>在整个文件中将 foo 全局替换成 bar</li>
+</ul>
+</li>
+<li>
+<pre><code class="language-plaintext">  %s/\[.*\](\(.*\))/\1/g
+</code></pre>
+<ul>
+<li>将有命名的 Markdown 链接替换成简单 URLs</li>
+</ul>
+</li>
+</ul>
+<h2 id="多窗口">多窗口</h2>
+<ul>
+<li>用 <code>:sp</code> / <code>:vsp</code> 来分割窗口</li>
+<li>同一个缓存可以在多个窗口中显示。</li>
+</ul>
+<h2 id="宏">宏</h2>
+<ul>
+<li>
+<p><code>q{字符}</code> 来开始在寄存器 <code>{字符}</code> 中录制宏</p>
+</li>
+<li>
+<p><code>q</code> 停止录制</p>
+</li>
+<li>
+<p><code>@{字符}</code> 重放宏</p>
+</li>
+<li>
+<p>宏的执行遇错误会停止</p>
+</li>
+<li>
+<p><code>{计数}@{字符}</code> 执行一个宏 {计数} 次</p>
+</li>
+<li>
+<p>宏可以递归</p>
+<ul>
+<li>首先用 <code>q{字符}q</code> 清除宏</li>
+<li>录制该宏， 用 <code>@{字符}</code> 来递归调用该宏 （在录制完成之前不会有任何操作）</li>
+</ul>
+</li>
+<li>
+<p>例子： 将 xml 转成 json (</p>
+<p>file</p>
+<p>)</p>
+<ul>
+<li>
+<p>一个有 “name” / “email” 键对象的数组</p>
+</li>
+<li>
+<p>用一个 Python 程序？</p>
+</li>
+<li>
+<p>用 sed / 正则表达式</p>
+<ul>
+<li><code>g/people/d</code></li>
+<li><code>%s/&lt;person&gt;/{/g</code></li>
+<li><code>%s/&lt;name&gt;\(.*\)&lt;\/name&gt;/&quot;name&quot;: &quot;\1&quot;,/g</code></li>
+<li>…</li>
+</ul>
+</li>
+<li>
+<p>Vim 命令 / 宏</p>
+<ul>
+<li>
+<p><code>Gdd</code>, <code>ggdd</code> 删除第一行和最后一行</p>
+</li>
+<li>
+<p>格式化最后一个元素的宏 （寄存器</p>
+<pre><code class="language-plaintext">e
+</code></pre>
+<p>）</p>
+<ul>
+<li>跳转到有 <code>&lt;name&gt;</code> 的行</li>
+<li><code>qe^r&quot;f&gt;s&quot;: &quot;&lt;ESC&gt;f&lt;C&quot;&lt;ESC&gt;q</code></li>
+</ul>
+</li>
+<li>
+<p>格式化一个人的宏</p>
+<ul>
+<li>跳转到有 <code>&lt;person&gt;</code> 的行</li>
+<li><code>qpS{&lt;ESC&gt;j@eA,&lt;ESC&gt;j@ejS},&lt;ESC&gt;q</code></li>
+</ul>
+</li>
+<li>
+<p>格式化一个人然后转到另外一个人的宏</p>
+<ul>
+<li>跳转到有 <code>&lt;person&gt;</code> 的行</li>
+<li><code>qq@pjq</code></li>
+</ul>
+</li>
+<li>
+<p>执行宏到文件尾</p>
+<ul>
+<li><code>999@q</code></li>
+</ul>
+</li>
+<li>
+<p>手动移除最后的 <code>,</code> 然后加上 <code>[</code> 和 <code>]</code> 分隔符</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="扩展资料">扩展资料</h1>
+<ul>
+<li><code>vimtutor</code> 是一个 Vim 安装时自带的教程</li>
+<li><a href="https://vim-adventures.com/">Vim Adventures</a> 是一个学习使用 Vim 的游戏</li>
+<li><a href="http://vim.wikia.com/wiki/Vim_Tips_Wiki">Vim Tips Wiki</a></li>
+<li><a href="https://vimways.org/2019/">Vim Advent Calendar</a> 有很多 Vim 小技巧</li>
+<li><a href="http://www.vimgolf.com/">Vim Golf</a> 是用 Vim 的用户界面作为程序语言的 <a href="https://en.wikipedia.org/wiki/Code_golf">code golf</a></li>
+<li><a href="https://vi.stackexchange.com/">Vi/Vim Stack Exchange</a></li>
+<li><a href="http://vimcasts.org/">Vim Screencasts</a></li>
+<li><a href="https://pragprog.com/book/dnvim2/practical-vim-second-edition">Practical Vim</a> （书）</li>
+</ul>
+<h1 id="课后练习">课后练习</h1>
+<ol>
+<li>
+<p>完成 <code>vimtutor</code>。 备注： 它在一个<br>
+<a href="https://en.wikipedia.org/wiki/VT100">80x24</a> （80 列， 24 行）<br>
+终端窗口看起来最好。✔️</p>
+</li>
+<li>
+<p>下载我们的 <a href="/2020/files/vimrc">基本 vimrc</a>， 然后把它保存到 <code>~/.vimrc</code>。 通读这个注释详细的文件<br>
+（用 Vim!）， 然后观察 Vim 在这个新的设置下看起来和使用起来有哪些细微的区别。✔️</p>
+</li>
+<li>
+<p>安装和配置一个插件：✔️<br>
+<a href="https://github.com/ctrlpvim/ctrlp.vim">ctrlp.vim</a>.</p>
+<ol>
+<li>用 <code>mkdir -p ~/.vim/pack/vendor/start</code> 创建插件文件夹</li>
+<li>下载这个插件： <code>cd ~/.vim/pack/vendor/start; git clone https://github.com/ctrlpvim/ctrlp.vim</code></li>
+<li>读这个插件的<br>
+<a href="https://github.com/ctrlpvim/ctrlp.vim/blob/master/readme.md">文档</a>。<br>
+尝试用 CtrlP 来在一个工程文件夹里定位一个文件， 打开 Vim, 然后用 Vim 命令控制行开始<br>
+<code>:CtrlP</code>.</li>
+<li>自定义 CtrlP： 添加<br>
+<a href="https://github.com/ctrlpvim/ctrlp.vim/blob/master/readme.md#basic-options">configuration</a><br>
+到你的 <code>~/.vimrc</code> 来用按 Ctrl-P 打开 CtrlP</li>
+</ol>
+</li>
+<li>
+<p>练习使用 Vim, 在你自己的机器上重做 <a href="#demo">演示</a>。✔️</p>
+<ul>
+<li>main is never called
+<ul>
+<li><code>G</code> end of file</li>
+<li><code>o</code> open new line below</li>
+<li>type in &quot;if <strong>name</strong> ...&quot; thing</li>
+</ul>
+</li>
+<li>starts at 0 instead of 1
+<ul>
+<li>search for <code>/range</code></li>
+<li><code>ww</code> to move forward 2 words</li>
+<li><code>i</code> to insert text, &quot;1, &quot;</li>
+<li><code>ea</code> to insert after limit, &quot;+1&quot;</li>
+</ul>
+</li>
+<li>newline for &quot;fizzbuzz&quot;
+<ul>
+<li><code>jj$i</code> to insert text at end of line</li>
+<li>add &quot;, end=''&quot;</li>
+<li><code>jj.</code> to repeat for second print</li>
+<li><code>jjo</code> to open line below if</li>
+<li>add &quot;else: print()&quot;</li>
+</ul>
+</li>
+<li>fizz fizz
+<ul>
+<li><code>ci'</code> to change fizz</li>
+</ul>
+</li>
+<li>command-line argument
+<ul>
+<li><code>ggO</code> to open above</li>
+<li>&quot;import sys&quot;</li>
+<li><code>/10</code></li>
+<li><code>ci(</code> to &quot;int(sys.argv[1])&quot;</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-python"># fizz_buzz.py
+import sys
+
+def fizz_buzz(limit):
+    for i in range(1, limit+1):
+        if i % 3 == 0:
+            print('fizz', end='')
+        if i % 5 == 0:
+            print('buzz', end='')
+        if i % 3 and i % 5:
+            print(i)
+
+def main():
+    fizz_buzz(int(sys.argv[1]))
+
+if __name__ == '__main__':
+    main()
+</code></pre>
+</li>
+<li>
+<p>下个月用 Vim 做你 <em>所有</em> 文件编辑。 每当不够高效的时候, 或者你感觉 “一定有一个更好的方式”，<br>
+尝试求助搜索引擎， 很有可能有一个更好的方式。 如果你遇到难题， 来我们的答疑时间或者给我们发邮件。✔️</p>
+</li>
+<li>
+<p>在你的其他工具中设置 Vim 快捷键 （见上面的操作指南）。✔️</p>
+</li>
+<li>
+<p>进一步自定义你的 <code>~/.vimrc</code> 和安装更多插件。✔️</p>
+</li>
+<li>
+<p>（高阶） 用 Vim 宏将 XML 转换到 JSON (<a href="/2020/files/example-data.xml">例子文件</a>)。<br>
+尝试着先完全自己做， 但是在你卡住的时候可以查看上面<br>
+<a href="#macros">宏</a> 章节。✔️</p>
+<ul>
+<li>
+<p>用 sed / 正则表达式</p>
+<pre><code class="language-shell">cat example-data.xml | sed  '/people/d' | sed 's/&lt;person&gt;/{/g' | sed 's/&lt;\/person&gt;/},/g' | sed 's/&lt;name&gt;\(.*\)&lt;\/name&gt;/&quot;name&quot;: &quot;\1&quot;,/g' | sed 's/&lt;email&gt;\(.*\)&lt;\/email&gt;/&quot;email&quot;: &quot;\1&quot;/g' &gt;data_changed.json
+# 手动移除最后的 , 然后加上 [ 和 ] 分隔符
+</code></pre>
+</li>
+<li>
+<p>Vim 命令 / 宏</p>
+<ul>
+<li><code>Gdd</code>, <code>ggdd</code> 删除第一行和最后一行</li>
+<li>格式化name的宏 （寄存器e）
+<ul>
+<li>跳转到有 <code>&lt;name&gt;</code> 的行</li>
+<li><code>qe^r&quot;f&gt;s&quot;: &quot;&lt;ESC&gt;f&lt;C&quot;&lt;ESC&gt;q</code></li>
+</ul>
+</li>
+<li>格式化person的宏
+<ul>
+<li>跳转到有 <code>&lt;person&gt;</code> 的行</li>
+<li><code>qpS{&lt;ESC&gt;j@eA,&lt;ESC&gt;j@ejS},&lt;ESC&gt;q</code></li>
+</ul>
+</li>
+<li>格式化一个人然后转到另外一个人的宏
+<ul>
+<li>跳转到有 <code>&lt;person&gt;</code> 的行</li>
+<li><code>qq@pjq</code></li>
+</ul>
+</li>
+<li>执行宏到文件尾
+<ul>
+<li><code>999@q</code></li>
+</ul>
+</li>
+<li>手动移除最后的 <code>,</code> 然后加上 <code>[</code> 和 <code>]</code> 分隔符</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Shell 工具和脚本]]></title>
         <id>https://umeimmense.github.io/post/shell-gong-ju-he-jiao-ben</id>
@@ -1111,125 +1854,6 @@ import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDown
   Task
 &lt;/HeaderCell&gt;
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[如何 React Table 实现 Fixed Column]]></title>
-        <id>https://umeimmense.github.io/post/ru-he-react-table-shi-xian-gu-ding-lie</id>
-        <link href="https://umeimmense.github.io/post/ru-he-react-table-shi-xian-gu-ding-lie">
-        </link>
-        <updated>2022-04-16T05:25:25.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>在本节中中，我想向你展示如何使用带有固定标题的 React Table库。在前面的例子中，你已经安装了 React Table Library 来创建一个Table组件并给它一个主题。现在，我们将允许用户将他们的列粘在一边：</p>
-<h2 id="实现">实现</h2>
-<pre><code class="language-jsx">import { useTheme } from '@table-library/react-table-library/theme';
-
-const App = () =&gt; {
-  const data = { nodes };
-
-  const theme = useTheme({
-    BaseCell: `
-      &amp;:nth-of-type(1) {
-        left: 0px;
-
-        min-width: 250px;
-        width: 250px;
-      }
-
-      &amp;:nth-of-type(2) {
-        left: 250px;
-
-        min-width: 150px;
-        width: 150px;
-      }
-
-      &amp;:nth-of-type(3),
-      &amp;:nth-of-type(4) {
-        min-width: 50%;
-        width: 50%;
-      }
-    `,
-  });
-
-  return (...);
-};
-</code></pre>
-<p>我们将列固定在左侧。你也可以以相同的方式将列固定到右侧。缺少的是给 Cell 组件一个 <code>pinLeft</code>（或 <code>pinRight</code>）Props来指示它们固定到一边：</p>
-<pre><code class="language-jsx">const App = () =&gt; {
-  ...
-
-  return (
-    &lt;Table data={data} theme={theme} layout={{ custom: true, horizontalScroll: true }}&gt;
-      {(tableList) =&gt; (
-        &lt;&gt;
-          &lt;Header&gt;
-            &lt;HeaderRow&gt;
-              &lt;HeaderCell pinLeft&gt;Task&lt;/HeaderCell&gt;
-              &lt;HeaderCell pinLeft&gt;Deadline&lt;/HeaderCell&gt;
-              &lt;HeaderCell&gt;Type&lt;/HeaderCell&gt;
-              &lt;HeaderCell&gt;Complete&lt;/HeaderCell&gt;
-            &lt;/HeaderRow&gt;
-          &lt;/Header&gt;
-
-          &lt;Body&gt;
-            {tableList.map((item) =&gt; (
-              &lt;Row key={item.id} item={item}&gt;
-                &lt;Cell pinLeft&gt;{item.name}&lt;/Cell&gt;
-                &lt;Cell pinLeft&gt;
-                  {item.deadline.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                  })}
-                &lt;/Cell&gt;
-                &lt;Cell&gt;{item.type}&lt;/Cell&gt;
-                &lt;Cell&gt;{item.isComplete.toString()}&lt;/Cell&gt;
-              &lt;/Row&gt;
-            ))}
-          &lt;/Body&gt;
-        &lt;/&gt;
-      )}
-    &lt;/Table&gt;
-  );
-};
-</code></pre>
-<p>一切就绪后，表格的非固定列将沿垂直方向滚动，而该列在表格的一侧保持固定。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[如何 React Table 实现 Fixed Header]]></title>
-        <id>https://umeimmense.github.io/post/ru-he-reacttable-shi-xian-gu-ding-biao-ti</id>
-        <link href="https://umeimmense.github.io/post/ru-he-reacttable-shi-xian-gu-ding-biao-ti">
-        </link>
-        <updated>2022-04-15T19:05:09.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
-<p>在本节中中，我想向您展示如何使用带有固定标题的 React Table库。在前面的例子中，你已经安装了 React Table Library 来创建一个Table组件并给它一个主题。现在，我们将允许用户将他们的标题粘贴到顶部：</p>
-<h2 id="实现">实现</h2>
-<pre><code class="language-jsx">import { useTheme } from '@table-library/react-table-library/theme';
-
-const App = () =&gt; {
-  const data = { nodes };
-
-  const theme = useTheme({
-    Table: `
-      height: 100%;
-    `,
-  });
-
-  return (
-    &lt;div
-      style={{
-        height: '150px',
-      }}
-    &gt;
-      &lt;Table data={data} theme={theme}&gt;
-        ...
-      &lt;/Table&gt;
-    &lt;/div&gt;
-  );
-};
-</code></pre>
-<p>固定Table标题所需的一切都是Table组件周围的容器组件。这样，Table的行将在垂直方向滚动，而标题保持在Table的顶部。</p>
 ]]></content>
     </entry>
 </feed>
